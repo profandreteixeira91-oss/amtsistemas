@@ -5,7 +5,10 @@
   "compatibility_flags": [
     "nodejs_compat"
   ],
-  "main": "src/server.ts",
+  "main": ".output/server/index.mjs",
+  "assets": {
+    "directory": ".output/public"
+  },
   "observability": {
     "enabled": true
   }
