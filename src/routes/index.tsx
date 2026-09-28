@@ -75,7 +75,7 @@ const amtCustomLogoUrl = amtCustomAsset.url;
 
 const TITLE = "AMT Sistemas | Sistemas White Label Personalizados";
 const DESCRIPTION =
-  "Desenvolvemos sistemas White Label personalizados para empresas de diferentes segmentos. Tecnologia, automação, IA e soluções sob medida para o seu negócio.";
+  "Desenvolvemos sistemas personalizados, plataformas White Label, automações e soluções com Inteligência Artificial para empresas.";\nconst WHATSAPP_NUMBER = "5511999738440";\nconst WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Olá! Gostaria de falar com a AMT Sistemas sobre um projeto.")}`;
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -490,7 +490,7 @@ function Hero() {
         >
           <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm">
             <Sparkles className="h-3.5 w-3.5 text-primary" />
-            Sistemas White Label sob medida para cada negócio
+            Tecnologia sob medida para o seu negócio
           </span>
 
           <h1 className="mx-auto mt-6 max-w-4xl text-balance text-3xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
@@ -504,9 +504,7 @@ function Hero() {
           </h1>
 
           <p className="mx-auto mt-6 max-w-2xl text-pretty text-base text-muted-foreground sm:text-lg">
-            Desenvolvemos sistemas White Label personalizados para empresas que precisam transformar
-            processos, automatizar operações e criar soluções digitais alinhadas à sua própria marca
-            e ao seu modelo de negócio.
+            Desenvolvemos sistemas personalizados, plataformas White Label, automações e soluções com Inteligência Artificial para empresas que querem transformar processos em tecnologia.
           </p>
 
           <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
@@ -516,7 +514,7 @@ function Hero() {
               </a>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <a href="#solucoes">Conhecer nossas soluções</a>
+              <a href={WHATSAPP_URL} target="_blank" rel="noreferrer">\n                Falar com a AMT pelo WhatsApp <MessageCircle className="h-4 w-4" />\n              </a>
             </Button>
           </div>
         </motion.div>
