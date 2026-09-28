@@ -75,7 +75,9 @@ const amtCustomLogoUrl = amtCustomAsset.url;
 
 const TITLE = "AMT Sistemas | Sistemas White Label Personalizados";
 const DESCRIPTION =
-  "Desenvolvemos sistemas personalizados, plataformas White Label, automações e soluções com Inteligência Artificial para empresas.";\nconst WHATSAPP_NUMBER = "5511999738440";\nconst WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Olá! Gostaria de falar com a AMT Sistemas sobre um projeto.")}`;
+  "Desenvolvemos sistemas personalizados, plataformas White Label, automações e soluções com Inteligência Artificial para empresas.";
+const WHATSAPP_NUMBER = "5511999738440";
+const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Olá! Gostaria de falar com a AMT Sistemas sobre um projeto.")}`;
 
 export const Route = createFileRoute("/")({
   head: () => ({
