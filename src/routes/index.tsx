@@ -968,20 +968,8 @@ function Solucoes() {
                 </div>
               )}
               <CardContent className="flex flex-1 flex-col p-6">
-                <div className="flex items-center gap-3">
-                  {s.logo ? (
-                    <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white ring-1 ring-border">
-                      <img src={s.logo} alt={`Logo ${s.nome}`} loading="lazy" className="h-9 w-9 object-contain" />
-                    </span>
-                  ) : (
-                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-sm font-bold text-primary-foreground">
-                      AB
-                    </span>
-                  )}
-                  <div>
-                    <h3 className="text-lg font-semibold tracking-tight">{s.nome}</h3>
-                    {!s.screenshot && <span className="text-xs text-muted-foreground">{s.status}</span>}
-                  </div>
+                <div>
+                  <h3 className="text-lg font-semibold tracking-tight">{s.nome}</h3>
                 </div>
                 <p className="mt-4 flex-1 text-sm leading-6 text-muted-foreground">{s.descricao}</p>
                 <Button asChild variant="outline" size="sm" className="mt-6 w-full justify-between gap-2">
