@@ -936,48 +936,53 @@ function Solucoes() {
   return (
     <Section id="solucoes">
       <Reveal>
-        <Eyebrow>Soluções desenvolvidas</Eyebrow>
-        <H2>A mesma metodologia aplicada a diferentes segmentos.</H2>
+        <Eyebrow>Portfólio em operação</Eyebrow>
+        <H2>Produtos reais, sistemas reais, negócios reais.</H2>
         <p className="mt-5 max-w-3xl text-muted-foreground">
-          Plataformas desenvolvidas pela AMT Sistemas. O mesmo princípio pode ser aplicado ao seu
-          segmento, com a sua marca.
+          Conheça algumas das plataformas desenvolvidas pela AMT Sistemas. Cada projeto nasce de uma
+          necessidade específica e pode evoluir para uma solução completa, com a identidade e os
+          processos da sua empresa.
         </p>
       </Reveal>
-      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
+      <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {solucoes.map((s, i) => (
           <Reveal key={s.nome} delay={i * 0.04}>
-            <Card className="flex h-full flex-col overflow-hidden border-border bg-card shadow-sm transition-shadow hover:shadow-md">
+            <Card className="group flex h-full flex-col overflow-hidden border-border/70 bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
               {s.screenshot && (
-                <div className="border-b border-border/60 bg-muted">
+                <div className="relative overflow-hidden border-b border-border/60 bg-muted">
                   <img
                     src={s.screenshot}
-                    alt={`Tela do sistema ${s.nome}`}
+                    alt={\`Tela do sistema \${s.nome}\`}
                     loading="lazy"
-                    className="h-40 w-full object-cover object-top"
+                    className="h-48 w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]"
                   />
+                  <span className="absolute right-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-medium text-primary shadow-sm">
+                    {s.status}
+                  </span>
                 </div>
               )}
-              <CardContent className="flex flex-1 flex-col p-5">
+              <CardContent className="flex flex-1 flex-col p-6">
                 <div className="flex items-center gap-3">
-                  <span className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-white ring-1 ring-border">
-                    <img src={s.logo} alt={`Logo ${s.nome}`} loading="lazy" className="h-10 w-10 object-contain" />
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white ring-1 ring-border shadow-sm">
+                    <img src={s.logo} alt={\`Logo \${s.nome}\`} loading="lazy" className="h-10 w-10 object-contain" />
                   </span>
                   <div>
-                    <h3 className="text-base font-semibold">{s.nome}</h3>
-                    <span className="text-xs text-muted-foreground">{s.status}</span>
+                    <h3 className="text-lg font-semibold tracking-tight">{s.nome}</h3>
+                    {!s.screenshot && <span className="text-xs text-muted-foreground">{s.status}</span>}
                   </div>
                 </div>
-                <p className="mt-3 flex-1 text-sm text-muted-foreground">{s.descricao}</p>
-                <div className="mt-4">
+                <p className="mt-4 flex-1 text-sm leading-6 text-muted-foreground">{s.descricao}</p>
+                <div className="mt-6 border-t border-border/60 pt-4">
                   {s.url ? (
-                    <Button asChild variant="outline" size="sm" className="gap-2">
+                    <Button asChild variant="outline" size="sm" className="w-full justify-between gap-2">
                       <a href={s.url} target="_blank" rel="noreferrer">
-                        Ver plataforma <ArrowRight className="h-3.5 w-3.5" />
+                        Conhecer plataforma <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                       </a>
                     </Button>
                   ) : (
-                    <Button asChild variant="ghost" size="sm">
-                      <a href="#formulario">Falar sobre este segmento</a>
+                    <Button asChild variant="ghost" size="sm" className="w-full justify-between">
+                      <a href="#formulario">Falar sobre este segmento <ArrowRight className="h-3.5 w-3.5" /></a>
                     </Button>
                   )}
                 </div>
@@ -987,17 +992,18 @@ function Solucoes() {
         ))}
 
         <Reveal delay={0.2}>
-          <Card className="flex h-full flex-col border-dashed border-primary/40 bg-accent/40 shadow-none">
-            <CardContent className="flex flex-1 flex-col p-5">
-              <span className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-white ring-1 ring-border">
+          <Card className="group flex h-full flex-col border-dashed border-primary/40 bg-accent/30 shadow-none transition-all duration-300 hover:-translate-y-1 hover:border-primary/60">
+            <CardContent className="flex flex-1 flex-col p-6">
+              <span className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-white ring-1 ring-border shadow-sm">
                 <img src={amtCustomLogoUrl} alt="AMT Custom" loading="lazy" className="h-10 w-10 object-contain" />
               </span>
-              <h3 className="mt-3 text-base font-semibold">AMT Custom — sob medida</h3>
-              <p className="mt-2 flex-1 text-sm text-muted-foreground">
+              <span className="mt-4 text-xs font-medium uppercase tracking-[0.16em] text-primary">Próximo projeto</span>
+              <h3 className="mt-2 text-lg font-semibold tracking-tight">AMT Custom — sob medida</h3>
+              <p className="mt-2 flex-1 text-sm leading-6 text-muted-foreground">
                 Seu sistema desenvolvido do zero, com os módulos, processos e a identidade da sua
                 empresa.
               </p>
-              <Button asChild size="sm" className="mt-4 gap-2">
+              <Button asChild size="sm" className="mt-6 w-full justify-between gap-2">
                 <a href="#formulario">
                   Quero criar meu sistema <ArrowRight className="h-3.5 w-3.5" />
                 </a>
@@ -1009,7 +1015,6 @@ function Solucoes() {
     </Section>
   );
 }
-
 function ComoFunciona() {
   return (
     <Section id="como-funciona" tone="blue">
