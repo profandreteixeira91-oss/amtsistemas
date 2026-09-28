@@ -958,7 +958,7 @@ function Solucoes() {
                 <div className="relative aspect-[16/9] overflow-hidden border-b border-border/60 bg-muted">
                   <img
                     src={s.screenshot}
-                    alt={\`Screenshot da plataforma \${s.nome}\`}
+                    alt={`Screenshot da plataforma ${s.nome}`}
                     loading="lazy"
                     className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.02]"
                   />
@@ -971,7 +971,7 @@ function Solucoes() {
                 <div className="flex items-center gap-3">
                   {s.logo ? (
                     <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white ring-1 ring-border">
-                      <img src={s.logo} alt={\`Logo \${s.nome}\`} loading="lazy" className="h-9 w-9 object-contain" />
+                      <img src={s.logo} alt={`Logo ${s.nome}`} loading="lazy" className="h-9 w-9 object-contain" />
                     </span>
                   ) : (
                     <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-sm font-bold text-primary-foreground">
