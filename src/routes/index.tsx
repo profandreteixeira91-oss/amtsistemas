@@ -6,8 +6,6 @@ import {
   Sparkles,
   Mail,
   MessageCircle,
-  Instagram,
-  Linkedin,
   ShieldCheck,
   Zap,
   Cpu,
@@ -512,7 +510,7 @@ function Hero() {
           </p>
 
           <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
-            <Button asChild size="lg" className="gap-2">
+            <Button asChild size="lg" className="gap-2 shadow-md shadow-primary/15">
               <a href="#formulario">
                 Quero desenvolver meu sistema <ArrowRight className="h-4 w-4" />
               </a>
@@ -522,6 +520,15 @@ function Hero() {
                 Falar com a AMT pelo WhatsApp <MessageCircle className="h-4 w-4" />
               </a>
             </Button>
+          </div>
+
+          <div className="mx-auto mt-7 flex max-w-2xl flex-wrap justify-center gap-x-6 gap-y-2 text-xs font-medium text-muted-foreground sm:text-sm">
+            {["Sistema sob medida", "Sua marca", "Processos integrados", "Evolução contínua"].map((item) => (
+              <span key={item} className="inline-flex items-center gap-1.5">
+                <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+                {item}
+              </span>
+            ))}
           </div>
         </motion.div>
 
@@ -982,6 +989,22 @@ function Solucoes() {
           </Reveal>
         ))}
       </div>
+
+      <Reveal>
+        <div className="mt-10 flex flex-col items-start justify-between gap-4 rounded-2xl border border-primary/15 bg-card p-5 shadow-sm sm:flex-row sm:items-center sm:p-6">
+          <div>
+            <p className="font-medium">Sua empresa precisa de algo diferente?</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Podemos partir de um processo específico e transformar a necessidade em uma solução digital.
+            </p>
+          </div>
+          <Button asChild className="shrink-0 gap-2">
+            <a href="#formulario">
+              Falar sobre meu projeto <ArrowRight className="h-4 w-4" />
+            </a>
+          </Button>
+        </div>
+      </Reveal>
     </Section>
   );
 }
@@ -1345,14 +1368,8 @@ function Footer() {
               personalizados. Tecnologia que se adapta ao seu negócio.
             </p>
             <div className="mt-5 flex gap-2">
-              <SocialLink href="#formulario" label="WhatsApp">
+              <SocialLink href={WHATSAPP_URL} label="WhatsApp">
                 <MessageCircle className="h-4 w-4" />
-              </SocialLink>
-              <SocialLink href="#formulario" label="Instagram">
-                <Instagram className="h-4 w-4" />
-              </SocialLink>
-              <SocialLink href="#formulario" label="LinkedIn">
-                <Linkedin className="h-4 w-4" />
               </SocialLink>
               <SocialLink href="mailto:contato@amtsistemas.com.br" label="E-mail">
                 <Mail className="h-4 w-4" />
