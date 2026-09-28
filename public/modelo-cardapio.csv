@@ -1,0 +1,4 @@
+nome,descricao,categoria,preco_venda,custo,tempo_preparo_min,disponivel,destaque
+Pizza Margherita,Molho de tomate mussarela e manjericao,Pizzas,45.90,15.00,25,sim,sim
+Hamburguer Classico,Pao brioche carne 180g queijo alface e tomate,Lanches,32.00,10.50,15,sim,nao
+Refrigerante Lata,Lata 350ml,Bebidas,7.00,3.00,0,sim,nao

@@ -1,0 +1,1 @@
+update manager_planos set ativo = false where sistema_id in (select id from manager_sistemas where ativo = false);

@@ -1,0 +1,6 @@
+update manager_sistemas set ativo = false where slug in ('amt-restaurant', 'amt-clinic', 'amt-hotel', 'amt-vet');
+insert into manager_sistemas (nome, slug, descricao, url, logo_url, cor, ativo, dominio, trial_dias, versao, configuracoes, pitch_comercial, suporte_whatsapp, suporte_email)
+values
+  ('AMT Fight Wear', 'amt-fight-wear', 'Plataforma de e-commerce e gestão para lojas de artes marciais, fight wear e equipamentos de combate.', 'https://fightwear.amtsistemas.com.br', 'https://9004f8a7-a4e5-4c85-a320-7cc61b2f87a4.lovable.app/src/assets/amt-fight-wear-product.png', '#f97316', true, 'fightwear.amtsistemas.com.br', 14, '1.0', '{}', null, null, null),
+  ('AMT Dojo Manager', 'amt-dojo-manager', 'Sistema de gestão para academias de artes marciais, dojos e estúdios de treino.', 'https://dojo.amtsistemas.com.br', 'https://9004f8a7-a4e5-4c85-a320-7cc61b2f87a4.lovable.app/src/assets/amt-dojo-manager-product.png', '#10b981', true, 'dojo.amtsistemas.com.br', 14, '1.0', '{}', null, null, null)
+returning id, nome, slug;

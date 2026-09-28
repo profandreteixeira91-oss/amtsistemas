@@ -1,0 +1,1 @@
+ALTER TABLE public.cupons_fiscais ALTER COLUMN mesa_numero TYPE text USING mesa_numero::text;

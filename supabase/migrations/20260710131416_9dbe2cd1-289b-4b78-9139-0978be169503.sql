@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS public.amt_page_overrides CASCADE;

@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+Disallow: /_authenticated/
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /crm
+Disallow: /amt-admin
