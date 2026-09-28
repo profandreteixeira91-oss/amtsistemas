@@ -59,7 +59,6 @@ import {
 
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import amtSistemas from "@/assets/amt-sistemas-logo.png.asset.json";
 import amtFightWearLogoAsset from "@/assets/amt-fight-wear-logo.png.asset.json";
 import amtDojoManagerLogoAsset from "@/assets/amt-dojo-manager-logo.png.asset.json";
 import amtCustomAsset from "@/assets/amt-custom-product.png.asset.json";
@@ -413,7 +412,7 @@ function Nav() {
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-5 sm:px-6">
         <Link to="/" className="flex items-center gap-3">
           <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg bg-white ring-1 ring-border">
-            <img src={amtSistemas.url} alt="AMT Sistemas" className="h-9 w-9 object-contain" />
+            <img src={"/amt-sistemas-logo.png"} alt="AMT Sistemas" className="h-9 w-9 object-contain" />
           </span>
           <span className="flex flex-col leading-tight">
             <span className="text-sm font-semibold">AMT Sistemas</span>
@@ -1397,7 +1396,7 @@ function Footer() {
             <Link to="/" className="flex items-center gap-3">
               <span className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-lg bg-white ring-1 ring-border">
                 <img
-                  src={amtSistemas.url}
+                  src={"/amt-sistemas-logo.png"}
                   alt="AMT Sistemas e Soluções"
                   className="h-10 w-10 object-contain"
                 />
