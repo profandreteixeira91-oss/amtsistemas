@@ -1394,7 +1394,7 @@ function Footer() {
             <Link to="/" className="flex items-center gap-3">
               <span className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-lg bg-white ring-1 ring-border">
                 <img
-                  src={amtSistemas.url}
+                  src="/amt-sistemas-logo.png"
                   alt="AMT Sistemas e Soluções"
                   className="h-10 w-10 object-contain"
                 />
