@@ -57,6 +57,7 @@ import {
 
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import amtSistemas from "@/assets/amt-sistemas-logo.png.asset.json";
 import amtFightWearLogoAsset from "@/assets/amt-fight-wear-logo.png.asset.json";
 import amtDojoManagerLogoAsset from "@/assets/amt-dojo-manager-logo.png.asset.json";
 import amtCustomAsset from "@/assets/amt-custom-product.png.asset.json";
