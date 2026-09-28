@@ -762,6 +762,49 @@ function DoProblemaASolucao() {
   );
 }
 
+function Beneficios() {
+  const beneficios = [
+    {
+      icon: Clock3,
+      titulo: "Menos trabalho manual",
+      texto: "Automatize tarefas repetitivas e reduza etapas que consomem tempo da equipe.",
+    },
+    {
+      icon: LayoutDashboard,
+      titulo: "Mais controle da operação",
+      texto: "Centralize informações e transforme dados espalhados em uma visão clara do negócio.",
+    },
+    {
+      icon: TrendingUp,
+      titulo: "Uma solução que evolui",
+      texto: "Comece pelo essencial e amplie o sistema conforme novas necessidades surgirem.",
+    },
+  ];
+
+  return (
+    <Section>
+      <Reveal>
+        <Eyebrow>Benefícios</Eyebrow>
+        <H2>O sistema precisa trabalhar a favor da sua operação.</H2>
+        <p className="mt-5 max-w-3xl text-muted-foreground">
+          A tecnologia deixa de ser apenas uma ferramenta e passa a fazer parte do processo do seu negócio.
+        </p>
+      </Reveal>
+      <div className="mt-10 grid gap-4 lg:grid-cols-3">
+        {beneficios.map((beneficio, i) => (
+          <Reveal key={beneficio.titulo} delay={i * 0.04}>
+            <div className="h-full rounded-2xl border border-primary/10 bg-card p-6 shadow-sm">
+              <beneficio.icon className="h-5 w-5 text-primary" />
+              <h3 className="mt-4 text-base font-semibold">{beneficio.titulo}</h3>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">{beneficio.texto}</p>
+            </div>
+          </Reveal>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
 function Modulos() {
   return (
     <Section id="modulos">
