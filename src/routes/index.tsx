@@ -303,6 +303,7 @@ function AmtLanding() {
         <WhiteLabel />
         <Segmentos />
         <DoProblemaASolucao />
+        <Beneficios />
         <Modulos />
         <Tecnologia />
         <Diferenciais />
