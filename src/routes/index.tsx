@@ -63,13 +63,9 @@ import amtSistemas from "@/assets/amt-sistemas-logo.png.asset.json";
 import amtFightWearLogoAsset from "@/assets/amt-fight-wear-logo.png.asset.json";
 import amtDojoManagerLogoAsset from "@/assets/amt-dojo-manager-logo.png.asset.json";
 import amtCustomAsset from "@/assets/amt-custom-product.png.asset.json";
-import screenFightWearAsset from "@/assets/screen-fight-wear.png.asset.json";
-import screenDojoManagerAsset from "@/assets/screen-dojo-manager.png.asset.json";
 
 const amtFightWearLogoUrl = amtFightWearLogoAsset.url;
 const amtDojoManagerLogoUrl = amtDojoManagerLogoAsset.url;
-const screenFightWear = screenFightWearAsset.url;
-const screenDojoManager = screenDojoManagerAsset.url;
 
 const amtCustomLogoUrl = amtCustomAsset.url;
 
@@ -198,7 +194,7 @@ const etapas = [
 type Solucao = {
   nome: string;
   descricao: string;
-  logo: string;
+  logo?: string;
   screenshot?: string;
   status: "Em operação" | "Em desenvolvimento";
   url?: string;
@@ -207,19 +203,26 @@ type Solucao = {
 const solucoes: Solucao[] = [
   {
     nome: "AMT Fight Wear",
-    descricao: "Plataforma de e-commerce e gestão para lojas de fight wear, artes marciais e equipamentos de combate.",
+    descricao: "E-commerce e gestão para o mercado de fight wear, artes marciais e equipamentos de combate.",
     logo: amtFightWearLogoUrl,
-    screenshot: screenFightWear,
+    screenshot: "/assets/screenshot-fight-wear.png",
     status: "Em operação",
     url: "https://www.amtfightwear.com.br",
   },
   {
     nome: "AMT Dojo Manager",
-    descricao: "Sistema de gestão para academias de artes marciais, dojos e estúdios de treino.",
+    descricao: "Gestão para academias de artes marciais, dojos e estúdios de treino.",
     logo: amtDojoManagerLogoUrl,
-    screenshot: screenDojoManager,
+    screenshot: "/assets/screenshot-dojo-manager.png",
     status: "Em operação",
     url: "https://dojomanager.amtfightwear.com.br",
+  },
+  {
+    nome: "AB Academy",
+    descricao: "Plataforma de gestão acadêmica para escola de idiomas, com portal do aluno, professores, aulas e atividades.",
+    screenshot: "/assets/screenshot-ab-academy.png",
+    status: "Em operação",
+    url: "https://abacademyidiomas.com.br",
   },
 ];
 
@@ -396,7 +399,7 @@ function FlowChain({ steps }: { steps: string[] }) {
 function Nav() {
   const [open, setOpen] = useState(false);
   const items = [
-    { label: "Soluções", href: "#solucoes" },
+    { label: "Portfólio", href: "#solucoes" },
     { label: "Como funciona", href: "#como-funciona" },
     { label: "White Label", href: "#white-label" },
     { label: "Segmentos", href: "#segmentos" },
@@ -496,17 +499,17 @@ function Hero() {
           </span>
 
           <h1 className="mx-auto mt-6 max-w-4xl text-balance text-3xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
-            Seu negócio precisa de um sistema.{" "}
+            Sistemas sob medida para o seu negócio.{" "}
             <span
               className="bg-clip-text text-transparent"
               style={{ backgroundImage: "var(--gradient-primary)" }}
             >
-              Nós desenvolvemos exatamente o que você precisa.
+              Tecnologia que se adapta à sua operação.
             </span>
           </h1>
 
           <p className="mx-auto mt-6 max-w-2xl text-pretty text-base text-muted-foreground sm:text-lg">
-            Desenvolvemos sistemas personalizados, plataformas White Label, automações e soluções com Inteligência Artificial para empresas que querem transformar processos em tecnologia.
+            Sistemas personalizados, White Label, automações e IA para transformar processos em uma operação mais simples, integrada e eficiente.
           </p>
 
           <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
@@ -516,7 +519,9 @@ function Hero() {
               </a>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <a href={WHATSAPP_URL} target="_blank" rel="noreferrer">\n                Falar com a AMT pelo WhatsApp <MessageCircle className="h-4 w-4" />\n              </a>
+              <a href={WHATSAPP_URL} target="_blank" rel="noreferrer">
+                Falar com a AMT pelo WhatsApp <MessageCircle className="h-4 w-4" />
+              </a>
             </Button>
           </div>
         </motion.div>
@@ -936,28 +941,27 @@ function Diferenciais() {
 
 function Solucoes() {
   return (
-    <Section id="solucoes">
+    <Section id="solucoes" tone="blue">
       <Reveal>
-        <Eyebrow>Portfólio em operação</Eyebrow>
-        <H2>Produtos reais, sistemas reais, negócios reais.</H2>
+        <Eyebrow>Portfólio</Eyebrow>
+        <H2>Sistemas que já saíram do projeto e estão em operação.</H2>
         <p className="mt-5 max-w-3xl text-muted-foreground">
-          Conheça algumas das plataformas desenvolvidas pela AMT Sistemas. Cada projeto nasce de uma
-          necessidade específica e pode evoluir para uma solução completa, com a identidade e os
-          processos da sua empresa.
+          Conheça produtos desenvolvidos pela AMT Sistemas. Cada plataforma foi construída para uma
+          operação real e pode servir de referência para o que podemos desenvolver para sua empresa.
         </p>
       </Reveal>
 
-      <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-10 grid gap-6 lg:grid-cols-3">
         {solucoes.map((s, i) => (
           <Reveal key={s.nome} delay={i * 0.04}>
             <Card className="group flex h-full flex-col overflow-hidden border-border/70 bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
               {s.screenshot && (
-                <div className="relative overflow-hidden border-b border-border/60 bg-muted">
+                <div className="relative aspect-[16/9] overflow-hidden border-b border-border/60 bg-muted">
                   <img
                     src={s.screenshot}
-                    alt={\`Tela do sistema \${s.nome}\`}
+                    alt={\`Screenshot da plataforma \${s.nome}\`}
                     loading="lazy"
-                    className="h-48 w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]"
+                    className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.02]"
                   />
                   <span className="absolute right-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-medium text-primary shadow-sm">
                     {s.status}
@@ -966,53 +970,30 @@ function Solucoes() {
               )}
               <CardContent className="flex flex-1 flex-col p-6">
                 <div className="flex items-center gap-3">
-                  <span className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white ring-1 ring-border shadow-sm">
-                    <img src={s.logo} alt={\`Logo \${s.nome}\`} loading="lazy" className="h-10 w-10 object-contain" />
-                  </span>
+                  {s.logo ? (
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white ring-1 ring-border">
+                      <img src={s.logo} alt={\`Logo \${s.nome}\`} loading="lazy" className="h-9 w-9 object-contain" />
+                    </span>
+                  ) : (
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-sm font-bold text-primary-foreground">
+                      AB
+                    </span>
+                  )}
                   <div>
                     <h3 className="text-lg font-semibold tracking-tight">{s.nome}</h3>
                     {!s.screenshot && <span className="text-xs text-muted-foreground">{s.status}</span>}
                   </div>
                 </div>
                 <p className="mt-4 flex-1 text-sm leading-6 text-muted-foreground">{s.descricao}</p>
-                <div className="mt-6 border-t border-border/60 pt-4">
-                  {s.url ? (
-                    <Button asChild variant="outline" size="sm" className="w-full justify-between gap-2">
-                      <a href={s.url} target="_blank" rel="noreferrer">
-                        Conhecer plataforma <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-                      </a>
-                    </Button>
-                  ) : (
-                    <Button asChild variant="ghost" size="sm" className="w-full justify-between">
-                      <a href="#formulario">Falar sobre este segmento <ArrowRight className="h-3.5 w-3.5" /></a>
-                    </Button>
-                  )}
-                </div>
+                <Button asChild variant="outline" size="sm" className="mt-6 w-full justify-between gap-2">
+                  <a href={s.url} target="_blank" rel="noreferrer">
+                    Conhecer plataforma <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                  </a>
+                </Button>
               </CardContent>
             </Card>
           </Reveal>
         ))}
-
-        <Reveal delay={0.2}>
-          <Card className="group flex h-full flex-col border-dashed border-primary/40 bg-accent/30 shadow-none transition-all duration-300 hover:-translate-y-1 hover:border-primary/60">
-            <CardContent className="flex flex-1 flex-col p-6">
-              <span className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-white ring-1 ring-border shadow-sm">
-                <img src={amtCustomLogoUrl} alt="AMT Custom" loading="lazy" className="h-10 w-10 object-contain" />
-              </span>
-              <span className="mt-4 text-xs font-medium uppercase tracking-[0.16em] text-primary">Próximo projeto</span>
-              <h3 className="mt-2 text-lg font-semibold tracking-tight">AMT Custom — sob medida</h3>
-              <p className="mt-2 flex-1 text-sm leading-6 text-muted-foreground">
-                Seu sistema desenvolvido do zero, com os módulos, processos e a identidade da sua
-                empresa.
-              </p>
-              <Button asChild size="sm" className="mt-6 w-full justify-between gap-2">
-                <a href="#formulario">
-                  Quero criar meu sistema <ArrowRight className="h-3.5 w-3.5" />
-                </a>
-              </Button>
-            </CardContent>
-          </Card>
-        </Reveal>
       </div>
     </Section>
   );
@@ -1176,7 +1157,9 @@ function Formulario() {
         form.problema.trim() ? `Problema a resolver: ${form.problema.trim()}` : null,
       ]
         .filter(Boolean)
-        .join("\n\n");
+        .join("
+
+");
 
       const { error } = await supabase.from("contatos_leads").insert({
         nome: form.nome.trim(),
