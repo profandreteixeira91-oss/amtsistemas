@@ -5,7 +5,7 @@
   "compatibility_flags": [
     "nodejs_compat"
   ],
-  "main": ".output/server/index.mjs",
+  "main": "src/server.ts",
   "assets": {
     "directory": ".output/public"
   },
