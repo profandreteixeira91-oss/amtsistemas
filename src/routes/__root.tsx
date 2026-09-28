@@ -79,16 +79,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "AMT Sistemas e Soluções — Software de gestão que reduz custo e aumenta receita" },
-      { name: "description", content: "Plataformas SaaS de gestão para restaurantes, comércio, saúde e beleza. Operação em tempo real, IA aplicada e implantação em até 14 dias. Agende uma demonstração." },
+      { title: "AMT Sistemas e Soluções | Sistemas personalizados, automação e IA" },
+      { name: "description", content: "A AMT Sistemas e Soluções desenvolve sistemas personalizados, plataformas White Label, automações e soluções com Inteligência Artificial para empresas." },
       { name: "author", content: "AMT Sistemas e Soluções" },
-      { property: "og:title", content: "AMT Sistemas e Soluções — Software de gestão que reduz custo e aumenta receita" },
-      { property: "og:description", content: "Plataformas SaaS de gestão para restaurantes, comércio, saúde e beleza. Operação em tempo real, IA aplicada e implantação em até 14 dias. Agende uma demonstração." },
+      { property: "og:title", content: "AMT Sistemas e Soluções | Sistemas personalizados, automação e IA" },
+      { property: "og:description", content: "Sistemas personalizados, plataformas White Label, automações e soluções com Inteligência Artificial para empresas." },
       { property: "og:type", content: "website" },
-      { property: "og:site_name", content: "AMT Restaurant" },
+      { property: "og:site_name", content: "AMT Sistemas e Soluções" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "AMT Sistemas e Soluções — Software de gestão que reduz custo e aumenta receita" },
-      { name: "twitter:description", content: "Plataformas SaaS de gestão para restaurantes, comércio, saúde e beleza. Operação em tempo real, IA aplicada e implantação em até 14 dias. Agende uma demonstração." },
+      { name: "twitter:title", content: "AMT Sistemas e Soluções | Sistemas personalizados, automação e IA" },
+      { name: "twitter:description", content: "Sistemas personalizados, plataformas White Label, automações e soluções com Inteligência Artificial para empresas." },
       { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/13601656-c4eb-4578-ab62-7968538b49e1" },
       { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/13601656-c4eb-4578-ab62-7968538b49e1" },
     ],
@@ -103,9 +103,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Organization",
-          name: "AMT Restaurant",
-          alternateName: "AMT Sistemas e Soluções",
-          description: "Sistema completo de gestão para restaurantes, bares e food service.",
+          name: "AMT Sistemas e Soluções",
+          alternateName: "AMT Sistemas",
+          description: "Desenvolvimento de sistemas personalizados, plataformas White Label, automações e soluções com Inteligência Artificial para empresas.",
           areaServed: "BR",
         }),
       },
@@ -119,7 +119,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="pt-BR" className="dark">
+    <html lang="pt-BR">
       <head>
         <HeadContent />
       </head>
