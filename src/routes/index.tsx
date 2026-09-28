@@ -1156,9 +1156,7 @@ function Formulario() {
         form.problema.trim() ? `Problema a resolver: ${form.problema.trim()}` : null,
       ]
         .filter(Boolean)
-        .join("
-
-");
+        .join("\n\n");
 
       const { error } = await supabase.from("contatos_leads").insert({
         nome: form.nome.trim(),
