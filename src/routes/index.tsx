@@ -220,7 +220,7 @@ const solucoes: Solucao[] = [
   {
     nome: "AB Academy",
     descricao: "Plataforma de gestão acadêmica para escola de idiomas, com portal do aluno, professores, aulas e atividades.",
-    screenshot: "/assets/screenshot-ab-academy.png",
+    screenshot: "/assets/screenshot-ab-academy.jpg",
     status: "Em operação",
     url: "https://abacademyidiomas.com.br",
   },
