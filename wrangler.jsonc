@@ -3,7 +3,7 @@
   "name": "amtsistemas",
   "compatibility_date": "2026-09-28",
   "compatibility_flags": ["nodejs_compat"],
-  "main": ".output/server/index.mjs",
+  "main": "src/server.ts",
   "assets": {
     "directory": ".output/public"
   },
