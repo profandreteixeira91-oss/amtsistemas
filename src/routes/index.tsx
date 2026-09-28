@@ -300,16 +300,14 @@ function AmtLanding() {
       <Nav />
       <main className="flex-1">
         <Hero />
+        <Solucoes />
         <QuemSomos />
-        <Adapta />
         <WhiteLabel />
         <Segmentos />
         <DoProblemaASolucao />
         <Modulos />
-        <Personalizacao />
         <Tecnologia />
         <Diferenciais />
-        <Solucoes />
         <ComoFunciona />
         <Investimento />
         <Faq />
@@ -403,6 +401,7 @@ function Nav() {
     { label: "Como funciona", href: "#como-funciona" },
     { label: "White Label", href: "#white-label" },
     { label: "Segmentos", href: "#segmentos" },
+    { label: "Contato", href: "#formulario" },
   ];
 
   return (
