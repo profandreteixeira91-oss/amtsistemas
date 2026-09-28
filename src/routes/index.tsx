@@ -25,6 +25,8 @@ import {
   Boxes,
   BarChart3,
   Bell,
+  Clock3,
+  TrendingUp,
   Workflow,
   Palette,
   Rocket,
