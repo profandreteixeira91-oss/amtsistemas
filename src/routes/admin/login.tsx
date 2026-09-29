@@ -49,7 +49,8 @@ function AdminLogin() {
       navigate({ to: "/admin" });
     } catch (error) {
       console.error(error);
-      const message = error instanceof Error ? error.message : "Não foi possível autenticar.";\n      toast.error(message);
+      const message = error instanceof Error ? error.message : "Não foi possível autenticar.";
+      toast.error(message);
     } finally {
       setLoading(false);
     }
