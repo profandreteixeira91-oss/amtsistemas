@@ -112,7 +112,7 @@ function ResetAdminPassword() {
           <p className="mt-2 text-sm leading-6 text-slate-500">
             Solicite uma nova recuperação de senha pela tela de login.
           </p>
-          <Button className="mt-6 w-full" onClick={() => navigate({ to: "/admin/login" })}>
+          <Button className="mt-6 w-full bg-black text-white hover:bg-slate-900" onClick={() => navigate({ to: "/admin/login" })}>
             Voltar para o login
           </Button>
         </div>
@@ -174,7 +174,7 @@ function ResetAdminPassword() {
 
           <p className="text-xs leading-5 text-slate-400">Use pelo menos 10 caracteres e não reutilize uma senha comprometida.</p>
 
-          <Button type="submit" disabled={saving} className="h-12 w-full">
+          <Button type="submit" disabled={saving} className="h-12 w-full bg-black text-white hover:bg-slate-900">
             {saving ? "Atualizando..." : "Atualizar senha"}
           </Button>
         </form>
