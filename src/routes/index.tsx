@@ -206,7 +206,7 @@ const solucoes: Solucao[] = [
     logo: amtFightWearLogoUrl,
     screenshot: "/assets/screenshot-fight-wear.png",
     status: "Em operação",
-    url: "https://www.amtfightwear.com.br",
+    url: "https://amtfightwear.com.br",
   },
   {
     nome: "AMT Dojo Manager",
