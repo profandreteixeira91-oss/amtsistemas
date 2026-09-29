@@ -392,7 +392,7 @@ function ToolsWorkspace() {
           <textarea value={urlInput} onChange={(e) => setUrlInput(e.target.value)} placeholder="texto ou parâmetro de URL" className="mt-5 min-h-28 w-full rounded-lg border border-slate-200 bg-white p-3 text-sm text-slate-950 outline-none focus:border-blue-500" />
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <select value={urlMode} onChange={(e) => setUrlMode(e.target.value as "encode" | "decode")} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950"><option value="encode">Codificar</option><option value="decode">Decodificar</option></select>
-            <Button type="button" size="sm" onClick={transformUrl}>Processar</Button>
+            <Button type="button" size="sm" onClick={transformUrl} className="bg-black text-white hover:bg-slate-900">Processar</Button>
             <Button type="button" size="sm" variant="ghost" onClick={() => { setUrlInput(""); setUrlOutput(""); }}>Limpar</Button>
           </div>
           {urlOutput && <div className="mt-4"><div className="mb-2 flex items-center justify-between"><span className="text-xs font-medium text-slate-500">Resultado</span><button type="button" onClick={() => void copyValue(urlOutput, "url")} className="inline-flex items-center gap-1 text-xs font-medium text-blue-700">{copied === "url" ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}{copied === "url" ? "Copiado" : "Copiar"}</button></div><div className="max-h-40 overflow-auto rounded-lg bg-slate-50 p-3 font-mono text-xs text-slate-800">{urlOutput}</div></div>}
