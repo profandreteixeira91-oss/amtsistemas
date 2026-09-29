@@ -340,7 +340,7 @@ function Section({
         backgroundColor: tone === "blue" ? "var(--section-blue)" : "var(--background)",
       }}
     >
-      <div className="mx-auto max-w-6xl px-5 py-16 sm:px-6 sm:py-24">{children}</div>
+      <div className="mx-auto max-w-6xl px-5 py-12 sm:px-6 sm:py-16">{children}</div>
     </section>
   );
 }
