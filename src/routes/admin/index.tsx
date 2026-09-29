@@ -23,7 +23,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getAdminSession, signOutAdmin } from "@/lib/amt-admin-auth";
+import { getAdminProfile, getAdminSession, signOutAdmin } from "@/lib/amt-admin-auth";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({
@@ -71,7 +71,13 @@ function AdminDashboard() {
           navigate({ to: "/admin/login" });
           return;
         }
-        setUserEmail(session.user.email ?? "");
+        const profile = await getAdminProfile(session.user.id);
+        if (!profile) {
+          await signOutAdmin();
+          navigate({ to: "/admin/login" });
+          return;
+        }
+        setUserEmail(profile.email);
         setLoading(false);
       })
       .catch(() => navigate({ to: "/admin/login" }));
