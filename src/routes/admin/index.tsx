@@ -370,7 +370,7 @@ function ToolsWorkspace() {
           <ToolHeader icon={Code2} title="Formatador de JSON" description="Valide, organize ou compacte objetos JSON antes de usar em APIs, configurações ou registros." />
           <textarea value={jsonInput} onChange={(e) => setJsonInput(e.target.value)} placeholder='{"exemplo": true}' className="mt-5 min-h-40 w-full rounded-lg border border-slate-200 bg-white p-3 font-mono text-xs text-slate-950 outline-none focus:border-blue-500" />
           <div className="mt-3 flex flex-wrap gap-2">
-            <Button type="button" size="sm" onClick={() => formatJson(false)}>Formatar</Button>
+            <Button type="button" size="sm" onClick={() => formatJson(false)} className="bg-black text-white hover:bg-slate-900">Formatar</Button>
             <Button type="button" size="sm" variant="outline" onClick={() => formatJson(true)}>Compactar</Button>
             <Button type="button" size="sm" variant="ghost" onClick={() => { setJsonInput(""); setJsonOutput(""); setJsonError(""); }}>Limpar</Button>
           </div>
