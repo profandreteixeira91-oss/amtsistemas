@@ -486,56 +486,73 @@ function Hero() {
             "radial-gradient(60% 50% at 50% 0%, oklch(0.72 0.13 205 / 0.16), transparent 70%), radial-gradient(45% 45% at 85% 90%, oklch(0.62 0.11 200 / 0.10), transparent 75%)",
         }}
       />
-      <div className="relative mx-auto max-w-5xl px-5 pb-16 pt-16 text-center sm:px-6 sm:pb-24 sm:pt-24">
-        <motion.div
-          initial={{ opacity: 0, y: 22 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-        >
-          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm">
-            <Sparkles className="h-3.5 w-3.5 text-primary" />
-            Tecnologia sob medida para o seu negócio
-          </span>
+      <div className="relative mx-auto max-w-6xl px-5 pb-16 pt-12 sm:px-6 sm:pb-20 sm:pt-16">
+        <div className="grid items-center gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-14">
+          <motion.div
+            initial={{ opacity: 0, x: -18 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="flex justify-center"
+          >
+            <img
+              src="/amt-sistemas-logo.png"
+              alt="Logomarca AMT Sistemas"
+              className="h-auto w-full max-w-[260px] object-contain sm:max-w-[340px] lg:max-w-[440px]"
+              fetchPriority="high"
+            />
+          </motion.div>
 
-          <h1 className="mx-auto mt-6 max-w-4xl text-balance text-3xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
-            Sistemas sob medida para o seu negócio.{" "}
-            <span
-              className="bg-clip-text text-transparent"
-              style={{ backgroundImage: "var(--gradient-primary)" }}
-            >
-              Tecnologia que se adapta à sua operação.
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="min-w-0 text-center lg:text-left"
+          >
+            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm">
+              <Sparkles className="h-3.5 w-3.5 shrink-0 text-primary" />
+              Tecnologia sob medida para o seu negócio
             </span>
-          </h1>
 
-          <p className="mx-auto mt-6 max-w-2xl text-pretty text-base text-muted-foreground sm:text-lg">
-            Sistemas personalizados, White Label, automações e IA para transformar processos em uma operação mais simples, integrada e eficiente.
-          </p>
-
-          <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
-            <Button asChild size="lg" className="gap-2 shadow-md shadow-primary/15">
-              <a href="#formulario">
-                Quero desenvolver meu sistema <ArrowRight className="h-4 w-4" />
-              </a>
-            </Button>
-            <Button asChild size="lg" variant="outline">
-              <a href={WHATSAPP_URL} target="_blank" rel="noreferrer">
-                Falar com a AMT pelo WhatsApp <MessageCircle className="h-4 w-4" />
-              </a>
-            </Button>
-          </div>
-
-          <div className="mx-auto mt-7 flex max-w-2xl flex-wrap justify-center gap-x-6 gap-y-2 text-xs font-medium text-muted-foreground sm:text-sm">
-            {["Sistema sob medida", "Sua marca", "Processos integrados", "Evolução contínua"].map((item) => (
-              <span key={item} className="inline-flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-                {item}
+            <h1 className="mt-6 break-words hyphens-none text-pretty text-3xl font-semibold tracking-tight sm:text-5xl lg:text-5xl xl:text-6xl">
+              Sistemas sob medida para o seu negócio.{" "}
+              <span
+                className="bg-clip-text text-transparent"
+                style={{ backgroundImage: "var(--gradient-primary)" }}
+              >
+                Tecnologia que se adapta à sua operação.
               </span>
-            ))}
-          </div>
-        </motion.div>
+            </h1>
+
+            <p className="mt-6 break-words hyphens-none text-pretty text-base text-muted-foreground sm:text-lg">
+              Sistemas personalizados, White Label, automações e IA para transformar processos em uma operação mais simples, integrada e eficiente.
+            </p>
+
+            <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center lg:justify-start">
+              <Button asChild size="lg" className="gap-2 shadow-md shadow-primary/15">
+                <a href="#formulario">
+                  Quero desenvolver meu sistema <ArrowRight className="h-4 w-4 shrink-0" />
+                </a>
+              </Button>
+              <Button asChild size="lg" variant="outline">
+                <a href={WHATSAPP_URL} target="_blank" rel="noreferrer">
+                  Falar com a AMT pelo WhatsApp <MessageCircle className="h-4 w-4 shrink-0" />
+                </a>
+              </Button>
+            </div>
+
+            <div className="mt-7 flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs font-medium text-muted-foreground sm:text-sm lg:justify-start">
+              {["Sistema sob medida", "Sua marca", "Processos integrados", "Evolução contínua"].map((item) => (
+                <span key={item} className="inline-flex items-center gap-1.5">
+                  <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-primary" />
+                  {item}
+                </span>
+              ))}
+            </div>
+          </motion.div>
+        </div>
 
         <Reveal delay={0.15}>
-          <div className="mt-14">
+          <div className="mt-12 sm:mt-14">
             <HeroFlow />
           </div>
         </Reveal>
