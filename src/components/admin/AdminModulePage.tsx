@@ -38,23 +38,23 @@ export function AdminModulePage({
   }
 
   if (loading) {
-    return <div className="flex min-h-screen items-center justify-center bg-slate-950 text-sm text-slate-400">Validando sessão...</div>;
+    return <div className="flex min-h-screen items-center justify-center bg-white text-sm text-slate-500">Validando sessão...</div>;
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 text-slate-950">
-      <header className="border-b border-slate-200 bg-white">
+    <main className="min-h-screen bg-white text-slate-950">
+      <header className="border-b border-blue-700 bg-blue-700 text-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
           <div className="flex items-center gap-3">
-            <Link to="/admin" className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900" aria-label="Voltar ao dashboard">
+            <Link to="/admin" className="rounded-lg p-2 text-blue-100 hover:bg-blue-600 hover:text-white" aria-label="Voltar ao dashboard">
               <ArrowLeft className="h-4 w-4" />
             </Link>
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white ring-1 ring-slate-200">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white ring-1 ring-blue-500">
               <img src="/amt-sistemas-logo.png" alt="AMT Sistemas" className="h-8 w-8 object-contain" />
             </div>
             <div>
               <p className="font-semibold">AMT Control Center</p>
-              <p className="text-xs text-slate-500">{email}</p>
+              <p className="text-xs text-blue-100">{email}</p>
             </div>
           </div>
           <Button variant="outline" size="sm" onClick={logout} className="gap-2">
