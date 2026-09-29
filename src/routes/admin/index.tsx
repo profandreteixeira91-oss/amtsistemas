@@ -265,7 +265,7 @@ function AdminDashboard() {
 
             </>}
             <div className="flex items-center gap-2 text-xs text-slate-400">
-              <ShieldCheck className="h-4 w-4" />
+              <Activity className="h-4 w-4" />
               Os indicadores desta primeira versão são demonstrativos e serão substituídos por dados do Supabase após a integração do backend.
               <ArrowUpRight className="h-3.5 w-3.5" />
             </div>
