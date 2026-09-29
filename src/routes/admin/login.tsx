@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getAdminSession, signInAdmin } from "@/lib/amt-admin-auth";
+import { getAdminSession, requestAdminPasswordReset, signInAdmin } from "@/lib/amt-admin-auth";
 
 export const Route = createFileRoute("/admin/login")({
   head: () => ({
@@ -24,6 +24,7 @@ function AdminLogin() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [recoveryLoading, setRecoveryLoading] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -149,7 +150,34 @@ function AdminLogin() {
                 </div>
               </div>
 
-              <Button type="submit" disabled={loading} className="h-12 w-full gap-2">
+              <div className="-mt-2 text-right">
+                <button
+                  type="button"
+                  disabled={loading || recoveryLoading}
+                  onClick={async () => {
+                    const targetEmail = email.trim();
+                    if (!targetEmail) {
+                      toast.error("Informe seu e-mail para recuperar a senha.");
+                      return;
+                    }
+                    setRecoveryLoading(true);
+                    try {
+                      await requestAdminPasswordReset(targetEmail);
+                      toast.success("Enviamos as instruções de redefinição para seu e-mail.");
+                    } catch (error) {
+                      console.error(error);
+                      toast.error("Não foi possível iniciar a recuperação da senha.");
+                    } finally {
+                      setRecoveryLoading(false);
+                    }
+                  }}
+                  className="text-sm font-medium text-blue-700 hover:text-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {recoveryLoading ? "Enviando..." : "Esqueci minha senha"}
+                </button>
+              </div>
+
+              <Button type="submit" disabled={loading || recoveryLoading} className="h-12 w-full gap-2">
                 {loading ? "Autenticando..." : "Entrar"}
                 {!loading && <ArrowRight className="h-4 w-4" />}
               </Button>
