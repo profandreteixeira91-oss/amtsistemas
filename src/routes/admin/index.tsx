@@ -65,7 +65,7 @@ function AdminDashboard() {
   useEffect(() => {
     let active = true;
     void getAdminSession()
-      .then((session) => {
+      .then(async (session) => {
         if (!active) return;
         if (!session) {
           navigate({ to: "/admin/login" });
