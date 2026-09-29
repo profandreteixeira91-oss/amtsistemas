@@ -18,6 +18,8 @@ import {
   Globe2,
   LayoutDashboard,
   LogOut,
+  Plus,
+  Search,
   ShieldCheck,
   Users,
   Wrench,
@@ -26,6 +28,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAdminProfile, getAdminSession, signOutAdmin } from "@/lib/amt-admin-auth";
+import { amtSupabase } from "@/integrations/amt-supabase/client";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({
@@ -289,9 +292,9 @@ function SidebarButton({ icon: Icon, label, active, collapsed, onClick }: {
 }
 
 function ModuleWorkspace({ module }: { module: string }) {
+  if (module === "Leads") return <LeadsWorkspace />;
   const descriptions: Record<string, string> = {
     Sistemas: "Gerencie os sistemas e integrações do ecossistema AMT.",
-    Leads: "Central de leads e oportunidades comerciais.",
     Formulários: "Acompanhe formulários e solicitações recebidas.",
     Ferramentas: "Ferramentas administrativas e operacionais.",
     Segurança: "Controles de acesso, permissões e segurança.",
@@ -302,6 +305,69 @@ function ModuleWorkspace({ module }: { module: string }) {
       <h2 className="text-lg font-semibold">{module}</h2>
       <p className="mt-1 text-sm text-slate-500">{descriptions[module] ?? "Módulo administrativo."}</p>
       <div className="mt-6 rounded-xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center text-sm text-slate-500">Área pronta para receber os dados e funcionalidades deste módulo.</div>
+    </section>
+  );
+}
+
+type Lead = { id: string; name: string; email: string | null; phone: string | null; source: string | null; status: string; notes: string | null; created_at: string };
+
+function LeadsWorkspace() {
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("todos");
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({ name: "", email: "", phone: "", source: "", notes: "" });
+  const [saving, setSaving] = useState(false);
+
+  async function loadLeads() {
+    const { data } = await amtSupabase.from("leads").select("*").order("created_at", { ascending: false });
+    setLeads((data ?? []) as Lead[]);
+  }
+
+  useEffect(() => { void loadLeads(); }, []);
+
+  async function createLead(event: React.FormEvent) {
+    event.preventDefault();
+    if (!form.name.trim()) return;
+    setSaving(true);
+    const { data } = await amtSupabase.from("leads").insert({ ...form, name: form.name.trim() }).select("*").single();
+    if (data) {
+      setLeads((current) => [data as Lead, ...current]);
+      setForm({ name: "", email: "", phone: "", source: "", notes: "" });
+      setShowForm(false);
+    }
+    setSaving(false);
+  }
+
+  async function updateStatus(id: string, nextStatus: string) {
+    const { data } = await amtSupabase.from("leads").update({ status: nextStatus, updated_at: new Date().toISOString() }).eq("id", id).select("*").single();
+    if (data) setLeads((current) => current.map((lead) => lead.id === id ? data as Lead : lead));
+  }
+
+  const filtered = leads.filter((lead) => {
+    const text = [lead.name, lead.email ?? "", lead.phone ?? ""].join(" ").toLowerCase();
+    return (status === "todos" || lead.status === status) && text.includes(search.toLowerCase());
+  });
+
+  return (
+    <section className="space-y-5">
+      <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <div><h2 className="text-lg font-semibold">Leads e CRM</h2><p className="mt-1 text-sm text-slate-500">{leads.length} lead(s) cadastrados</p></div>
+        <Button onClick={() => setShowForm((value) => !value)} className="gap-2 bg-blue-700 hover:bg-blue-800"><Plus className="h-4 w-4" /> Novo lead</Button>
+      </div>
+      {showForm && <form onSubmit={createLead} className="grid gap-3 rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:grid-cols-2">
+        {([["name","Nome *"],["email","E-mail"],["phone","Telefone"],["source","Origem"]] as const).map(([key,label]) => <label key={key} className="text-sm font-medium text-slate-700">{label}<input value={form[key]} onChange={(e) => setForm((v) => ({ ...v, [key]: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500" /></label>)}
+        <label className="text-sm font-medium text-slate-700 sm:col-span-2">Observações<textarea value={form.notes} onChange={(e) => setForm((v) => ({ ...v, notes: e.target.value }))} className="mt-1 min-h-20 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500" /></label>
+        <div className="sm:col-span-2"><Button type="submit" disabled={saving}>{saving ? "Salvando..." : "Cadastrar lead"}</Button></div>
+      </form>}
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <label className="relative flex-1"><Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" /><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar por nome, e-mail ou telefone" className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm outline-none focus:border-blue-500" /></label>
+        <select value={status} onChange={(e) => setStatus(e.target.value)} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm"><option value="todos">Todos os status</option><option value="novo">Novo</option><option value="contatado">Contatado</option><option value="qualificado">Qualificado</option><option value="convertido">Convertido</option><option value="perdido">Perdido</option></select>
+      </div>
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="hidden grid-cols-[1.5fr_1fr_1fr_160px] gap-4 border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-medium uppercase tracking-wide text-slate-500 md:grid"><span>Lead</span><span>Contato</span><span>Origem</span><span>Status</span></div>
+        {filtered.length === 0 ? <div className="p-10 text-center text-sm text-slate-500">Nenhum lead encontrado.</div> : filtered.map((lead) => <div key={lead.id} className="grid gap-3 border-b border-slate-100 px-5 py-4 last:border-0 md:grid-cols-[1.5fr_1fr_1fr_160px] md:items-center md:gap-4"><div><p className="font-medium">{lead.name}</p><p className="mt-1 text-xs text-slate-500">{new Date(lead.created_at).toLocaleDateString("pt-BR")}</p></div><div className="text-sm text-slate-600">{lead.email || lead.phone || "—"}</div><div className="text-sm text-slate-600">{lead.source || "—"}</div><select value={lead.status} onChange={(e) => void updateStatus(lead.id, e.target.value)} className="rounded-lg border border-slate-200 bg-white px-2 py-2 text-sm"><option value="novo">Novo</option><option value="contatado">Contatado</option><option value="qualificado">Qualificado</option><option value="convertido">Convertido</option><option value="perdido">Perdido</option></select></div>)}
+      </div>
     </section>
   );
 }
