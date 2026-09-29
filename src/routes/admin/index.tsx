@@ -175,7 +175,7 @@ function AdminDashboard() {
             </section>
 
             <section className="grid gap-6 xl:grid-cols-[1.35fr_0.65fr]">
-              <Card className="border-slate-200 shadow-sm">
+              <Card className="border-slate-200 bg-white text-slate-950 shadow-sm">
                 <CardHeader className="flex flex-row items-center justify-between">
                   <div>
                     <CardTitle className="text-lg">Sistemas</CardTitle>
@@ -205,7 +205,7 @@ function AdminDashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="border-slate-200 shadow-sm">
+              <Card className="border-slate-200 bg-white text-slate-950 shadow-sm">
                 <CardHeader>
                   <CardTitle className="text-lg">Acessos rápidos</CardTitle>
                   <p className="mt-1 text-sm text-slate-500">Ferramentas centrais da operação.</p>
@@ -219,7 +219,7 @@ function AdminDashboard() {
             </section>
 
             <section className="grid gap-6 lg:grid-cols-2">
-              <Card className="border-slate-200 shadow-sm">
+              <Card className="border-slate-200 bg-white text-slate-950 shadow-sm">
                 <CardHeader>
                   <CardTitle className="text-lg">Atividade recente</CardTitle>
                   <p className="mt-1 text-sm text-slate-500">Estrutura preparada para o futuro log de auditoria.</p>
@@ -242,7 +242,7 @@ function AdminDashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="border-slate-200 shadow-sm">
+              <Card className="border-slate-200 bg-white text-slate-950 shadow-sm">
                 <CardHeader>
                   <CardTitle className="text-lg">Próximos módulos</CardTitle>
                   <p className="mt-1 text-sm text-slate-500">Áreas já previstas na arquitetura do Control Center.</p>
