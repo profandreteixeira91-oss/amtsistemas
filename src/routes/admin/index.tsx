@@ -43,54 +43,9 @@ export const Route = createFileRoute("/admin/")({
 });
 
 const systems = [
-  {
-    id: "ab-academy",
-    name: "AB Academy",
-    description: "Plataforma integrada de gestão acadêmica.",
-    status: "Integrado",
-    href: "https://abacademyidiomas.com.br/aluno",
-    icon: Globe2,
-    links: {
-      site: "https://abacademyidiomas.com.br",
-      github: "https://github.com/profandreteixeira91-oss/ab-academy",
-      cloudflare: "https://dash.cloudflare.com/",
-      supabase: "https://supabase.com/dashboard/project/vwmrxdzskvwojyfddjwd",
-      operation: "https://abacademyidiomas.com.br/admin",
-    },
-    capabilities: ["Site", "GitHub", "Cloudflare", "Supabase", "Administração"],
-  },
-  {
-    id: "dojo-manager",
-    name: "AMT Dojo Manager",
-    description: "SaaS de gestão para academias e dojos.",
-    status: "Acesso externo",
-    href: "https://dojomanager.amtfightwear.com.br",
-    icon: Boxes,
-    links: {
-      site: "https://dojomanager.amtfightwear.com.br",
-      github: "https://github.com/profandreteixeira91-oss",
-      cloudflare: "https://dash.cloudflare.com/",
-      supabase: "",
-      operation: "https://dojomanager.amtfightwear.com.br",
-    },
-    capabilities: ["Site", "GitHub", "Cloudflare", "Operação externa"],
-  },
-  {
-    id: "fight-wear",
-    name: "AMT Fight Wear",
-    description: "E-commerce e operação de fight wear.",
-    status: "Acesso externo",
-    href: "https://amtfightwear.com.br",
-    icon: BriefcaseBusiness,
-    links: {
-      site: "https://amtfightwear.com.br",
-      github: "https://github.com/profandreteixeira91-oss",
-      cloudflare: "https://dash.cloudflare.com/",
-      supabase: "",
-      operation: "https://amtfightwear.com.br",
-    },
-    capabilities: ["Site", "GitHub", "Cloudflare", "Operação externa"],
-  },
+  { id: "ab-academy", name: "AB Academy", description: "Plataforma integrada de gestão acadêmica.", status: "Integrado", href: "https://abacademyidiomas.com.br/aluno", icon: Globe2, links: { site: "https://abacademyidiomas.com.br", github: "https://github.com/profandreteixeira91-oss/ab-academy", cloudflare: "https://dash.cloudflare.com/", supabase: "https://supabase.com/dashboard/project/vwmrxdzskvwojyfddjwd", operation: "https://abacademyidiomas.com.br/admin" }, capabilities: ["Site", "GitHub", "Cloudflare", "Supabase", "Administração"], githubRepo: "profandreteixeira91-oss/ab-academy" },
+  { id: "dojo-manager", name: "AMT Dojo Manager", description: "SaaS de gestão para academias e dojos.", status: "Acesso externo", href: "https://dojomanager.amtfightwear.com.br", icon: Boxes, links: { site: "https://dojomanager.amtfightwear.com.br", github: "https://github.com/profandreteixeira91-oss", cloudflare: "https://dash.cloudflare.com/", supabase: "", operation: "https://dojomanager.amtfightwear.com.br" }, capabilities: ["Site", "GitHub", "Cloudflare", "Operação externa"] },
+  { id: "fight-wear", name: "AMT Fight Wear", description: "E-commerce e operação de fight wear.", status: "Acesso externo", href: "https://amtfightwear.com.br", icon: BriefcaseBusiness, links: { site: "https://amtfightwear.com.br", github: "https://github.com/profandreteixeira91-oss", cloudflare: "https://dash.cloudflare.com/", supabase: "", operation: "https://amtfightwear.com.br" }, capabilities: ["Site", "GitHub", "Cloudflare", "Operação externa"] },
 ];
 
 const modules = [
@@ -557,461 +512,58 @@ function AuditWorkspace() {
         <aside className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           {!selected ? <div className="flex min-h-64 items-center justify-center text-center text-sm text-slate-500">Selecione um evento para visualizar os detalhes.</div> : (
             <>
-              <div><p className="text-xs font-medium uppercase tracking-wide text-slate-400">Evento</p><h3 className="mt-1 font-semibold text-slate-950">{formatAction(selected.action)}</h3><p className="mt-1 text-xs texfunction SystemsWorkspace() {
-  const [selectedId, setSelectedId] = useState(systems[0]?.id ?? "");
+              <div><p className="text-xs font-medium uppercase tracking-wide text-slate-400">Evento</p><h3 className="mt-1 font-semibold text-slate-950">{formatAction(selected.action)}</h3><p className="mt-1 text-xs text-slate-500">{new Date(selected.created_at).toLocaleString("pt-BR")}</p></div>
+              <div className="mt-5 space-y-4 text-sm">
+                <div><p className="text-xs text-slate-500">ID do evento</p><p className="mt-1 break-all font-mono text-xs text-slate-700">{selected.id}</p></div>
+                <div><p className="text-xs text-slate-500">Usuário responsável</p><p className="mt-1 break-all font-mono text-xs text-slate-700">{selected.actor_user_id || "Não identificado"}</p></div>
+                <div><p className="text-xs text-slate-500">Tipo de recurso</p><p className="mt-1 text-slate-950">{selected.resource_type || "Não informado"}</p></div>
+                <div><p className="text-xs text-slate-500">ID do recurso</p><p className="mt-1 break-all font-mono text-xs text-slate-700">{selected.resource_id || "Não informado"}</p></div>
+                <div><p className="text-xs text-slate-500">Metadados</p><pre className="mt-1 max-h-72 overflow-auto rounded-lg bg-slate-50 p-3 text-xs leading-5 text-slate-700">{JSON.stringify(selected.metadata, null, 2)}</pre></div>
+              </div>
+            </>
+          )}
+        </aside>
+      </div>
+    </section>
+  );
+}
+
+function SystemsWorkspace() {
+  const [selectedId, setSelectedId] = useState("ab-academy");
   const selected = systems.find((system) => system.id === selectedId) ?? systems[0];
+  const [github, setGithub] = useState<{ loading: boolean; error: string; repo: any; commit: any; issues: number; prs: number }>({ loading: false, error: "", repo: null, commit: null, issues: 0, prs: 0 });
+
+  useEffect(() => {
+    if (!selected.githubRepo) { setGithub({ loading: false, error: "", repo: null, commit: null, issues: 0, prs: 0 }); return; }
+    let active = true;
+    setGithub((value) => ({ ...value, loading: true, error: "" }));
+    const base = "https://api.github.com/repos/" + selected.githubRepo;
+    Promise.all([
+      fetch(base).then((r) => r.ok ? r.json() : Promise.reject(new Error("Não foi possível consultar o repositório."))),
+      fetch(base + "/commits?per_page=1").then((r) => r.ok ? r.json() : Promise.reject(new Error("Não foi possível consultar os commits."))),
+      fetch(base + "/issues?state=open&per_page=100").then((r) => r.ok ? r.json() : Promise.reject(new Error("Não foi possível consultar as issues."))),
+    ]).then(([repo, commits, issues]) => {
+      if (!active) return;
+      setGithub({ loading: false, error: "", repo, commit: commits?.[0] ?? null, issues: (issues ?? []).filter((item: { pull_request?: unknown }) => !item.pull_request).length, prs: (issues ?? []).filter((item: { pull_request?: unknown }) => Boolean(item.pull_request)).length });
+    }).catch((error) => {
+      if (active) setGithub((value) => ({ ...value, loading: false, error: error instanceof Error ? error.message : "Falha ao consultar o GitHub." }));
+    });
+    return () => { active = false; };
+  }, [selected]);
 
   if (!selected) return null;
-
   const isIntegrated = selected.status === "Integrado";
-
-  const quickLinks = [
-    ["Site", selected.links.site, Globe2],
-    ["GitHub", selected.links.github, GitBranch],
-    ["Cloudflare", selected.links.cloudflare, Globe2],
-    ["Supabase", selected.links.supabase, Code2],
-    ["Operação", selected.links.operation, Boxes],
-  ] as const;
-
-  const indicators = [
-    ["Visitas hoje", "—", "Integração de analytics na próxima fase", BarChart3],
-    ["Últimos 7 dias", "—", "Integração de analytics na próxima fase", Activity],
-    ["Leads", "—", "Conectado ao módulo comercial futuramente", Users],
-    ["Status", isIntegrated ? "Integrado" : "Externo", isIntegrated ? "Conexão preparada" : "Operação fora do Control Center", Globe2],
-  ] as const;
-
+  const quickLinks = [["Site", selected.links.site, Globe2], ["GitHub", selected.links.github, GitBranch], ["Cloudflare", selected.links.cloudflare, Globe2], ["Supabase", selected.links.supabase, Code2], ["Operação", selected.links.operation, Boxes]] as const;
   return (
     <section className="space-y-6">
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.16em] text-blue-600">Ecossistema AMT</p>
-            <h2 className="mt-1 text-lg font-semibold text-slate-950">Sistemas</h2>
-            <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-500">
-              Central operacional para acessar infraestrutura, código, serviços e indicadores de cada produto.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2 text-xs">
-            <span className="rounded-full bg-blue-50 px-3 py-1.5 font-medium text-blue-700">{systems.length} sistemas</span>
-            <span className="rounded-full bg-slate-100 px-3 py-1.5 font-medium text-slate-700">{systems.filter((system) => system.status === "Integrado").length} integrado</span>
-            <span className="rounded-full bg-slate-100 px-3 py-1.5 font-medium text-slate-700">{systems.filter((system) => system.status !== "Integrado").length} externos</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-3">
-        {systems.map((system) => {
-          const Icon = system.icon;
-          const active = system.id === selected.id;
-          return (
-            <button
-              key={system.id}
-              type="button"
-              onClick={() => setSelectedId(system.id)}
-              className={`rounded-xl border bg-white p-5 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md ${active ? "border-blue-500 ring-1 ring-blue-500/20" : "border-slate-200"}`}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100">
-                  <Icon className="h-5 w-5 text-slate-900" />
-                </div>
-                <span className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${system.status === "Integrado" ? "bg-blue-50 text-blue-700" : "bg-slate-100 text-slate-600"}`}>
-                  {system.status}
-                </span>
-              </div>
-              <h3 className="mt-4 font-semibold text-slate-950">{system.name}</h3>
-              <p className="mt-1 text-sm leading-5 text-slate-500">{system.description}</p>
-              <div className="mt-4 flex flex-wrap gap-1.5">
-                {system.capabilities.map((capability) => (
-                  <span key={capability} className="rounded-md bg-slate-50 px-2 py-1 text-[10px] font-medium text-slate-500">{capability}</span>
-                ))}
-              </div>
-            </button>
-          );
-        })}
-      </div>
-
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div>
-            <div className="flex flex-wrap items-center gap-3">
-              <h3 className="text-xl font-semibold text-slate-950">{selected.name}</h3>
-              <span className={`rounded-full px-3 py-1 text-xs font-medium ${isIntegrated ? "bg-blue-50 text-blue-700" : "bg-slate-100 text-slate-600"}`}>
-                {selected.status}
-              </span>
-            </div>
-            <p className="mt-1 text-sm text-slate-500">{selected.description}</p>
-          </div>
-          <a href={selected.href} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-lg bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800">
-            Abrir sistema <ExternalLink className="h-4 w-4" />
-          </a>
-        </div>
-
-        <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {indicators.map(([label, value, detail, Icon]) => (
-            <div key={String(label)} className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
-              <div className="flex items-center gap-2 text-xs font-medium text-slate-500"><Icon className="h-4 w-4 text-blue-700" />{label}</div>
-              <p className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">{value}</p>
-              <p className="mt-1 text-[11px] leading-4 text-slate-400">{detail}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <div className="grid gap-6 xl:grid-cols-[1fr_360px]">
-        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div>
-            <h3 className="text-base font-semibold text-slate-950">Acessos operacionais</h3>
-            <p className="mt-1 text-sm text-slate-500">Links separados por responsabilidade para reduzir a navegação manual entre painéis.</p>
-          </div>
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            {quickLinks.map(([label, href, Icon]) => (
-              <a
-                key={label}
-                href={href || undefined}
-                target={href ? "_blank" : undefined}
-                rel={href ? "noreferrer" : undefined}
-                aria-disabled={!href}
-                className={`flex items-center justify-between rounded-xl border p-4 transition-colors ${href ? "border-slate-200 hover:border-blue-300 hover:bg-blue-50/30" : "cursor-not-allowed border-dashed border-slate-200 bg-slate-50 opacity-60"}`}
-              >
-                <span className="flex items-center gap-3">
-                  <span className="rounded-lg bg-slate-100 p-2"><Icon className="h-4 w-4 text-blue-700" /></span>
-                  <span><span className="block text-sm font-medium text-slate-950">{label}</span><span className="block text-[11px] text-slate-400">{href ? "Abrir painel" : "Ainda não configurado"}</span></span>
-                </span>
-                <ExternalLink className="h-4 w-4 text-slate-400" />
-              </a>
-            ))}
-          </div>
-        </section>
-
-        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h3 className="text-base font-semibold text-slate-950">Capacidades previstas</h3>
-          <p className="mt-1 text-sm text-slate-500">A fase 1 cria a estrutura; as fontes reais entram nas próximas integrações.</p>
-          <div className="mt-5 space-y-3">
-            {[
-              ["Analytics", "Visitas, sessões, páginas e origens", BarChart3],
-              ["Infraestrutura", "Deploy, domínio, DNS, SSL e CDN", Globe2],
-              ["Código", "Repositório, commits, issues e workflows", GitBranch],
-              ["Backend", "Banco, autenticação, storage e funções", Code2],
-              ["Operação", "Leads, formulários, usuários e eventos", Activity],
-            ].map(([title, description, Icon]) => (
-              <div key={String(title)} className="flex gap-3 rounded-lg bg-slate-50 p-3">
-                <Icon className="mt-0.5 h-4 w-4 shrink-0 text-blue-700" />
-                <div><p className="text-sm font-medium text-slate-950">{title}</p><p className="mt-0.5 text-xs leading-5 text-slate-500">{String(description)}</p></div>
-              </div>
-            ))}
-          </div>
-        </section>
-      </div>
-
-      <section className="rounded-xl border border-dashed border-slate-200 bg-white p-5">
-        <div className="flex gap-3">
-          <Activity className="mt-0.5 h-4 w-4 shrink-0 text-blue-700" />
-          <div>
-            <p className="text-sm font-medium text-slate-950">Fase 1 — estrutura operacional</p>
-            <p className="mt-1 text-xs leading-5 text-slate-500">
-              Os acessos acima já ficam organizados por sistema. Visitas, status de deploy, métricas de infraestrutura e dados de cada plataforma serão conectados sem alterar esta interface na próxima fase.
-            </p>
-          </div>
-        </div>
-      </section>
-    </section>
-  );
-} Acessar <ExternalLink className="h-3.5 w-3.5" />
-                </a>
-              </div>
-            </article>
-          );
-        })}
-      </div>
-
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h3 className="text-base font-semibold">Arquitetura de integração</h3>
-        <div className="mt-4 grid gap-3 sm:grid-cols-3">
-          {[
-            ["Integrados", "Dados e operações poderão ser centralizados no Control Center.", Globe2],
-            ["Externos", "Acesso rápido sem assumir integração direta com sistemas independentes.", ExternalLink],
-            ["Expansão", "Novos sistemas poderão ser adicionados sem alterar a navegação principal.", GitBranch],
-          ].map(([title, description, Icon]) => (
-            <div key={String(title)} className="rounded-xl border border-slate-200 bg-white p-4">
-              <div className="flex items-center gap-2 text-sm font-medium text-slate-950"><Icon className="h-4 w-4 text-blue-700" />{title}</div>
-              <p className="mt-2 text-xs leading-5 text-slate-600">{String(description)}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"><div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between"><div><p className="text-xs font-medium uppercase tracking-[0.16em] text-blue-600">Ecossistema AMT</p><h2 className="mt-1 text-lg font-semibold text-slate-950">Sistemas</h2><p className="mt-1 max-w-2xl text-sm leading-6 text-slate-500">Central operacional para acessar infraestrutura, código, serviços e indicadores de cada produto.</p></div><div className="flex flex-wrap gap-2 text-xs"><span className="rounded-full bg-blue-50 px-3 py-1.5 font-medium text-blue-700">{systems.length} sistemas</span><span className="rounded-full bg-slate-100 px-3 py-1.5 font-medium text-slate-700">{systems.filter((system) => system.status === "Integrado").length} integrado</span><span className="rounded-full bg-slate-100 px-3 py-1.5 font-medium text-slate-700">{systems.filter((system) => system.status !== "Integrado").length} externos</span></div></div></div>
+      <div className="grid gap-4 md:grid-cols-3">{systems.map((system) => { const Icon = system.icon; const active = system.id === selected.id; return <button key={system.id} type="button" onClick={() => setSelectedId(system.id)} className={`rounded-xl border bg-white p-5 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md ${active ? "border-blue-500 ring-1 ring-blue-500/20" : "border-slate-200"}`}><div className="flex items-start justify-between gap-3"><div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100"><Icon className="h-5 w-5 text-slate-900" /></div><span className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${system.status === "Integrado" ? "bg-blue-50 text-blue-700" : "bg-slate-100 text-slate-600"}`}>{system.status}</span></div><h3 className="mt-4 font-semibold text-slate-950">{system.name}</h3><p className="mt-1 text-sm leading-5 text-slate-500">{system.description}</p><div className="mt-4 flex flex-wrap gap-1.5">{system.capabilities.map((capability) => <span key={capability} className="rounded-md bg-slate-50 px-2 py-1 text-[10px] font-medium text-slate-500">{capability}</span>)}</div></button>; })}</div>
+      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"><div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between"><div><div className="flex flex-wrap items-center gap-3"><h3 className="text-xl font-semibold text-slate-950">{selected.name}</h3><span className={`rounded-full px-3 py-1 text-xs font-medium ${isIntegrated ? "bg-blue-50 text-blue-700" : "bg-slate-100 text-slate-600"}`}>{selected.status}</span></div><p className="mt-1 text-sm text-slate-500">{selected.description}</p></div><a href={selected.href} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-lg bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800">Abrir sistema <ExternalLink className="h-4 w-4" /></a></div><div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{[["Visitas hoje","—","Analytics será conectado na próxima etapa",BarChart3],["Últimos 7 dias","—","Analytics será conectado na próxima etapa",Activity],["Leads","—","Dados do módulo Leads",Users],["GitHub issues",selected.githubRepo ? (github.loading ? "…" : String(github.issues)) : "—",github.error || "Dados públicos do repositório",GitBranch]].map(([label,value,detail,Icon]) => <div key={String(label)} className="rounded-xl border border-slate-200 bg-slate-50/60 p-4"><div className="flex items-center gap-2 text-xs font-medium text-slate-500"><Icon className="h-4 w-4 text-blue-700" />{label}</div><p className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">{String(value)}</p><p className="mt-1 text-[11px] leading-4 text-slate-400">{String(detail)}</p></div>)}</div></section>
+      <div className="grid gap-6 xl:grid-cols-[1fr_360px]"><section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"><h3 className="text-base font-semibold text-slate-950">Acessos operacionais</h3><p className="mt-1 text-sm text-slate-500">Acesso direto aos serviços e painéis do sistema selecionado.</p><div className="mt-5 grid gap-3 sm:grid-cols-2">{quickLinks.map(([label,href,Icon]) => <a key={label} href={href || undefined} target={href ? "_blank" : undefined} rel={href ? "noreferrer" : undefined} aria-disabled={!href} className={`flex items-center justify-between rounded-xl border p-4 ${href ? "border-slate-200 hover:border-blue-300 hover:bg-blue-50/30" : "cursor-not-allowed border-dashed border-slate-200 bg-slate-50 opacity-60"}`}><span className="flex items-center gap-3"><span className="rounded-lg bg-slate-100 p-2"><Icon className="h-4 w-4 text-blue-700" /></span><span><span className="block text-sm font-medium text-slate-950">{label}</span><span className="block text-[11px] text-slate-400">{href ? "Abrir painel" : "Ainda não configurado"}</span></span></span><ExternalLink className="h-4 w-4 text-slate-400" /></a>)}</div></section><section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"><h3 className="text-base font-semibold text-slate-950">GitHub</h3><p className="mt-1 text-sm text-slate-500">Informações públicas do repositório selecionado.</p>{selected.githubRepo ? <div className="mt-5 space-y-3"><div className="rounded-lg bg-slate-50 p-3"><p className="text-xs text-slate-500">Repositório</p><p className="mt-1 truncate text-sm font-medium text-slate-950">{github.repo?.full_name ?? selected.githubRepo}</p></div><div className="grid grid-cols-2 gap-3"><div className="rounded-lg border border-slate-200 p-3"><p className="text-xs text-slate-500">Issues abertas</p><p className="mt-1 text-lg font-semibold text-slate-950">{github.loading ? "…" : github.issues}</p></div><div className="rounded-lg border border-slate-200 p-3"><p className="text-xs text-slate-500">Pull requests</p><p className="mt-1 text-lg font-semibold text-slate-950">{github.loading ? "…" : github.prs}</p></div></div><div className="rounded-lg border border-slate-200 p-3"><p className="text-xs text-slate-500">Último commit</p><p className="mt-1 text-sm font-medium text-slate-950">{github.commit?.commit?.message ?? (github.loading ? "Carregando…" : "Não disponível")}</p>{github.commit?.sha && <p className="mt-1 font-mono text-[10px] text-slate-400">{github.commit.sha.slice(0, 7)} · {new Date(github.commit.commit.author.date).toLocaleString("pt-BR")}</p>}</div>{github.error && <p className="text-xs font-medium text-red-600">{github.error}</p>}<a href={selected.links.github} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-sm font-medium text-blue-700">Abrir GitHub <ExternalLink className="h-3.5 w-3.5" /></a></div> : <div className="mt-5 rounded-lg border border-dashed border-slate-200 p-4 text-xs leading-5 text-slate-500">Repositório ainda não configurado para este sistema.</div>}</section></div>
+      <section className="rounded-xl border border-dashed border-slate-200 bg-white p-5"><div className="flex gap-3"><Activity className="mt-0.5 h-4 w-4 shrink-0 text-blue-700" /><div><p className="text-sm font-medium text-slate-950">Fase 2 — GitHub conectado</p><p className="mt-1 text-xs leading-5 text-slate-500">O Control Center já consulta dados públicos do repositório configurado. Analytics, Cloudflare e dados operacionais específicos entram nas próximas integrações.</p></div></div></section>
     </section>
   );
 }
-
-type FormSubmission = { id: string; form_name: string; name: string; email: string | null; phone: string | null; source: string | null; status: string; payload: Record<string, unknown>; notes: string | null; created_at: string; updated_at: string };
-
-function FormsWorkspace() {
-  const [items, setItems] = useState<FormSubmission[]>([]);
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("todos");
-  const [formName, setFormName] = useState("todos");
-  const [selected, setSelected] = useState<FormSubmission | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [showNew, setShowNew] = useState(false);
-  const [newItem, setNewItem] = useState({ form_name: "", name: "", email: "", phone: "", source: "", notes: "" });
-  const [message, setMessage] = useState("");
-
-  async function load() {
-    const { data, error } = await amtSupabase.from("form_submissions").select("*").order("created_at", { ascending: false });
-    if (error) { setMessage("Não foi possível carregar as solicitações."); return; }
-    setItems((data ?? []) as FormSubmission[]);
-  }
-  useEffect(() => { void load(); }, []);
-
-  async function audit(action: string, id: string, metadata: Record<string, unknown>) {
-    const { data } = await amtSupabase.auth.getSession();
-    if (data.session) await amtSupabase.from("audit_logs").insert({ actor_user_id: data.session.user.id, action, resource_type: "form_submission", resource_id: id, metadata });
-  }
-
-  async function createSubmission(e: React.FormEvent) {
-    e.preventDefault();
-    if (!newItem.form_name.trim() || !newItem.name.trim()) return;
-    setSaving(true); setMessage("");
-    const payload = { ...newItem, form_name: newItem.form_name.trim(), name: newItem.name.trim(), email: newItem.email.trim() || null, phone: newItem.phone.trim() || null, source: newItem.source.trim() || null, notes: newItem.notes.trim() || null };
-    const { data, error } = await amtSupabase.from("form_submissions").insert(payload).select("*").single();
-    if (error || !data) setMessage(error?.message ?? "Não foi possível cadastrar a solicitação.");
-    else {
-      const item = data as FormSubmission; setItems((v) => [item, ...v]); await audit("form_submission.created", item.id, { form_name: item.form_name });
-      setNewItem({ form_name: "", name: "", email: "", phone: "", source: "", notes: "" }); setShowNew(false); setMessage("Solicitação cadastrada.");
-    }
-    setSaving(false);
-  }
-
-  async function updateStatus(id: string, next: string) {
-    const current = items.find((item) => item.id === id);
-    const { data, error } = await amtSupabase.from("form_submissions").update({ status: next, updated_at: new Date().toISOString() }).eq("id", id).select("*").single();
-    if (error || !data) { setMessage("Não foi possível atualizar o status."); return; }
-    const item = data as FormSubmission; setItems((v) => v.map((x) => x.id === id ? item : x)); if (selected?.id === id) setSelected(item);
-    await audit("form_submission.status_changed", id, { from: current?.status, to: next });
-  }
-
-  async function remove(id: string) {
-    if (!window.confirm("Arquivar/excluir esta solicitação?")) return;
-    const { error } = await amtSupabase.from("form_submissions").delete().eq("id", id);
-    if (error) { setMessage("Não foi possível remover a solicitação."); return; }
-    await audit("form_submission.deleted", id, {}); setItems((v) => v.filter((x) => x.id !== id)); setSelected(null); setMessage("Solicitação removida.");
-  }
-
-  const counts = {
-    total: items.length,
-    novo: items.filter((x) => x.status === "novo").length,
-    atendimento: items.filter((x) => x.status === "em_atendimento").length,
-    concluido: items.filter((x) => x.status === "concluido").length,
-    arquivado: items.filter((x) => x.status === "arquivado").length,
-  };
-  const formNames = Array.from(new Set(items.map((x) => x.form_name)));
-  const filtered = items.filter((item) => {
-    const haystack = [item.name, item.email ?? "", item.phone ?? "", item.source ?? "", item.form_name].join(" ").toLowerCase();
-    return (status === "todos" || item.status === status) && (formName === "todos" || item.form_name === formName) && haystack.includes(search.toLowerCase());
-  });
-
-  return (
-    <section className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div><h2 className="text-lg font-semibold">Formulários e solicitações</h2><p className="mt-1 text-sm text-slate-500">Centralize os contatos recebidos pelos formulários do ecossistema AMT.</p></div>
-        <Button onClick={() => setShowNew((v) => !v)} className="gap-2 bg-blue-700 hover:bg-blue-800"><Plus className="h-4 w-4" /> Nova solicitação</Button>
-      </div>
-      {message && <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">{message}</div>}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {[["Total",counts.total],["Novas",counts.novo],["Em atendimento",counts.atendimento],["Concluídas",counts.concluido]].map(([label,value]) => <div key={String(label)} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"><p className="text-xs text-slate-500">{label}</p><p className="mt-2 text-2xl font-semibold text-slate-950">{String(value)}</p></div>)}
-      </div>
-      {showNew && <form onSubmit={createSubmission} className="grid gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:grid-cols-2">
-        <div><h3 className="font-semibold">Cadastrar solicitação</h3><p className="mt-1 text-xs text-slate-500">Útil para registros manuais até os formulários públicos estarem integrados.</p></div><div />
-        {([["form_name","Formulário *"],["name","Nome *"],["email","E-mail"],["phone","Telefone"],["source","Origem"]] as const).map(([key,label]) => <label key={key} className="text-sm font-medium text-slate-700">{label}<input required={key==="form_name"||key==="name"} value={newItem[key]} onChange={(e) => setNewItem((v) => ({...v,[key]:e.target.value}))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-950 outline-none focus:border-blue-500" /></label>)}
-        <label className="sm:col-span-2 text-sm font-medium text-slate-700">Observações<textarea value={newItem.notes} onChange={(e) => setNewItem((v) => ({...v,notes:e.target.value}))} className="mt-1 min-h-20 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-950" /></label>
-        <div className="sm:col-span-2"><Button type="submit" disabled={saving}>{saving ? "Salvando..." : "Cadastrar"}</Button></div>
-      </form>}
-      <div className="flex flex-col gap-3 lg:flex-row">
-        <label className="relative flex-1"><Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" /><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar por nome, e-mail, telefone ou formulário" className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm text-slate-950" /></label>
-        <select value={formName} onChange={(e) => setFormName(e.target.value)} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-950"><option value="todos">Todos os formulários</option>{formNames.map((name) => <option key={name} value={name}>{name}</option>)}</select>
-        <select value={status} onChange={(e) => setStatus(e.target.value)} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-950"><option value="todos">Todos os status</option><option value="novo">Novo</option><option value="em_atendimento">Em atendimento</option><option value="concluido">Concluído</option><option value="arquivado">Arquivado</option></select>
-      </div>
-      <div className="grid gap-5 xl:grid-cols-[1fr_320px]">
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <div className="grid grid-cols-[1.1fr_1fr_130px] gap-4 border-b border-slate-200 bg-white px-5 py-3 text-xs font-medium uppercase tracking-wide text-slate-950"><span>Contato</span><span>Formulário</span><span>Status</span></div>
-          {filtered.length === 0 ? <div className="p-10 text-center text-sm text-slate-500">Nenhuma solicitação encontrada.</div> : filtered.map((item) => <button type="button" key={item.id} onClick={() => setSelected(item)} className="grid w-full grid-cols-[1.1fr_1fr_130px] gap-4 border-b border-slate-100 px-5 py-4 text-left last:border-0 hover:bg-slate-50"><div><p className="font-medium text-slate-950">{item.name}</p><p className="mt-1 text-xs text-slate-500">{item.email || item.phone || "Sem contato"} · {new Date(item.created_at).toLocaleDateString("pt-BR")}</p></div><div className="truncate text-sm text-slate-600">{item.form_name}</div><span className="self-start rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">{item.status.replace("_"," ")}</span></button>)}
-        </div>
-        <aside className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          {!selected ? <div className="flex min-h-64 items-center justify-center text-center text-sm text-slate-500">Selecione uma solicitação para visualizar os detalhes.</div> : <>
-            <div><h3 className="font-semibold text-slate-950">{selected.name}</h3><p className="mt-1 text-xs text-slate-500">{selected.form_name} · {new Date(selected.created_at).toLocaleString("pt-BR")}</p></div>
-            <div className="mt-5 space-y-4 text-sm">
-              <div><p className="text-xs text-slate-500">E-mail</p><p className="mt-1 text-slate-950">{selected.email || "Não informado"}</p></div>
-              <div><p className="text-xs text-slate-500">Telefone</p><p className="mt-1 text-slate-950">{selected.phone || "Não informado"}</p></div>
-              <div><p className="text-xs text-slate-500">Origem</p><p className="mt-1 text-slate-950">{selected.source || "Não informada"}</p></div>
-              <div><p className="text-xs text-slate-500">Dados enviados</p><pre className="mt-1 max-h-40 overflow-auto rounded-lg bg-white p-2 text-xs text-slate-700">{JSON.stringify(selected.payload, null, 2)}</pre></div>
-              <div><p className="text-xs text-slate-500">Observações</p><p className="mt-1 whitespace-pre-wrap text-slate-700">{selected.notes || "Nenhuma."}</p></div>
-              <label className="block"><p className="text-xs text-slate-500">Status</p><select value={selected.status} onChange={(e) => void updateStatus(selected.id,e.target.value)} className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950"><option value="novo">Novo</option><option value="em_atendimento">Em atendimento</option><option value="concluido">Concluído</option><option value="arquivado">Arquivado</option></select></label>
-              <button type="button" onClick={() => void remove(selected.id)} className="w-full rounded-lg border border-red-200 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50">Excluir registro</button>
-            </div>
-          </>}
-        </aside>
-      </div>
-    </section>
-  );
-}
-
-type Lead = { id: string; name: string; email: string | null; phone: string | null; source: string | null; status: string; notes: string | null; created_at: string };
-
-function LeadsWorkspace() {
-  const [leads, setLeads] = useState<Lead[]>([]);
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("todos");
-  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
-  const [showForm, setShowForm] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState("");
-  const emptyForm = { name: "", email: "", phone: "", source: "", notes: "", status: "novo" };
-  const [form, setForm] = useState(emptyForm);
-
-  async function loadLeads() {
-    const { data, error } = await amtSupabase.from("leads").select("*").order("created_at", { ascending: false });
-    if (error) { setMessage("Não foi possível carregar os leads."); return; }
-    setLeads((data ?? []) as Lead[]);
-  }
-
-  useEffect(() => { void loadLeads(); }, []);
-
-  async function writeAudit(action: string, resourceId: string, metadata: Record<string, unknown>) {
-    const session = await amtSupabase.auth.getSession();
-    if (!session.data.session) return;
-    await amtSupabase.from("audit_logs").insert({
-      actor_user_id: session.data.session.user.id,
-      action,
-      resource_type: "lead",
-      resource_id: resourceId,
-      metadata,
-    });
-  }
-
-  async function saveLead(event: React.FormEvent) {
-    event.preventDefault();
-    if (!form.name.trim()) return;
-    setSaving(true);
-    setMessage("");
-    const payload = { ...form, name: form.name.trim(), email: form.email.trim() || null, phone: form.phone.trim() || null, source: form.source.trim() || null, notes: form.notes.trim() || null };
-    const result = selectedLead
-      ? await amtSupabase.from("leads").update({ ...payload, updated_at: new Date().toISOString() }).eq("id", selectedLead.id).select("*").single()
-      : await amtSupabase.from("leads").insert(payload).select("*").single();
-
-    if (result.error || !result.data) {
-      setMessage(result.error?.message ?? "Não foi possível salvar o lead.");
-    } else {
-      const lead = result.data as Lead;
-      setLeads((current) => selectedLead ? current.map((item) => item.id === lead.id ? lead : item) : [lead, ...current]);
-      await writeAudit(selectedLead ? "lead.updated" : "lead.created", lead.id, { name: lead.name, status: lead.status });
-      setSelectedLead(null);
-      setShowForm(false);
-      setForm(emptyForm);
-      setMessage(selectedLead ? "Lead atualizado." : "Lead cadastrado.");
-    }
-    setSaving(false);
-  }
-
-  async function changeStatus(id: string, nextStatus: string) {
-    const current = leads.find((lead) => lead.id === id);
-    const { data, error } = await amtSupabase.from("leads").update({ status: nextStatus, updated_at: new Date().toISOString() }).eq("id", id).select("*").single();
-    if (error || !data) { setMessage("Não foi possível atualizar o status."); return; }
-    const lead = data as Lead;
-    setLeads((items) => items.map((item) => item.id === id ? lead : item));
-    if (selectedLead?.id === id) setSelectedLead(lead);
-    await writeAudit("lead.status_changed", id, { from: current?.status, to: nextStatus });
-  }
-
-  async function deleteLead(id: string) {
-    if (!window.confirm("Excluir este lead? Essa ação não poderá ser desfeita.")) return;
-    const { error } = await amtSupabase.from("leads").delete().eq("id", id);
-    if (error) { setMessage("Não foi possível excluir o lead."); return; }
-    await writeAudit("lead.deleted", id, {});
-    setLeads((items) => items.filter((item) => item.id !== id));
-    setSelectedLead(null);
-    setMessage("Lead excluído.");
-  }
-
-  function editLead(lead: Lead) {
-    setSelectedLead(lead);
-    setForm({ name: lead.name, email: lead.email ?? "", phone: lead.phone ?? "", source: lead.source ?? "", notes: lead.notes ?? "", status: lead.status });
-    setShowForm(true);
-  }
-
-  const counts = {
-    total: leads.length,
-    novo: leads.filter((l) => l.status === "novo").length,
-    contatado: leads.filter((l) => l.status === "contatado").length,
-    qualificado: leads.filter((l) => l.status === "qualificado").length,
-    convertido: leads.filter((l) => l.status === "convertido").length,
-    perdido: leads.filter((l) => l.status === "perdido").length,
-  };
-  const filtered = leads.filter((lead) => {
-    const text = [lead.name, lead.email ?? "", lead.phone ?? "", lead.source ?? ""].join(" ").toLowerCase();
-    return (status === "todos" || lead.status === status) && text.includes(search.toLowerCase());
-  });
-
-  return (
-    <section className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div><h2 className="text-lg font-semibold">Leads e CRM</h2><p className="mt-1 text-sm text-slate-500">Central comercial para captura, acompanhamento e conversão de oportunidades.</p></div>
-        <Button onClick={() => { setSelectedLead(null); setForm(emptyForm); setShowForm(true); }} className="gap-2 bg-blue-700 hover:bg-blue-800"><Plus className="h-4 w-4" /> Novo lead</Button>
-      </div>
-
-      {message && <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">{message}</div>}
-
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
-        {[
-          ["Total", counts.total], ["Novos", counts.novo], ["Em contato", counts.contatado],
-          ["Qualificados", counts.qualificado], ["Convertidos", counts.convertido], ["Perdidos", counts.perdido],
-        ].map(([label, value]) => (
-          <div key={String(label)} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"><p className="text-xs text-slate-500">{label}</p><p className="mt-2 text-2xl font-semibold text-slate-950">{String(value)}</p></div>
-        ))}
-      </div>
-
-      {showForm && <form onSubmit={saveLead} className="grid gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:grid-cols-2">
-        <div className="sm:col-span-2 flex items-center justify-between"><div><h3 className="font-semibold">{selectedLead ? "Editar lead" : "Novo lead"}</h3><p className="text-xs text-slate-500">Preencha os dados comerciais do contato.</p></div><button type="button" onClick={() => setShowForm(false)} className="text-sm text-slate-500 hover:text-slate-950">Fechar</button></div>
-        {([["name","Nome *"],["email","E-mail"],["phone","Telefone"],["source","Origem"]] as const).map(([key,label]) => <label key={key} className="text-sm font-medium text-slate-700">{label}<input required={key === "name"} value={form[key]} onChange={(e) => setForm((v) => ({ ...v, [key]: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-950 outline-none focus:border-blue-500" /></label>)}
-        <label className="text-sm font-medium text-slate-700">Status<select value={form.status} onChange={(e) => setForm((v) => ({ ...v, status: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950"><option value="novo">Novo</option><option value="contatado">Contatado</option><option value="qualificado">Qualificado</option><option value="convertido">Convertido</option><option value="perdido">Perdido</option></select></label>
-        <label className="text-sm font-medium text-slate-700 sm:col-span-2">Observações<textarea value={form.notes} onChange={(e) => setForm((v) => ({ ...v, notes: e.target.value }))} className="mt-1 min-h-24 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-950 outline-none focus:border-blue-500" /></label>
-        <div className="sm:col-span-2 flex gap-2"><Button type="submit" disabled={saving}>{saving ? "Salvando..." : selectedLead ? "Salvar alterações" : "Cadastrar lead"}</Button><Button type="button" variant="outline" onClick={() => setShowForm(false)}>Cancelar</Button></div>
-      </form>}
-
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <label className="relative flex-1"><Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" /><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar por nome, e-mail, telefone ou origem" className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm text-slate-950 outline-none focus:border-blue-500" /></label>
-        <select value={status} onChange={(e) => setStatus(e.target.value)} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-950"><option value="todos">Todos os status</option><option value="novo">Novo</option><option value="contatado">Contatado</option><option value="qualificado">Qualificado</option><option value="convertido">Convertido</option><option value="perdido">Perdido</option></select>
-      </div>
-
-      <div className="grid gap-5 xl:grid-cols-[1fr_320px]">
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <div className="grid grid-cols-[1.4fr_1fr_140px] gap-4 border-b border-slate-200 bg-white px-5 py-3 text-xs font-medium uppercase tracking-wide text-slate-950"><span>Lead</span><span>Contato</span><span>Status</span></div>
-          {filtered.length === 0 ? <div className="p-10 text-center text-sm text-slate-500">Nenhum lead encontrado.</div> : filtered.map((lead) => (
-            <button key={lead.id} type="button" onClick={() => setSelectedLead(lead)} className="grid w-full grid-cols-[1.4fr_1fr_140px] gap-4 border-b border-slate-100 px-5 py-4 text-left last:border-0 hover:bg-slate-50">
-              <div><p className="font-medium text-slate-950">{lead.name}</p><p className="mt-1 text-xs text-slate-500">{lead.source || "Origem não informada"} · {new Date(lead.created_at).toLocaleDateString("pt-BR")}</p></div>
-              <div className="truncate text-sm text-slate-600">{lead.email || lead.phone || "—"}</div>
-              <div><span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">{lead.status}</span></div>
-            </button>
-          ))}
-        </div>
-
-        <aside className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          {!selectedLead ? <div className="flex min-h-64 items-center justify-center text-center text-sm text-slate-500">Selecione um lead para visualizar os detalhes.</div> : <>
-            <div className="flex items-start justify-between gap-3"><div><h3 className="font-semibold text-slate-950">{selectedLead.name}</h3><p className="mt-1 text-xs text-slate-500">Cadastrado em {new Date(selectedLead.created_at).toLocaleString("pt-BR")}</p></div><button type="button" onClick={() => editLead(selectedLead)} className="text-sm font-medium text-blue-700">Editar</button></div>
-            <div className="mt-5 space-y-4 text-sm">
-              <div><p className="text-xs text-slate-500">E-mail</p><p className="mt-1 text-slate-950">{selectedLead.email || "Não informado"}</p></div>
-              <div><p className="text-xs text-slate-500">Telefone</p><p className="mt-1 text-slate-950">{selectedLead.phone || "Não informado"}</p></div>
-              <div><p className="text-xs text-slate-500">Origem</p><p className="mt-1 text-slate-950">{selectedLead.source || "Não informada"}</p></div>
-              <div><p className="text-xs text-slate-500">Observações</p><p className="mt-1 whitespace-pre-wrap text-slate-700">{selectedLead.notes || "Nenhuma observação."}</p></div>
-              <label className="block"><p className="text-xs text-slate-500">Status</p><select value={selectedLead.status} onChange={(e) => void changeStatus(selectedLead.id, e.target.value)} className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950"><option value="novo">Novo</option><option value="contatado">Contatado</option><option value="qualificado">Qualificado</option><option value="convertido">Convertido</option><option value="perdido">Perdido</option></select></label>
-              <button type="button" onClick={() => void deleteLead(selectedLead.id)} className="w-full rounded-lg border border-red-200 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50">Excluir lead</button>
-            </div>
-          </>}
-        </aside>
-      </div>
-    </section>
-  );
-}
-
 
 function QuickLink({ href, icon: Icon, label }: { href: string; icon: React.ComponentType<{ className?: string }>; label: string }) {
   return (
