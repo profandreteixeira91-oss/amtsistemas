@@ -382,7 +382,7 @@ function ToolsWorkspace() {
           <ToolHeader icon={RefreshCw} title="Gerador de UUID" description="Gere identificadores UUID v4 para testes, registros técnicos e operações administrativas." />
           <div className="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4 font-mono text-sm break-all text-slate-950">{uuid}</div>
           <div className="mt-3 flex flex-wrap gap-2">
-            <Button type="button" size="sm" onClick={() => setUuid(crypto.randomUUID())}>Novo UUID</Button>
+            <Button type="button" size="sm" onClick={() => setUuid(crypto.randomUUID())} className="bg-black text-white hover:bg-slate-900">Novo UUID</Button>
             <Button type="button" size="sm" variant="outline" onClick={() => void copyValue(uuid, "uuid")} className="gap-1.5"><Copy className="h-3.5 w-3.5" />{copied === "uuid" ? "Copiado" : "Copiar"}</Button>
           </div>
         </article>
