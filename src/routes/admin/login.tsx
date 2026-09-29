@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getAdminSession, requestAdminPasswordReset, signInAdmin } from "@/lib/amt-admin-auth";
+import { getAdminProfile, getAdminSession, requestAdminPasswordReset, signInAdmin, signOutAdmin } from "@/lib/amt-admin-auth";
 
 export const Route = createFileRoute("/admin/login")({
   head: () => ({
@@ -29,10 +29,24 @@ function AdminLogin() {
   useEffect(() => {
     let active = true;
     void getAdminSession()
-      .then((session) => {
-        if (active && session) navigate({ to: "/admin" });
+      .then(async (session) => {
+        if (!active || !session) return;
+        try {
+          const profile = await getAdminProfile(session.user.id);
+          if (!active) return;
+          if (profile) {
+            navigate({ to: "/admin" });
+            return;
+          }
+          await signOutAdmin();
+        } catch (error) {
+          console.error(error);
+          await signOutAdmin().catch(() => undefined);
+        }
       })
-      .catch(() => undefined);
+      .catch((error) => {
+        console.error(error);
+      });
     return () => {
       active = false;
     };
