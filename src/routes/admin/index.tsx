@@ -93,13 +93,13 @@ function AdminDashboard() {
   }
 
   if (loading) {
-    return <div className="flex min-h-screen items-center justify-center bg-slate-950 text-sm text-slate-400">Validando sessão...</div>;
+    return <div className="flex min-h-screen items-center justify-center bg-white text-sm text-slate-500">Validando sessão...</div>;
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 text-slate-950">
+    <main className="min-h-screen bg-white text-slate-950">
       <div className="flex min-h-screen">
-        <aside className="hidden w-72 shrink-0 flex-col border-r border-slate-800 bg-slate-950 text-white lg:flex">
+        <aside className="hidden w-72 shrink-0 flex-col border-r border-blue-950 bg-blue-700 text-white lg:flex">
           <div className="flex h-20 items-center gap-3 border-b border-white/10 px-6">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white">
               <img src="/amt-sistemas-logo.png" alt="AMT Sistemas" className="h-9 w-9 object-contain" />
