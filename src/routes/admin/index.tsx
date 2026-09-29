@@ -304,7 +304,7 @@ function ModuleWorkspace({ module }: { module: string }) {
     <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
       <h2 className="text-lg font-semibold">{module}</h2>
       <p className="mt-1 text-sm text-slate-500">{descriptions[module] ?? "Módulo administrativo."}</p>
-      <div className="mt-6 rounded-xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center text-sm text-slate-500">Área pronta para receber os dados e funcionalidades deste módulo.</div>
+      <div className="mt-6 rounded-xl border border-dashed border-slate-200 bg-white p-8 text-center text-sm text-slate-950">Área pronta para receber os dados e funcionalidades deste módulo.</div>
     </section>
   );
 }
@@ -365,7 +365,7 @@ function LeadsWorkspace() {
         <select value={status} onChange={(e) => setStatus(e.target.value)} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm"><option value="todos">Todos os status</option><option value="novo">Novo</option><option value="contatado">Contatado</option><option value="qualificado">Qualificado</option><option value="convertido">Convertido</option><option value="perdido">Perdido</option></select>
       </div>
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <div className="hidden grid-cols-[1.5fr_1fr_1fr_160px] gap-4 border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-medium uppercase tracking-wide text-slate-500 md:grid"><span>Lead</span><span>Contato</span><span>Origem</span><span>Status</span></div>
+        <div className="hidden grid-cols-[1.5fr_1fr_1fr_160px] gap-4 border-b border-slate-200 bg-white px-5 py-3 text-xs font-medium uppercase tracking-wide text-slate-950 md:grid"><span>Lead</span><span>Contato</span><span>Origem</span><span>Status</span></div>
         {filtered.length === 0 ? <div className="p-10 text-center text-sm text-slate-500">Nenhum lead encontrado.</div> : filtered.map((lead) => <div key={lead.id} className="grid gap-3 border-b border-slate-100 px-5 py-4 last:border-0 md:grid-cols-[1.5fr_1fr_1fr_160px] md:items-center md:gap-4"><div><p className="font-medium">{lead.name}</p><p className="mt-1 text-xs text-slate-500">{new Date(lead.created_at).toLocaleDateString("pt-BR")}</p></div><div className="text-sm text-slate-600">{lead.email || lead.phone || "—"}</div><div className="text-sm text-slate-600">{lead.source || "—"}</div><select value={lead.status} onChange={(e) => void updateStatus(lead.id, e.target.value)} className="rounded-lg border border-slate-200 bg-white px-2 py-2 text-sm"><option value="novo">Novo</option><option value="contatado">Contatado</option><option value="qualificado">Qualificado</option><option value="convertido">Convertido</option><option value="perdido">Perdido</option></select></div>)}
       </div>
     </section>
