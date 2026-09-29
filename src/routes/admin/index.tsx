@@ -27,6 +27,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 
+import { DevelopmentWorkspace } from "@/components/admin/DevelopmentWorkspace";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAdminProfile, getAdminSession, signOutAdmin } from "@/lib/amt-admin-auth";
@@ -54,6 +55,7 @@ const modules = [
   { label: "Formulários", icon: FileText, to: "/admin/formularios" },
   { label: "Ferramentas", icon: Wrench, to: "/admin/ferramentas" },
   { label: "Auditoria", icon: Activity, to: "/admin/auditoria" },
+  { label: "Desenvolvimento", icon: Code2, to: "/admin/desenvolvimento" },
 ];
 
 const kpis = [
@@ -297,6 +299,7 @@ function ModuleWorkspace({ module }: { module: string }) {
   if (module === "Formulários") return <FormsWorkspace />;
   if (module === "Ferramentas") return <ToolsWorkspace />;
   if (module === "Auditoria") return <AuditWorkspace />;
+  if (module === "Desenvolvimento") return <DevelopmentWorkspace />;
   const descriptions: Record<string, string> = {
     Sistemas: "Gerencie os sistemas e integrações do ecossistema AMT.",
     Formulários: "Acompanhe formulários e solicitações recebidas.",
