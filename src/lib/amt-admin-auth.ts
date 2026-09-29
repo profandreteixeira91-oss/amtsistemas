@@ -1,5 +1,7 @@
 import { amtSupabase } from "@/integrations/amt-supabase/client";
 
+export const FIRST_ADMIN_EMAIL = "profandreteixeira91@gmail.com";
+
 export async function getAdminSession() {
   if (!amtSupabase) return null;
   const { data, error } = await amtSupabase.auth.getSession();
@@ -8,15 +10,19 @@ export async function getAdminSession() {
 }
 
 export async function signInAdmin(email: string, password: string) {
-  if (!amtSupabase) {
-    throw new Error("A autenticação administrativa ainda não foi configurada neste ambiente.");
+  if (!amtSupabase) throw new Error("A autenticação administrativa ainda não foi configurada neste ambiente.");
+  const { data, error } = await amtSupabase.auth.signInWithPassword({ email, password });
+  if (error) throw error;
+  return data;
+}
+
+export async function setFirstAdminPassword(password: string) {
+  if (!amtSupabase) throw new Error("A autenticação administrativa ainda não foi configurada neste ambiente.");
+  const session = await getAdminSession();
+  if (session?.user?.email?.toLowerCase() !== FIRST_ADMIN_EMAIL) {
+    throw new Error("A configuração de primeiro acesso não está disponível para este usuário.");
   }
-
-  const { data, error } = await amtSupabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-
+  const { data, error } = await amtSupabase.auth.updateUser({ password });
   if (error) throw error;
   return data;
 }
