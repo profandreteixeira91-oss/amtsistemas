@@ -123,8 +123,8 @@ function AdminDashboard() {
           </div>
 
           <nav className="flex-1 space-y-1 p-3">
-            <SidebarButton icon={LayoutDashboard} label="Dashboard" active={activeModule === "Dashboard"} collapsed={sidebarCollapsed} onClick={() => setActiveModule("Dashboard")} />
-            {modules.map((item) => <SidebarButton key={item.label} icon={item.icon} label={item.label} active={activeModule === item.label} collapsed={sidebarCollapsed} onClick={() => setActiveModule(item.label)} />)}
+            <SidebarButton icon={LayoutDashboard} label="Dashboard" to="/admin" active={activeModule === "Dashboard"} collapsed={sidebarCollapsed} />
+            {modules.map((item) => <SidebarButton key={item.label} icon={item.icon} label={item.label} to={item.to} collapsed={sidebarCollapsed} />)}
           </nav>
 
           <div className="border-t border-white/10 p-3">
@@ -276,18 +276,22 @@ function AdminDashboard() {
   );
 }
 
-function SidebarButton({ icon: Icon, label, active, collapsed, onClick }: {
+function SidebarButton({ icon: Icon, label, to, active, collapsed }: {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
+  to: "/admin" | "/admin/sistemas" | "/admin/leads" | "/admin/formularios" | "/admin/ferramentas" | "/admin/auditoria";
   active?: boolean;
   collapsed?: boolean;
-  onClick: () => void;
 }) {
   return (
-    <button type="button" onClick={onClick} title={collapsed ? label : undefined} className={`flex w-full items-center rounded-xl text-left text-sm transition-colors ${collapsed ? "justify-center px-2 py-3" : "gap-3 px-3 py-2.5"} ${active ? "bg-blue-600 text-white" : "text-slate-300 hover:bg-white/10 hover:text-white"}`}>
+    <Link
+      to={to}
+      title={collapsed ? label : undefined}
+      className={`flex w-full items-center rounded-xl text-left text-sm transition-colors ${collapsed ? "justify-center px-2 py-3" : "gap-3 px-3 py-2.5"} ${active ? "bg-blue-600 text-white" : "text-slate-300 hover:bg-white/10 hover:text-white"}`}
+    >
       <Icon className="h-4 w-4 shrink-0" />
       {!collapsed && label}
-    </button>
+    </Link>
   );
 }
 
