@@ -296,9 +296,7 @@ function SidebarButton({ icon: Icon, label, to, active, collapsed }: {
 }
 
 function ModuleWorkspace({ module }: { module: string }) {
-  if (module === "Leads") return <LeadsWorkspace />;
   if (module === "Sistemas") return <SystemsWorkspace />;
-  if (module === "Formulários") return <FormsWorkspace />;
   if (module === "Ferramentas") return <ToolsWorkspace />;
   if (module === "Auditoria") return <AuditWorkspace />;
   const descriptions: Record<string, string> = {
