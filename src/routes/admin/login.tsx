@@ -49,7 +49,7 @@ function AdminLogin() {
       navigate({ to: "/admin" });
     } catch (error) {
       console.error(error);
-      toast.error("E-mail ou senha inválidos.");
+      const message = error instanceof Error ? error.message : "Não foi possível autenticar.";\n      toast.error(message);
     } finally {
       setLoading(false);
     }
