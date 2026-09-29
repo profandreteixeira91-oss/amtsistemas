@@ -192,7 +192,7 @@ function AdminLogin() {
                 </button>
               </div>
 
-              <Button type="submit" disabled={loading || recoveryLoading} className="h-12 w-full gap-2">
+              <Button type="submit" disabled={loading || recoveryLoading} className="h-12 w-full gap-2 bg-black text-white hover:bg-slate-900">
                 {loading ? "Autenticando..." : "Entrar"}
                 {!loading && <ArrowRight className="h-4 w-4" />}
               </Button>
