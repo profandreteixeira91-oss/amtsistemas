@@ -20,7 +20,6 @@ import {
   LogOut,
   Plus,
   Search,
-  ShieldCheck,
   Users,
   Wrench,
   Check,
@@ -54,7 +53,6 @@ const modules = [
   { label: "Leads", icon: Users, to: "/admin/leads" },
   { label: "Formulários", icon: FileText, to: "/admin/formularios" },
   { label: "Ferramentas", icon: Wrench, to: "/admin/ferramentas" },
-  { label: "Segurança", icon: ShieldCheck, to: "/admin/seguranca" },
   { label: "Auditoria", icon: Activity, to: "/admin/auditoria" },
 ];
 
@@ -216,10 +214,6 @@ function AdminDashboard() {
                   <QuickLink href="https://github.com/profandreteixeira91-oss" icon={GitBranch} label="GitHub" />
                   <QuickLink href="https://supabase.com/dashboard" icon={Code2} label="Supabase" />
                   <QuickLink href="https://dash.cloudflare.com/" icon={Globe2} label="Cloudflare" />
-                  <Link to="/admin/seguranca" className="flex items-center justify-between rounded-xl border border-slate-200 p-3 text-sm hover:bg-slate-50">
-                    <span className="flex items-center gap-3"><ShieldCheck className="h-4 w-4 text-blue-700" /> Segurança</span>
-                    <ChevronRight className="h-4 w-4 text-slate-400" />
-                  </Link>
                 </CardContent>
               </Card>
             </section>
@@ -257,7 +251,6 @@ function AdminDashboard() {
                   {[
                     ["Leads e CRM", Users],
                     ["Infraestrutura", GitBranch],
-                    ["Segurança", ShieldCheck],
                     ["Auditoria", Activity],
                     ["Financeiro", CircleDollarSign],
                     ["Métricas", BarChart3],
@@ -303,13 +296,11 @@ function ModuleWorkspace({ module }: { module: string }) {
   if (module === "Sistemas") return <SystemsWorkspace />;
   if (module === "Formulários") return <FormsWorkspace />;
   if (module === "Ferramentas") return <ToolsWorkspace />;
-  if (module === "Segurança") return <SecurityWorkspace />;
   if (module === "Auditoria") return <AuditWorkspace />;
   const descriptions: Record<string, string> = {
     Sistemas: "Gerencie os sistemas e integrações do ecossistema AMT.",
     Formulários: "Acompanhe formulários e solicitações recebidas.",
     Ferramentas: "Ferramentas administrativas e operacionais.",
-    Segurança: "Controles de acesso, permissões e segurança.",
     Auditoria: "Histórico de ações e eventos administrativos.",
   };
   return (
