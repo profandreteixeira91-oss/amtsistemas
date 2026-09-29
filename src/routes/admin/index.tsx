@@ -8,6 +8,8 @@ import {
   Boxes,
   BriefcaseBusiness,
   ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
   CircleDollarSign,
   Code2,
   ExternalLink,
@@ -61,6 +63,8 @@ function AdminDashboard() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState("");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [activeModule, setActiveModule] = useState("Dashboard");
 
   useEffect(() => {
     let active = true;
@@ -99,7 +103,7 @@ function AdminDashboard() {
   return (
     <main className="min-h-screen bg-white text-slate-950">
       <div className="flex min-h-screen">
-        <aside className="hidden w-72 shrink-0 flex-col border-r border-slate-800 bg-slate-950 text-white lg:flex">
+        <aside className={`fixed inset-y-0 left-0 z-40 hidden shrink-0 flex-col border-r border-slate-800 bg-slate-950 text-white transition-[width] duration-200 lg:flex ${sidebarCollapsed ? "w-20" : "w-72"}`}>
           <div className="flex h-20 items-center gap-3 border-b border-white/10 px-6">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white">
               <img src="/amt-sistemas-logo.png" alt="AMT Sistemas" className="h-9 w-9 object-contain" />
@@ -110,28 +114,26 @@ function AdminDashboard() {
             </div>
           </div>
 
-          <nav className="flex-1 space-y-1 p-4">
-            <SidebarItem to="/admin" icon={LayoutDashboard} label="Dashboard" active />
-            {modules.map((item) => <SidebarItem key={item.label} {...item} />)}
+          <nav className="flex-1 space-y-1 p-3">
+            <SidebarButton icon={LayoutDashboard} label="Dashboard" active={activeModule === "Dashboard"} collapsed={sidebarCollapsed} onClick={() => setActiveModule("Dashboard")} />
+            {modules.map((item) => <SidebarButton key={item.label} icon={item.icon} label={item.label} active={activeModule === item.label} collapsed={sidebarCollapsed} onClick={() => setActiveModule(item.label)} />)}
           </nav>
 
-          <div className="border-t border-white/10 p-4">
-            <div className="mb-3 rounded-xl bg-white/5 p-3">
-              <p className="truncate text-xs text-slate-300">{userEmail}</p>
-              <p className="mt-1 text-[11px] text-slate-500">Sessão administrativa</p>
-            </div>
-            <Button variant="ghost" onClick={handleLogout} className="w-full justify-start gap-2 text-slate-300 hover:bg-white/10 hover:text-white">
-              <LogOut className="h-4 w-4" />
-              Sair
+          <div className="border-t border-white/10 p-3">
+            {!sidebarCollapsed && <div className="mb-3 rounded-xl bg-white/5 p-3"><p className="truncate text-xs text-slate-300">{userEmail}</p><p className="mt-1 text-[11px] text-slate-500">Sessão administrativa</p></div>}
+            <Button variant="ghost" onClick={handleLogout} className={`w-full gap-2 text-slate-300 hover:bg-white/10 hover:text-white ${sidebarCollapsed ? "justify-center px-2" : "justify-start"}`} title="Sair"><LogOut className="h-4 w-4" />{!sidebarCollapsed && "Sair"}</Button>
+            <Button variant="ghost" onClick={() => setSidebarCollapsed((value) => !value)} className={`mt-1 w-full gap-2 text-slate-400 hover:bg-white/10 hover:text-white ${sidebarCollapsed ? "justify-center px-2" : "justify-start"}`} title={sidebarCollapsed ? "Expandir sidebar" : "Minimizar menu"}>
+              {sidebarCollapsed ? <ChevronsRight className="h-4 w-4" /> : <ChevronsLeft className="h-4 w-4" />}
+              {!sidebarCollapsed && "Minimizar menu"}
             </Button>
           </div>
         </aside>
 
-        <section className="min-w-0 flex-1">
+        <section className={`min-w-0 flex-1 transition-[margin] duration-200 ${sidebarCollapsed ? "lg:ml-20" : "lg:ml-72"}`}>
           <header className="flex min-h-20 items-center justify-between border-b border-slate-200 bg-white px-5 sm:px-8">
             <div>
               <p className="text-xs font-medium uppercase tracking-[0.16em] text-blue-600">Operação</p>
-              <h1 className="mt-1 text-xl font-semibold tracking-tight sm:text-2xl">Dashboard</h1>
+              <h1 className="mt-1 text-xl font-semibold tracking-tight sm:text-2xl">{activeModule}</h1>
             </div>
             <div className="flex items-center gap-2">
               <span className="hidden rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 sm:inline-flex">Sistema operacional</span>
@@ -142,6 +144,8 @@ function AdminDashboard() {
           </header>
 
           <div className="space-y-8 p-5 sm:p-8">
+            {activeModule !== "Dashboard" && <ModuleWorkspace module={activeModule} />}
+            {activeModule === "Dashboard" && <>
             <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               {kpis.map((item) => {
                 const Icon = item.icon;
@@ -169,7 +173,7 @@ function AdminDashboard() {
                     <CardTitle className="text-lg">Sistemas</CardTitle>
                     <p className="mt-1 text-sm text-slate-500">Visão rápida dos produtos e plataformas.</p>
                   </div>
-                  <Link to="/admin/sistemas" className="text-sm font-medium text-blue-700 hover:text-blue-800">Ver todos</Link>
+                  <button type="button" onClick={() => setActiveModule("Sistemas")} className="text-sm font-medium text-blue-700 hover:text-blue-800">Ver todos</button>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {systems.map((system) => {
@@ -256,6 +260,7 @@ function AdminDashboard() {
               </Card>
             </section>
 
+            </>}
             <div className="flex items-center gap-2 text-xs text-slate-400">
               <ShieldCheck className="h-4 w-4" />
               Os indicadores desta primeira versão são demonstrativos e serão substituídos por dados do Supabase após a integração do backend.
@@ -268,20 +273,36 @@ function AdminDashboard() {
   );
 }
 
-function SidebarItem({ to, icon: Icon, label, active = false }: {
-  to: string;
+function SidebarButton({ icon: Icon, label, active, collapsed, onClick }: {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
   active?: boolean;
+  collapsed?: boolean;
+  onClick: () => void;
 }) {
   return (
-    <Link
-      to={to}
-      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors ${active ? "bg-blue-600 text-white" : "text-slate-300 hover:bg-white/10 hover:text-white"}`}
-    >
-      <Icon className="h-4 w-4" />
-      {label}
-    </Link>
+    <button type="button" onClick={onClick} title={collapsed ? label : undefined} className={`flex w-full items-center rounded-xl text-left text-sm transition-colors ${collapsed ? "justify-center px-2 py-3" : "gap-3 px-3 py-2.5"} ${active ? "bg-blue-600 text-white" : "text-slate-300 hover:bg-white/10 hover:text-white"}`}>
+      <Icon className="h-4 w-4 shrink-0" />
+      {!collapsed && label}
+    </button>
+  );
+}
+
+function ModuleWorkspace({ module }: { module: string }) {
+  const descriptions: Record<string, string> = {
+    Sistemas: "Gerencie os sistemas e integrações do ecossistema AMT.",
+    Leads: "Central de leads e oportunidades comerciais.",
+    Formulários: "Acompanhe formulários e solicitações recebidas.",
+    Ferramentas: "Ferramentas administrativas e operacionais.",
+    Segurança: "Controles de acesso, permissões e segurança.",
+    Auditoria: "Histórico de ações e eventos administrativos.",
+  };
+  return (
+    <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <h2 className="text-lg font-semibold">{module}</h2>
+      <p className="mt-1 text-sm text-slate-500">{descriptions[module] ?? "Módulo administrativo."}</p>
+      <div className="mt-6 rounded-xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center text-sm text-slate-500">Área pronta para receber os dados e funcionalidades deste módulo.</div>
+    </section>
   );
 }
 
