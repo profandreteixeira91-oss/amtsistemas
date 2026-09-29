@@ -602,7 +602,7 @@ function HeroFlow() {
 
 function QuemSomos() {
   return (
-    <Section id="amt" tone="blue">
+    <Section id="amt" tone="blue" className="[&>div]:!py-10 sm:[&>div]:!py-14">
       <Reveal>
         <Eyebrow>O que é a AMT Sistemas</Eyebrow>
         <H2>Não entregamos apenas um sistema. Desenvolvemos a solução que o seu negócio precisa.</H2>
@@ -625,7 +625,7 @@ function QuemSomos() {
 
 function Adapta() {
   return (
-    <Section>
+    <Section className="[&>div]:!pt-10 [&>div]:!pb-14 sm:[&>div]:!pt-14 sm:[&>div]:!pb-20">
       <Reveal>
         <Eyebrow>Diferencial</Eyebrow>
         <H2>Seu negócio não é igual aos outros. Seu sistema também não deveria ser.</H2>
