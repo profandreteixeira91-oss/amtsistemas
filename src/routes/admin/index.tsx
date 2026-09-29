@@ -56,7 +56,7 @@ const modules = [
 ];
 
 const kpis = [
-  { label: "Sistemas", value: "04", detail: "02 integrados · 02 externos", icon: Boxes },
+  { label: "Sistemas", value: "03", detail: "01 integrado · 02 externos", icon: Boxes },
   { label: "Leads", value: "12", detail: "Dados demonstrativos", icon: Users },
   { label: "Formulários", value: "08", detail: "Últimos 30 dias · demo", icon: FileText },
   { label: "Alertas", value: "03", detail: "Painel preparado", icon: Bell },
@@ -293,6 +293,7 @@ function SidebarButton({ icon: Icon, label, active, collapsed, onClick }: {
 
 function ModuleWorkspace({ module }: { module: string }) {
   if (module === "Leads") return <LeadsWorkspace />;
+  if (module === "Sistemas") return <SystemsWorkspace />;
   const descriptions: Record<string, string> = {
     Sistemas: "Gerencie os sistemas e integrações do ecossistema AMT.",
     Formulários: "Acompanhe formulários e solicitações recebidas.",
@@ -305,6 +306,71 @@ function ModuleWorkspace({ module }: { module: string }) {
       <h2 className="text-lg font-semibold">{module}</h2>
       <p className="mt-1 text-sm text-slate-500">{descriptions[module] ?? "Módulo administrativo."}</p>
       <div className="mt-6 rounded-xl border border-dashed border-slate-200 bg-white p-8 text-center text-sm text-slate-950">Área pronta para receber os dados e funcionalidades deste módulo.</div>
+    </section>
+  );
+}
+
+function SystemsWorkspace() {
+  const integrated = systems.filter((system) => system.status === "Integrado");
+  const external = systems.filter((system) => system.status !== "Integrado");
+
+  return (
+    <section className="space-y-6">
+      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold">Sistemas</h2>
+            <p className="mt-1 text-sm text-slate-500">Visão centralizada dos sistemas que fazem parte do ecossistema AMT.</p>
+          </div>
+          <div className="flex gap-2 text-xs">
+            <span className="rounded-full bg-blue-50 px-3 py-1.5 font-medium text-blue-700">{integrated.length} integrado</span>
+            <span className="rounded-full bg-slate-100 px-3 py-1.5 font-medium text-slate-700">{external.length} externos</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        {systems.map((system) => {
+          const Icon = system.icon;
+          const isIntegrated = system.status === "Integrado";
+          return (
+            <article key={system.name} className="flex min-h-64 flex-col rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100">
+                  <Icon className="h-6 w-6 text-slate-900" />
+                </div>
+                <span className={`rounded-full px-3 py-1 text-xs font-medium ${isIntegrated ? "bg-blue-50 text-blue-700" : "bg-slate-100 text-slate-700"}`}>
+                  {system.status}
+                </span>
+              </div>
+              <h3 className="mt-5 text-base font-semibold text-slate-950">{system.name}</h3>
+              <p className="mt-2 flex-1 text-sm leading-6 text-slate-600">{system.description}</p>
+              <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
+                <span className="text-xs text-slate-500">{isIntegrated ? "Conexão com o Control Center" : "Operação em sistema externo"}</span>
+                <a href={system.href} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-700 hover:text-blue-800">
+                  Acessar <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+
+      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h3 className="text-base font-semibold">Arquitetura de integração</h3>
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          {[
+            ["Integrados", "Dados e operações poderão ser centralizados no Control Center.", Globe2],
+            ["Externos", "Acesso rápido sem assumir integração direta com sistemas independentes.", ExternalLink],
+            ["Expansão", "Novos sistemas poderão ser adicionados sem alterar a navegação principal.", GitBranch],
+          ].map(([title, description, Icon]) => (
+            <div key={String(title)} className="rounded-xl border border-slate-200 bg-white p-4">
+              <div className="flex items-center gap-2 text-sm font-medium text-slate-950"><Icon className="h-4 w-4 text-blue-700" />{title}</div>
+              <p className="mt-2 text-xs leading-5 text-slate-600">{String(description)}</p>
+            </div>
+          ))}
+        </div>
+      </section>
     </section>
   );
 }
