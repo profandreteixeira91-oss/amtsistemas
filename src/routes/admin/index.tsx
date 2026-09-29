@@ -90,7 +90,11 @@ function AdminDashboard() {
         setUserEmail(profile.email);
         setLoading(false);
       })
-      .catch(() => navigate({ to: "/admin/login" }));
+      .catch(async (error) => {
+        console.error(error);
+        await signOutAdmin().catch(() => undefined);
+        if (active) navigate({ to: "/admin/login" });
+      });
 
     return () => {
       active = false;
