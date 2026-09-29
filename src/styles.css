@@ -277,3 +277,35 @@
   }
 }
 
+
+
+/* Final viewport containment: animated/transformed children can overflow the page box. */
+html:has(.amt-corp),
+body:has(.amt-corp) {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+.amt-corp {
+  position: relative;
+  isolation: isolate;
+  contain: inline-size;
+}
+
+.amt-corp main,
+.amt-corp main > section,
+.amt-corp main > section > *,
+.amt-corp [data-state],
+.amt-corp [data-sonner-toaster] {
+  min-width: 0;
+  max-width: 100%;
+}
+
+@supports not (overflow: clip) {
+  html:has(.amt-corp),
+  body:has(.amt-corp),
+  .amt-corp {
+    overflow-x: hidden;
+  }
+}
