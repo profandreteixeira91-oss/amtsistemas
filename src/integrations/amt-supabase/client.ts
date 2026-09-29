@@ -1,21 +1,20 @@
 import { createClient } from "@supabase/supabase-js";
 
-const url = import.meta.env.VITE_AMT_SUPABASE_URL as string | undefined;
-const publishableKey = import.meta.env.VITE_AMT_SUPABASE_PUBLISHABLE_KEY as string | undefined;
+const DEFAULT_AMT_SUPABASE_URL = "https://yqxmxevphdumyuwlvppg.supabase.co";
+const DEFAULT_AMT_SUPABASE_PUBLISHABLE_KEY =
+  "sb_publishable_jK7lhco6DQLlfjYm8LGS3g_sGBkVtK2";
 
-if (!url || !publishableKey) {
-  console.warn(
-    "[AMT Control Center] Configure VITE_AMT_SUPABASE_URL and VITE_AMT_SUPABASE_PUBLISHABLE_KEY to enable the administrative authentication."
-  );
-}
+const url =
+  (import.meta.env.VITE_AMT_SUPABASE_URL as string | undefined) ??
+  DEFAULT_AMT_SUPABASE_URL;
+const publishableKey =
+  (import.meta.env.VITE_AMT_SUPABASE_PUBLISHABLE_KEY as string | undefined) ??
+  DEFAULT_AMT_SUPABASE_PUBLISHABLE_KEY;
 
-export const amtSupabase =
-  url && publishableKey
-    ? createClient(url, publishableKey, {
-        auth: {
-          persistSession: true,
-          autoRefreshToken: true,
-          detectSessionInUrl: true,
-        },
-      })
-    : null;
+export const amtSupabase = createClient(url, publishableKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+  },
+});
