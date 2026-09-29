@@ -43,9 +43,54 @@ export const Route = createFileRoute("/admin/")({
 });
 
 const systems = [
-  { name: "AB Academy", description: "Plataforma integrada de gestão acadêmica.", status: "Integrado", href: "https://abacademyidiomas.com.br/aluno", icon: Globe2 },
-  { name: "AMT Dojo Manager", description: "SaaS de gestão para academias e dojos.", status: "Acesso externo", href: "https://dojomanager.amtfightwear.com.br", icon: Boxes },
-  { name: "AMT Fight Wear", description: "E-commerce e operação de fight wear.", status: "Acesso externo", href: "https://amtfightwear.com.br", icon: BriefcaseBusiness },
+  {
+    id: "ab-academy",
+    name: "AB Academy",
+    description: "Plataforma integrada de gestão acadêmica.",
+    status: "Integrado",
+    href: "https://abacademyidiomas.com.br/aluno",
+    icon: Globe2,
+    links: {
+      site: "https://abacademyidiomas.com.br",
+      github: "https://github.com/profandreteixeira91-oss/ab-academy",
+      cloudflare: "https://dash.cloudflare.com/",
+      supabase: "https://supabase.com/dashboard/project/vwmrxdzskvwojyfddjwd",
+      operation: "https://abacademyidiomas.com.br/admin",
+    },
+    capabilities: ["Site", "GitHub", "Cloudflare", "Supabase", "Administração"],
+  },
+  {
+    id: "dojo-manager",
+    name: "AMT Dojo Manager",
+    description: "SaaS de gestão para academias e dojos.",
+    status: "Acesso externo",
+    href: "https://dojomanager.amtfightwear.com.br",
+    icon: Boxes,
+    links: {
+      site: "https://dojomanager.amtfightwear.com.br",
+      github: "https://github.com/profandreteixeira91-oss",
+      cloudflare: "https://dash.cloudflare.com/",
+      supabase: "",
+      operation: "https://dojomanager.amtfightwear.com.br",
+    },
+    capabilities: ["Site", "GitHub", "Cloudflare", "Operação externa"],
+  },
+  {
+    id: "fight-wear",
+    name: "AMT Fight Wear",
+    description: "E-commerce e operação de fight wear.",
+    status: "Acesso externo",
+    href: "https://amtfightwear.com.br",
+    icon: BriefcaseBusiness,
+    links: {
+      site: "https://amtfightwear.com.br",
+      github: "https://github.com/profandreteixeira91-oss",
+      cloudflare: "https://dash.cloudflare.com/",
+      supabase: "",
+      operation: "https://amtfightwear.com.br",
+    },
+    capabilities: ["Site", "GitHub", "Cloudflare", "Operação externa"],
+  },
 ];
 
 const modules = [
@@ -512,61 +557,166 @@ function AuditWorkspace() {
         <aside className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           {!selected ? <div className="flex min-h-64 items-center justify-center text-center text-sm text-slate-500">Selecione um evento para visualizar os detalhes.</div> : (
             <>
-              <div><p className="text-xs font-medium uppercase tracking-wide text-slate-400">Evento</p><h3 className="mt-1 font-semibold text-slate-950">{formatAction(selected.action)}</h3><p className="mt-1 text-xs text-slate-500">{new Date(selected.created_at).toLocaleString("pt-BR")}</p></div>
-              <div className="mt-5 space-y-4 text-sm">
-                <div><p className="text-xs text-slate-500">ID do evento</p><p className="mt-1 break-all font-mono text-xs text-slate-700">{selected.id}</p></div>
-                <div><p className="text-xs text-slate-500">Usuário responsável</p><p className="mt-1 break-all font-mono text-xs text-slate-700">{selected.actor_user_id || "Não identificado"}</p></div>
-                <div><p className="text-xs text-slate-500">Tipo de recurso</p><p className="mt-1 text-slate-950">{selected.resource_type || "Não informado"}</p></div>
-                <div><p className="text-xs text-slate-500">ID do recurso</p><p className="mt-1 break-all font-mono text-xs text-slate-700">{selected.resource_id || "Não informado"}</p></div>
-                <div><p className="text-xs text-slate-500">Metadados</p><pre className="mt-1 max-h-72 overflow-auto rounded-lg bg-slate-50 p-3 text-xs leading-5 text-slate-700">{JSON.stringify(selected.metadata, null, 2)}</pre></div>
-              </div>
-            </>
-          )}
-        </aside>
-      </div>
-    </section>
-  );
-}
+              <div><p className="text-xs font-medium uppercase tracking-wide text-slate-400">Evento</p><h3 className="mt-1 font-semibold text-slate-950">{formatAction(selected.action)}</h3><p className="mt-1 text-xs texfunction SystemsWorkspace() {
+  const [selectedId, setSelectedId] = useState(systems[0]?.id ?? "");
+  const selected = systems.find((system) => system.id === selectedId) ?? systems[0];
 
-function SystemsWorkspace() {
-  const integrated = systems.filter((system) => system.status === "Integrado");
-  const external = systems.filter((system) => system.status !== "Integrado");
+  if (!selected) return null;
+
+  const isIntegrated = selected.status === "Integrado";
+
+  const quickLinks = [
+    ["Site", selected.links.site, Globe2],
+    ["GitHub", selected.links.github, GitBranch],
+    ["Cloudflare", selected.links.cloudflare, Globe2],
+    ["Supabase", selected.links.supabase, Code2],
+    ["Operação", selected.links.operation, Boxes],
+  ] as const;
+
+  const indicators = [
+    ["Visitas hoje", "—", "Integração de analytics na próxima fase", BarChart3],
+    ["Últimos 7 dias", "—", "Integração de analytics na próxima fase", Activity],
+    ["Leads", "—", "Conectado ao módulo comercial futuramente", Users],
+    ["Status", isIntegrated ? "Integrado" : "Externo", isIntegrated ? "Conexão preparada" : "Operação fora do Control Center", Globe2],
+  ] as const;
 
   return (
     <section className="space-y-6">
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h2 className="text-lg font-semibold">Sistemas</h2>
-            <p className="mt-1 text-sm text-slate-500">Visão centralizada dos sistemas que fazem parte do ecossistema AMT.</p>
+            <p className="text-xs font-medium uppercase tracking-[0.16em] text-blue-600">Ecossistema AMT</p>
+            <h2 className="mt-1 text-lg font-semibold text-slate-950">Sistemas</h2>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-500">
+              Central operacional para acessar infraestrutura, código, serviços e indicadores de cada produto.
+            </p>
           </div>
-          <div className="flex gap-2 text-xs">
-            <span className="rounded-full bg-blue-50 px-3 py-1.5 font-medium text-blue-700">{integrated.length} integrado</span>
-            <span className="rounded-full bg-slate-100 px-3 py-1.5 font-medium text-slate-700">{external.length} externos</span>
+          <div className="flex flex-wrap gap-2 text-xs">
+            <span className="rounded-full bg-blue-50 px-3 py-1.5 font-medium text-blue-700">{systems.length} sistemas</span>
+            <span className="rounded-full bg-slate-100 px-3 py-1.5 font-medium text-slate-700">{systems.filter((system) => system.status === "Integrado").length} integrado</span>
+            <span className="rounded-full bg-slate-100 px-3 py-1.5 font-medium text-slate-700">{systems.filter((system) => system.status !== "Integrado").length} externos</span>
           </div>
         </div>
       </div>
 
-      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-3">
         {systems.map((system) => {
           const Icon = system.icon;
-          const isIntegrated = system.status === "Integrado";
+          const active = system.id === selected.id;
           return (
-            <article key={system.name} className="flex min-h-64 flex-col rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100">
-                  <Icon className="h-6 w-6 text-slate-900" />
+            <button
+              key={system.id}
+              type="button"
+              onClick={() => setSelectedId(system.id)}
+              className={`rounded-xl border bg-white p-5 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md ${active ? "border-blue-500 ring-1 ring-blue-500/20" : "border-slate-200"}`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100">
+                  <Icon className="h-5 w-5 text-slate-900" />
                 </div>
-                <span className={`rounded-full px-3 py-1 text-xs font-medium ${isIntegrated ? "bg-blue-50 text-blue-700" : "bg-slate-100 text-slate-700"}`}>
+                <span className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${system.status === "Integrado" ? "bg-blue-50 text-blue-700" : "bg-slate-100 text-slate-600"}`}>
                   {system.status}
                 </span>
               </div>
-              <h3 className="mt-5 text-base font-semibold text-slate-950">{system.name}</h3>
-              <p className="mt-2 flex-1 text-sm leading-6 text-slate-600">{system.description}</p>
-              <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
-                <span className="text-xs text-slate-500">{isIntegrated ? "Conexão com o Control Center" : "Operação em sistema externo"}</span>
-                <a href={system.href} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-700 hover:text-blue-800">
-                  Acessar <ExternalLink className="h-3.5 w-3.5" />
+              <h3 className="mt-4 font-semibold text-slate-950">{system.name}</h3>
+              <p className="mt-1 text-sm leading-5 text-slate-500">{system.description}</p>
+              <div className="mt-4 flex flex-wrap gap-1.5">
+                {system.capabilities.map((capability) => (
+                  <span key={capability} className="rounded-md bg-slate-50 px-2 py-1 text-[10px] font-medium text-slate-500">{capability}</span>
+                ))}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <div className="flex flex-wrap items-center gap-3">
+              <h3 className="text-xl font-semibold text-slate-950">{selected.name}</h3>
+              <span className={`rounded-full px-3 py-1 text-xs font-medium ${isIntegrated ? "bg-blue-50 text-blue-700" : "bg-slate-100 text-slate-600"}`}>
+                {selected.status}
+              </span>
+            </div>
+            <p className="mt-1 text-sm text-slate-500">{selected.description}</p>
+          </div>
+          <a href={selected.href} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-lg bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800">
+            Abrir sistema <ExternalLink className="h-4 w-4" />
+          </a>
+        </div>
+
+        <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {indicators.map(([label, value, detail, Icon]) => (
+            <div key={String(label)} className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+              <div className="flex items-center gap-2 text-xs font-medium text-slate-500"><Icon className="h-4 w-4 text-blue-700" />{label}</div>
+              <p className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">{value}</p>
+              <p className="mt-1 text-[11px] leading-4 text-slate-400">{detail}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <div className="grid gap-6 xl:grid-cols-[1fr_360px]">
+        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div>
+            <h3 className="text-base font-semibold text-slate-950">Acessos operacionais</h3>
+            <p className="mt-1 text-sm text-slate-500">Links separados por responsabilidade para reduzir a navegação manual entre painéis.</p>
+          </div>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            {quickLinks.map(([label, href, Icon]) => (
+              <a
+                key={label}
+                href={href || undefined}
+                target={href ? "_blank" : undefined}
+                rel={href ? "noreferrer" : undefined}
+                aria-disabled={!href}
+                className={`flex items-center justify-between rounded-xl border p-4 transition-colors ${href ? "border-slate-200 hover:border-blue-300 hover:bg-blue-50/30" : "cursor-not-allowed border-dashed border-slate-200 bg-slate-50 opacity-60"}`}
+              >
+                <span className="flex items-center gap-3">
+                  <span className="rounded-lg bg-slate-100 p-2"><Icon className="h-4 w-4 text-blue-700" /></span>
+                  <span><span className="block text-sm font-medium text-slate-950">{label}</span><span className="block text-[11px] text-slate-400">{href ? "Abrir painel" : "Ainda não configurado"}</span></span>
+                </span>
+                <ExternalLink className="h-4 w-4 text-slate-400" />
+              </a>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h3 className="text-base font-semibold text-slate-950">Capacidades previstas</h3>
+          <p className="mt-1 text-sm text-slate-500">A fase 1 cria a estrutura; as fontes reais entram nas próximas integrações.</p>
+          <div className="mt-5 space-y-3">
+            {[
+              ["Analytics", "Visitas, sessões, páginas e origens", BarChart3],
+              ["Infraestrutura", "Deploy, domínio, DNS, SSL e CDN", Globe2],
+              ["Código", "Repositório, commits, issues e workflows", GitBranch],
+              ["Backend", "Banco, autenticação, storage e funções", Code2],
+              ["Operação", "Leads, formulários, usuários e eventos", Activity],
+            ].map(([title, description, Icon]) => (
+              <div key={String(title)} className="flex gap-3 rounded-lg bg-slate-50 p-3">
+                <Icon className="mt-0.5 h-4 w-4 shrink-0 text-blue-700" />
+                <div><p className="text-sm font-medium text-slate-950">{title}</p><p className="mt-0.5 text-xs leading-5 text-slate-500">{String(description)}</p></div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      <section className="rounded-xl border border-dashed border-slate-200 bg-white p-5">
+        <div className="flex gap-3">
+          <Activity className="mt-0.5 h-4 w-4 shrink-0 text-blue-700" />
+          <div>
+            <p className="text-sm font-medium text-slate-950">Fase 1 — estrutura operacional</p>
+            <p className="mt-1 text-xs leading-5 text-slate-500">
+              Os acessos acima já ficam organizados por sistema. Visitas, status de deploy, métricas de infraestrutura e dados de cada plataforma serão conectados sem alterar esta interface na próxima fase.
+            </p>
+          </div>
+        </div>
+      </section>
+    </section>
+  );
+} Acessar <ExternalLink className="h-3.5 w-3.5" />
                 </a>
               </div>
             </article>
