@@ -95,6 +95,7 @@ export function DevelopmentWorkspace() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [showIssueForm, setShowIssueForm] = useState(false);
+  const [syncingGitHub, setSyncingGitHub] = useState(false);
   const [issueForm, setIssueForm] = useState({ title: "", project_id: "", module: "", priority: "media", description: "" });
 
   async function loadAll() {
@@ -124,6 +125,49 @@ export function DevelopmentWorkspace() {
   const openIssues = issues.filter((i) => !["validado", "corrigido"].includes(i.status)).length;
   const failedDeploys = deployments.filter((d) => d.status === "falha").length;
   const latestHealth = projects.map((p) => health.find((h) => h.project_id === p.id)).filter(Boolean) as HealthCheck[];
+
+  async function syncGitHubHistory() {
+    const project = projects.find((item) => item.id === selectedProject) || projects.find((item) => item.repository?.includes("/"));
+    if (!project?.repository?.includes("/")) {
+      setMessage("Selecione um projeto com repositório GitHub configurado.");
+      return;
+    }
+    setSyncingGitHub(true);
+    setMessage("");
+    try {
+      const base = \`https://api.github.com/repos/\${project.repository}\`;
+      const response = await fetch(\`\${base}/commits?per_page=20\`);
+      if (!response.ok) throw new Error("Não foi possível consultar o GitHub.");
+      const commits = await response.json() as Array<{ sha: string; html_url: string; commit: { message: string; author?: { date?: string } } }>;
+      let imported = 0;
+      for (const commit of commits) {
+        const existing = changes.some((item) => item.project_id === project.id && item.commit_sha === commit.sha);
+        if (existing) continue;
+        const detailResponse = await fetch(\`\${base}/commits/\${commit.sha}\`);
+        const detail = detailResponse.ok ? await detailResponse.json() as { files?: Array<{ filename: string }> } : { files: [] };
+        const { data, error } = await amtSupabase.from("development_changes").insert({
+          project_id: project.id,
+          change_type: "github_commit",
+          summary: commit.commit.message.split("\\n")[0].slice(0, 180),
+          files: (detail.files ?? []).map((file) => file.filename).slice(0, 100),
+          commit_sha: commit.sha,
+          commit_url: commit.html_url,
+          reason: "Sincronizado automaticamente do GitHub.",
+          status: "concluida",
+          created_at: commit.commit.author?.date || new Date().toISOString(),
+        }).select("id,project_id,summary,change_type,files,commit_sha,commit_url,reason,status,created_at").single();
+        if (!error && data) {
+          setChanges((items) => [data as Change, ...items]);
+          imported++;
+        }
+      }
+      setMessage(imported ? \`${imported} alterações importadas do GitHub.\` : "O histórico já está sincronizado.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Falha ao sincronizar o GitHub.");
+    } finally {
+      setSyncingGitHub(false);
+    }
+  }
 
   async function createIssue(e: React.FormEvent) {
     e.preventDefault();
@@ -215,7 +259,7 @@ export function DevelopmentWorkspace() {
             <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-500">Organize manutenção, problemas, alterações, deploys e saúde dos sistemas em um único lugar.</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button type="button" variant="outline" onClick={() => void loadAll()} className="gap-2"><RefreshCw className="h-4 w-4" /> Atualizar</Button>
+            <Button type="button" variant="outline" onClick={() => void syncGitHubHistory()} disabled={syncingGitHub} className="gap-2"><GitBranch className="h-4 w-4" /> {syncingGitHub ? "Sincronizando..." : "Sincronizar GitHub"}</Button><Button type="button" variant="outline" onClick={() => void loadAll()} className="gap-2"><RefreshCw className="h-4 w-4" /> Atualizar</Button>
             <Button type="button" onClick={() => { setIssueForm((v) => ({ ...v, project_id: selectedProject || projects[0]?.id || "" })); setShowIssueForm(true); }} className="gap-2 bg-black text-white hover:bg-slate-900"><Plus className="h-4 w-4" /> Novo problema</Button>
           </div>
         </div>
