@@ -99,7 +99,6 @@ export function DevelopmentWorkspace() {
   const [syncingGitHub, setSyncingGitHub] = useState(false);
   const [contextProjectId, setContextProjectId] = useState("");
   const [contextText, setContextText] = useState("");
-  const [selectedIssueId, setSelectedIssueId] = useState("");
   const [issueForm, setIssueForm] = useState({ title: "", project_id: "", module: "", priority: "media", description: "" });
 
   async function loadAll() {
