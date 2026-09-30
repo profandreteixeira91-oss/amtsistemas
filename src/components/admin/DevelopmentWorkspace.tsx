@@ -138,19 +138,18 @@ export function DevelopmentWorkspace() {
     setSyncingGitHub(true);
     setMessage("");
     try {
-      const base = \`https://api.github.com/repos/\${project.repository}\`;
-      const response = await fetch(\`\${base}/commits?per_page=20\`);
+      const base = `https://api.github.com/repos/${project.repository}`;
+      const response = await fetch(`${base}/commits?per_page=20`);
       if (!response.ok) throw new Error("Não foi possível consultar o GitHub.");
       const commits = await response.json() as Array<{ sha: string; html_url: string; commit: { message: string; author?: { date?: string } } }>;
       let imported = 0;
       for (const commit of commits) {
         const existing = changes.some((item) => item.project_id === project.id && item.commit_sha === commit.sha);
         if (existing) continue;
-        const detailResponse = await fetch(\`\${base}/commits/\${commit.sha}\`);
+        const detailResponse = await fetch(`${base}/commits/${commit.sha}`);
         const detail = detailResponse.ok ? await detailResponse.json() as { files?: Array<{ filename: string }> } : { files: [] };
         const { data, error } = await amtSupabase.from("development_changes").insert({
           project_id: project.id,
-          issue_id: selectedIssueId || null,
           change_type: "github_commit",
           summary: commit.commit.message.split("\\n")[0].slice(0, 180),
           files: (detail.files ?? []).map((file) => file.filename).slice(0, 100),
@@ -165,7 +164,7 @@ export function DevelopmentWorkspace() {
           imported++;
         }
       }
-      setMessage(imported ? \`${imported} alterações importadas do GitHub.\` : "O histórico já está sincronizado.");
+      setMessage(imported ? `${imported} alterações importadas do GitHub.` : "O histórico já está sincronizado.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Falha ao sincronizar o GitHub.");
     } finally {
