@@ -49,7 +49,7 @@ export function DevelopmentAgentWorkspace({ projects, issues, changes }: { proje
       const treeResponse=await fetch("https://api.github.com/repos/"+owner+"/"+repo+"/git/trees/"+encodeURIComponent(branch)+"?recursive=1",{headers:{"Accept":"application/vnd.github+json"}});
       if(!treeResponse.ok) throw new Error("Não foi possível ler a árvore do repositório.");
       const tree=await treeResponse.json();
-      const paths=(tree.tree||[]).filter((item:{type?:string;path?:string})=>item.type==="blob"&&item.path).map((item:{path:string})=>item.path).filter((path:string)=>/(^|\\/)(App|main|router|routes?|routeTree\\.gen)\\.(tsx|ts|jsx|js)$/.test(path)||/^src\\/routes\\/.*\\.(tsx|ts|jsx|js)$/.test(path)).slice(0,80);
+      const paths=(tree.tree||[]).filter((item:{type?:string;path?:string})=>item.type==="blob"&&item.path).map((item:{path:string})=>item.path).filter((path:string)=>{ const normalized=path.replaceAll("\\\\","/"); const file=normalized.split("/").pop()||""; return /^src\/routes\/.*\.(tsx|ts|jsx|js)$/.test(normalized)||/^(App|main|router|routes?|routeTree\.gen)\.(tsx|ts|jsx|js)$/.test(file); }).slice(0,80);
       const discovered=new Map<string,string>();
       const patterns=[new RegExp("(?:path|to)\\\\s*[:=]\\\\s*[\\\"\\\']([^\\\"\\\']+)[\\\"\\\']","g"),new RegExp("(?:navigate|redirect|Link|NavLink)[^\\n]{0,160}[\\\"\\\'](\\/[^\\\"\\\']*)[\\\"\\\']","g"),new RegExp("pathname\\\\s*===\\\\s*[\\\"\\\']([^\\\"\\\']+)[\\\"\\\']","g"),new RegExp("case\\\\s*[\\\"\\\']([^\\\"\\\']+)[\\\"\\\']","g")];
       for(const path of paths){
