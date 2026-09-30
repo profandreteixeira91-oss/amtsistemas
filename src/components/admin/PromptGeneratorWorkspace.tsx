@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Clipboard, ExternalLink, FileCode2, Loader2, Sparkles } from "lucide-react";
+import { Clipboard, ExternalLink, FileCode2, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
