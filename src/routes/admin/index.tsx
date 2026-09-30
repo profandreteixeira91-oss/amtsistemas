@@ -385,7 +385,7 @@ function FormsWorkspace() {
     <section className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div><h2 className="text-lg font-semibold">Formulários e solicitações</h2><p className="mt-1 text-sm text-slate-500">Centralize os contatos recebidos pelos formulários do ecossistema AMT.</p></div>
-        <Button onClick={() => setShowNew((v) => !v)} className="gap-2 bg-blue-700 hover:bg-blue-800"><Plus className="h-4 w-4" /> Nova solicitação</Button>
+        <Button onClick={() => setShowNew((v) => !v)} className="gap-2 bg-blue-700 text-white hover:bg-blue-800"><Plus className="h-4 w-4" /> Nova solicitação</Button>
       </div>
       {message && <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">{message}</div>}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -395,7 +395,7 @@ function FormsWorkspace() {
         <div><h3 className="font-semibold">Cadastrar solicitação</h3><p className="mt-1 text-xs text-slate-500">Útil para registros manuais até os formulários públicos estarem integrados.</p></div><div />
         {([["form_name","Formulário *"],["name","Nome *"],["email","E-mail"],["phone","Telefone"],["source","Origem"]] as const).map(([key,label]) => <label key={key} className="text-sm font-medium text-slate-700">{label}<input required={key==="form_name"||key==="name"} value={newItem[key]} onChange={(e) => setNewItem((v) => ({...v,[key]:e.target.value}))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-950 outline-none focus:border-blue-500" /></label>)}
         <label className="sm:col-span-2 text-sm font-medium text-slate-700">Observações<textarea value={newItem.notes} onChange={(e) => setNewItem((v) => ({...v,notes:e.target.value}))} className="mt-1 min-h-20 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-950" /></label>
-        <div className="sm:col-span-2"><Button type="submit" disabled={saving}>{saving ? "Salvando..." : "Cadastrar"}</Button></div>
+        <div className="sm:col-span-2"><Button type="submit" disabled={saving} className="bg-black text-white hover:bg-slate-900">{saving ? "Salvando..." : "Cadastrar"}</Button></div>
       </form>}
       <div className="flex flex-col gap-3 lg:flex-row">
         <label className="relative flex-1"><Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" /><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar por nome, e-mail, telefone ou formulário" className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm text-slate-950" /></label>
@@ -545,7 +545,7 @@ function LeadsWorkspace() {
         {([["name","Nome *"],["email","E-mail"],["phone","Telefone"],["source","Origem"]] as const).map(([key,label]) => <label key={key} className="text-sm font-medium text-slate-700">{label}<input required={key === "name"} value={form[key]} onChange={(e) => setForm((v) => ({ ...v, [key]: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-950 outline-none focus:border-blue-500" /></label>)}
         <label className="text-sm font-medium text-slate-700">Status<select value={form.status} onChange={(e) => setForm((v) => ({ ...v, status: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950"><option value="novo">Novo</option><option value="contatado">Contatado</option><option value="qualificado">Qualificado</option><option value="convertido">Convertido</option><option value="perdido">Perdido</option></select></label>
         <label className="text-sm font-medium text-slate-700 sm:col-span-2">Observações<textarea value={form.notes} onChange={(e) => setForm((v) => ({ ...v, notes: e.target.value }))} className="mt-1 min-h-24 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-950 outline-none focus:border-blue-500" /></label>
-        <div className="sm:col-span-2 flex gap-2"><Button type="submit" disabled={saving}>{saving ? "Salvando..." : selectedLead ? "Salvar alterações" : "Cadastrar lead"}</Button><Button type="button" variant="outline" onClick={() => setShowForm(false)}>Cancelar</Button></div>
+        <div className="sm:col-span-2 flex gap-2"><Button type="submit" disabled={saving} className="bg-black text-white hover:bg-slate-900">{saving ? "Salvando..." : selectedLead ? "Salvar alterações" : "Cadastrar lead"}</Button><Button type="button" variant="outline" onClick={() => setShowForm(false)}>Cancelar</Button></div>
       </form>}
 
       <div className="flex flex-col gap-3 sm:flex-row">
