@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import type { ComponentType } from "react";
 import { Bot, CheckCircle2, FileCode2, Loader2, Search, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -223,7 +224,7 @@ export function DevelopmentAgentWorkspace({
   );
 }
 
-function AgentList({ title, items, icon: Icon }: { title: string; items?: string[]; icon: React.ComponentType<{ className?: string }> }) {
+function AgentList({ title, items, icon: Icon }: { title: string; items?: string[]; icon: ComponentType<{ className?: string }> }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex items-center gap-2">
