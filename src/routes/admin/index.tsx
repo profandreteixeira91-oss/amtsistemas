@@ -30,6 +30,7 @@ import {
 
 import { DevelopmentWorkspace } from "@/components/admin/DevelopmentWorkspace";
 import { PromptGeneratorWorkspace } from "@/components/admin/PromptGeneratorWorkspace";
+import { DevelopmentAgentWorkspace } from "@/components/admin/DevelopmentAgentWorkspace";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAdminProfile, getAdminSession, signOutAdmin } from "@/lib/amt-admin-auth";
@@ -839,7 +840,7 @@ function SystemsWorkspace() {
 }
 
 function DevelopmentModuleWorkspace() {
-  const [view, setView] = useState<"central" | "prompt">("central");
+  const [view, setView] = useState<"central" | "prompt" | "agent">("central");
   const [projects, setProjects] = useState<Array<{
     id: string;
     name: string;
@@ -890,8 +891,12 @@ function DevelopmentModuleWorkspace() {
           <SparklesIcon className="h-4 w-4" />
           Gerador de prompt
         </button>
+        <button type="button" onClick={() => setView("agent")} className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${view === "agent" ? "bg-black text-white" : "text-slate-600 hover:bg-slate-100"}`}>
+          <SparklesIcon className="h-4 w-4" />
+          Agente GPT/Codex
+        </button>
       </div>
-      {view === "central" ? <DevelopmentWorkspace /> : <PromptGeneratorWorkspace projects={projects} issues={issues} changes={changes} />}
+      {view === "central" ? <DevelopmentWorkspace /> : view === "prompt" ? <PromptGeneratorWorkspace projects={projects} issues={issues} changes={changes} /> : <DevelopmentAgentWorkspace projects={projects} issues={issues} changes={changes} />}
     </section>
   );
 }
