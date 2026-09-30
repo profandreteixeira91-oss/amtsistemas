@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ComponentType } from "react";
 import { Bot, CheckCircle2, FileCode2, GitBranch, Loader2, Search, ShieldCheck } from "lucide-react";
 
@@ -8,6 +8,7 @@ import { amtSupabase } from "@/integrations/amt-supabase/client";
 type Project = { id:string; name:string; description:string|null; repository:string|null; branch:string|null; production_url:string|null; stack:string|null; status:string };
 type Issue = { id:string; project_id:string; title:string; description:string|null; module:string|null; priority:string; status:string };
 type Change = { id:string; project_id:string; summary:string; commit_sha:string|null; files:string[]; created_at:string };
+type RouteOption = { path:string; source:string };
 type AgentAnalysis = {
   summary?:string; findings?:string[]; files?:Array<{path:string;reason:string;confidence:string}>;
   plan?:string[]; risks?:string[]; validation?:string[]; needs_database?:boolean; needs_auth?:boolean; needs_cloudflare?:boolean;
@@ -22,6 +23,9 @@ type Proposal = {
 export function DevelopmentAgentWorkspace({ projects, issues, changes }: { projects:Project[]; issues:Issue[]; changes:Change[] }) {
   const [projectId,setProjectId]=useState(projects[0]?.id||"");
   const [route,setRoute]=useState("");
+  const [routes,setRoutes]=useState<RouteOption[]>([]);
+  const [routesLoading,setRoutesLoading]=useState(false);
+  const [routesMessage,setRoutesMessage]=useState("");
   const [request,setRequest]=useState("");
   const [analysis,setAnalysis]=useState<AgentAnalysis|null>(null);
   const [proposal,setProposal]=useState<Proposal|null>(null);
@@ -33,6 +37,37 @@ export function DevelopmentAgentWorkspace({ projects, issues, changes }: { proje
   const [branch,setBranch]=useState("");
 
   const project=projects.find((item)=>item.id===projectId);
+
+  async function loadRoutes(selected:Project|undefined) {
+    setRoutes([]); setRoute(""); setRoutesMessage("");
+    if(!selected?.repository) return;
+    const parts=selected.repository.split("/"); const owner=parts[0]; const repo=parts[1];
+    if(!owner||!repo) return;
+    setRoutesLoading(true);
+    try {
+      const branch=selected.branch||"main";
+      const treeResponse=await fetch("https://api.github.com/repos/"+owner+"/"+repo+"/git/trees/"+encodeURIComponent(branch)+"?recursive=1",{headers:{"Accept":"application/vnd.github+json"}});
+      if(!treeResponse.ok) throw new Error("Não foi possível ler a árvore do repositório.");
+      const tree=await treeResponse.json();
+      const paths=(tree.tree||[]).filter((item:{type?:string;path?:string})=>item.type==="blob"&&item.path).map((item:{path:string})=>item.path).filter((path:string)=>/(^|\\/)(App|main|router|routes?|routeTree\\.gen)\\.(tsx|ts|jsx|js)$/.test(path)||/^src\\/routes\\/.*\\.(tsx|ts|jsx|js)$/.test(path)).slice(0,80);
+      const discovered=new Map<string,string>();
+      const patterns=[new RegExp("(?:path|to)\\\\s*[:=]\\\\s*[\\\"\\\']([^\\\"\\\']+)[\\\"\\\']","g"),new RegExp("(?:navigate|redirect|Link|NavLink)[^\\n]{0,160}[\\\"\\\'](\\/[^\\\"\\\']*)[\\\"\\\']","g"),new RegExp("pathname\\\\s*===\\\\s*[\\\"\\\']([^\\\"\\\']+)[\\\"\\\']","g"),new RegExp("case\\\\s*[\\\"\\\']([^\\\"\\\']+)[\\\"\\\']","g")];
+      for(const path of paths){
+        try {
+          const response=await fetch("https://raw.githubusercontent.com/"+owner+"/"+repo+"/"+encodeURIComponent(branch)+"/"+path.split("/").map(encodeURIComponent).join("/"));
+          if(!response.ok) continue;
+          const source=await response.text();
+          for(const pattern of patterns){ pattern.lastIndex=0; let match:RegExpExecArray|null; while((match=pattern.exec(source))){ const candidate=(match[1]||"").trim(); if(!candidate.startsWith("/")||candidate==="*"||candidate==="/*"||candidate.length>120||candidate.includes("${")) continue; discovered.set(candidate,path); } }
+        } catch {}
+      }
+      const ordered=[...discovered.entries()].sort(([a],[b])=>a.localeCompare(b,undefined,{numeric:true}));
+      setRoutes(ordered.map(([path,source])=>({path,source})));
+      if(!ordered.length) setRoutesMessage("Nenhuma rota foi identificada automaticamente no repositório.");
+    } catch(error) { setRoutesMessage(error instanceof Error?error.message:"Não foi possível carregar as rotas."); }
+    finally { setRoutesLoading(false); }
+  }
+
+  useEffect(()=>{ void loadRoutes(project); },[projectId]);
   const projectIssues=useMemo(()=>issues.filter((item)=>item.project_id===projectId&&!["corrigido","validado"].includes(item.status)).slice(0,8),[issues,projectId]);
   const projectChanges=useMemo(()=>changes.filter((item)=>item.project_id===projectId).slice(0,8),[changes,projectId]);
 
@@ -92,7 +127,14 @@ export function DevelopmentAgentWorkspace({ projects, issues, changes }: { proje
           </select>
         </label>
         <label className="space-y-2"><span className="text-sm font-medium text-slate-900">Página / rota</span>
-          <input value={route} onChange={(e)=>setRoute(e.target.value)} placeholder="/aluno/central" className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-950"/>
+          <select value={route} onChange={(e)=>setRoute(e.target.value)} disabled={routesLoading||!project} className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-950 disabled:cursor-not-allowed disabled:bg-slate-50">
+            <option value="">{routesLoading?"Lendo rotas do GitHub...":"Selecione uma rota do GitHub"}</option>
+            {routes.map((item)=><option key={item.path} value={item.path}>{item.path}</option>)}
+          </select>
+          <div className="flex items-center justify-between gap-3 text-[11px] text-slate-400">
+            <span>{routes.length?routes.length+" rota(s) identificada(s) no repositório":routesMessage||"As rotas são carregadas automaticamente do GitHub."}</span>
+            {project&&<button type="button" onClick={()=>void loadRoutes(project)} disabled={routesLoading} className="font-medium text-blue-700 hover:text-blue-800 disabled:opacity-50">{routesLoading?"Atualizando...":"Atualizar rotas"}</button>}
+          </div>
         </label>
       </div>
 
