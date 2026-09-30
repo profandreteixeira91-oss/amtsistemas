@@ -156,7 +156,7 @@ export function DevelopmentWorkspace() {
         const { data, error } = await amtSupabase.from("development_changes").insert({
           project_id: project.id,
           change_type: "github_commit",
-          summary: commit.commit.message.split("\\n")[0].slice(0, 180),
+          summary: commit.commit.message.split("\n")[0].slice(0, 180),
           files: (detail.files ?? []).map((file) => file.filename).slice(0, 100),
           commit_sha: commit.sha,
           commit_url: commit.html_url,
