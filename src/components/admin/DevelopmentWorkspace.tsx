@@ -67,6 +67,7 @@ type Deployment = {
   created_at: string;
   deployed_at: string | null;
   notes?: string | null;
+  external_id?: string | null;
 };
 
 type HealthCheck = {
@@ -100,6 +101,7 @@ export function DevelopmentWorkspace() {
   const [message, setMessage] = useState("");
   const [showIssueForm, setShowIssueForm] = useState(false);
   const [syncingGitHub, setSyncingGitHub] = useState(false);
+  const [syncingCloudflare, setSyncingCloudflare] = useState(false);
   const [contextProjectId, setContextProjectId] = useState("");
   const [contextText, setContextText] = useState("");
   const [issueForm, setIssueForm] = useState({ title: "", project_id: "", module: "", priority: "media", description: "" });
@@ -113,7 +115,7 @@ export function DevelopmentWorkspace() {
       amtSupabase.from("development_projects").select("*").order("name"),
       amtSupabase.from("development_issues").select("id,project_id,title,description,module,priority,status,created_at").order("created_at", { ascending: false }),
       amtSupabase.from("development_changes").select("id,project_id,summary,change_type,files,commit_sha,commit_url,reason,status,created_at,issue_id").order("created_at", { ascending: false }).limit(100),
-      amtSupabase.from("development_deployments").select("id,project_id,change_id,commit_sha,provider,environment,status,url,created_at,deployed_at,notes").order("created_at", { ascending: false }).limit(100),
+      amtSupabase.from("development_deployments").select("id,project_id,change_id,commit_sha,provider,environment,status,url,created_at,deployed_at,notes,external_id").order("created_at", { ascending: false }).limit(100),
       amtSupabase.from("system_health_checks").select("id,project_id,status,response_ms,status_code,url,checked_at").order("checked_at", { ascending: false }).limit(100),
     ]);
     const error = p.error || i.error || c.error || d.error || h.error;
@@ -174,6 +176,27 @@ export function DevelopmentWorkspace() {
       setMessage(error instanceof Error ? error.message : "Falha ao sincronizar o GitHub.");
     } finally {
       setSyncingGitHub(false);
+    }
+  }
+
+  async function syncCloudflareDeployments() {
+    setSyncingCloudflare(true);
+    setMessage("");
+    try {
+      const { data, error } = await amtSupabase.functions.invoke("sync-cloudflare-deployments", {
+        body: { project_ids: selectedProject ? [selectedProject] : [] },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const imported = Number(data?.imported ?? 0);
+      const skipped = Array.isArray(data?.skipped) ? data.skipped.length : 0;
+      await loadAll();
+      setTab("deploys");
+      setMessage(imported ? `${imported} deploys sincronizados do Cloudflare.${skipped ? ` ${skipped} sistema(s) não foram encontrados no Cloudflare Pages.` : ""}` : "O histórico do Cloudflare já está sincronizado.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Falha ao sincronizar os deploys do Cloudflare.");
+    } finally {
+      setSyncingCloudflare(false);
     }
   }
 
@@ -271,7 +294,7 @@ export function DevelopmentWorkspace() {
       url: deployForm.url.trim() || null,
       notes: deployForm.notes.trim() || null,
       deployed_at: deployForm.status === "sucesso" ? new Date().toISOString() : null,
-    }).select("id,project_id,change_id,commit_sha,provider,environment,status,url,created_at,deployed_at,notes").single();
+    }).select("id,project_id,change_id,commit_sha,provider,environment,status,url,created_at,deployed_at,notes,external_id").single();
     if (error || !data) {
       setMessage(error?.message ?? "Não foi possível registrar o deploy.");
       return;
@@ -287,7 +310,7 @@ export function DevelopmentWorkspace() {
     const { data, error } = await amtSupabase.from("development_deployments").update({
       status,
       deployed_at: status === "sucesso" ? new Date().toISOString() : null,
-    }).eq("id", id).select("id,project_id,change_id,commit_sha,provider,environment,status,url,created_at,deployed_at,notes").single();
+    }).eq("id", id).select("id,project_id,change_id,commit_sha,provider,environment,status,url,created_at,deployed_at,notes,external_id").single();
     if (error || !data) {
       setMessage("Não foi possível atualizar o deploy.");
       return;
@@ -365,7 +388,7 @@ export function DevelopmentWorkspace() {
             <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-500">Organize manutenção, problemas, alterações, deploys e saúde dos sistemas em um único lugar.</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button type="button" variant="outline" onClick={() => void syncGitHubHistory()} disabled={syncingGitHub} className="gap-2 bg-white text-slate-900 hover:bg-slate-100"><GitBranch className="h-4 w-4" /> {syncingGitHub ? "Sincronizando..." : "Sincronizar GitHub"}</Button><Button type="button" variant="outline" onClick={generateDevelopmentContext} className="gap-2 bg-white text-slate-900 hover:bg-slate-100"><Wrench className="h-4 w-4" /> Contexto para desenvolvimento</Button><Button type="button" variant="outline" onClick={() => void loadAll()} className="gap-2 bg-white text-slate-900 hover:bg-slate-100"><RefreshCw className="h-4 w-4" /> Atualizar</Button>
+            <Button type="button" variant="outline" onClick={() => void syncGitHubHistory()} disabled={syncingGitHub} className="gap-2 bg-white text-slate-900 hover:bg-slate-100"><GitBranch className="h-4 w-4" /> {syncingGitHub ? "Sincronizando..." : "Sincronizar GitHub"}</Button><Button type="button" variant="outline" onClick={() => void syncCloudflareDeployments()} disabled={syncingCloudflare} className="gap-2 bg-white text-slate-900 hover:bg-slate-100"><Server className="h-4 w-4" /> {syncingCloudflare ? "Sincronizando..." : "Sincronizar Cloudflare"}</Button><Button type="button" variant="outline" onClick={generateDevelopmentContext} className="gap-2 bg-white text-slate-900 hover:bg-slate-100"><Wrench className="h-4 w-4" /> Contexto para desenvolvimento</Button><Button type="button" variant="outline" onClick={() => void loadAll()} className="gap-2 bg-white text-slate-900 hover:bg-slate-100"><RefreshCw className="h-4 w-4" /> Atualizar</Button>
             <Button type="button" onClick={() => { setIssueForm((v) => ({ ...v, project_id: selectedProject || projects[0]?.id || "" })); setShowIssueForm(true); }} className="gap-2 bg-black text-white hover:bg-slate-900"><Plus className="h-4 w-4" /> Novo problema</Button>
           </div>
         </div>
