@@ -52,11 +52,13 @@ type Change = {
   reason: string | null;
   status: string;
   created_at: string;
+  issue_id?: string | null;
 };
 
 type Deployment = {
   id: string;
   project_id: string;
+  change_id?: string | null;
   commit_sha: string | null;
   provider: string;
   environment: string;
@@ -64,6 +66,7 @@ type Deployment = {
   url: string | null;
   created_at: string;
   deployed_at: string | null;
+  notes?: string | null;
 };
 
 type HealthCheck = {
@@ -100,6 +103,8 @@ export function DevelopmentWorkspace() {
   const [contextProjectId, setContextProjectId] = useState("");
   const [contextText, setContextText] = useState("");
   const [issueForm, setIssueForm] = useState({ title: "", project_id: "", module: "", priority: "media", description: "" });
+  const [showDeployForm, setShowDeployForm] = useState(false);
+  const [deployForm, setDeployForm] = useState({ project_id: "", change_id: "", commit_sha: "", provider: "Cloudflare", environment: "production", status: "pendente", url: "", notes: "" });
 
   async function loadAll() {
     setLoading(true);
@@ -108,7 +113,7 @@ export function DevelopmentWorkspace() {
       amtSupabase.from("development_projects").select("*").order("name"),
       amtSupabase.from("development_issues").select("id,project_id,title,description,module,priority,status,created_at").order("created_at", { ascending: false }),
       amtSupabase.from("development_changes").select("id,project_id,summary,change_type,files,commit_sha,commit_url,reason,status,created_at,issue_id").order("created_at", { ascending: false }).limit(100),
-      amtSupabase.from("development_deployments").select("id,project_id,commit_sha,provider,environment,status,url,created_at,deployed_at").order("created_at", { ascending: false }).limit(100),
+      amtSupabase.from("development_deployments").select("id,project_id,change_id,commit_sha,provider,environment,status,url,created_at,deployed_at,notes").order("created_at", { ascending: false }).limit(100),
       amtSupabase.from("system_health_checks").select("id,project_id,status,response_ms,status_code,url,checked_at").order("checked_at", { ascending: false }).limit(100),
     ]);
     const error = p.error || i.error || c.error || d.error || h.error;
@@ -248,6 +253,48 @@ export function DevelopmentWorkspace() {
     setTab("problemas");
   }
 
+  async function createDeployment(e: React.FormEvent) {
+    e.preventDefault();
+    if (!deployForm.project_id) return;
+    const commitSha = deployForm.commit_sha.trim() || null;
+    let changeId = deployForm.change_id || null;
+    if (!changeId && commitSha) {
+      changeId = changes.find((item) => item.project_id === deployForm.project_id && item.commit_sha === commitSha)?.id || null;
+    }
+    const { data, error } = await amtSupabase.from("development_deployments").insert({
+      project_id: deployForm.project_id,
+      change_id: changeId,
+      commit_sha: commitSha,
+      provider: deployForm.provider.trim() || "Cloudflare",
+      environment: deployForm.environment,
+      status: deployForm.status,
+      url: deployForm.url.trim() || null,
+      notes: deployForm.notes.trim() || null,
+      deployed_at: deployForm.status === "sucesso" ? new Date().toISOString() : null,
+    }).select("id,project_id,change_id,commit_sha,provider,environment,status,url,created_at,deployed_at,notes").single();
+    if (error || !data) {
+      setMessage(error?.message ?? "Não foi possível registrar o deploy.");
+      return;
+    }
+    setDeployments((items) => [data as Deployment, ...items].slice(0, 100));
+    setDeployForm({ project_id: selectedProject || projects[0]?.id || "", change_id: "", commit_sha: "", provider: "Cloudflare", environment: "production", status: "pendente", url: "", notes: "" });
+    setShowDeployForm(false);
+    setMessage("Deploy registrado.");
+    setTab("deploys");
+  }
+
+  async function updateDeploymentStatus(id: string, status: string) {
+    const { data, error } = await amtSupabase.from("development_deployments").update({
+      status,
+      deployed_at: status === "sucesso" ? new Date().toISOString() : null,
+    }).eq("id", id).select("id,project_id,change_id,commit_sha,provider,environment,status,url,created_at,deployed_at,notes").single();
+    if (error || !data) {
+      setMessage("Não foi possível atualizar o deploy.");
+      return;
+    }
+    setDeployments((items) => items.map((item) => item.id === id ? data as Deployment : item));
+  }
+
   async function updateIssueStatus(id: string, status: string) {
     const { data, error } = await amtSupabase.from("development_issues").update({ status, updated_at: new Date().toISOString() }).eq("id", id).select("id,project_id,title,description,module,priority,status,created_at").single();
     if (error || !data) {
@@ -345,7 +392,7 @@ export function DevelopmentWorkspace() {
 
       {tab === "alteracoes" && <ListTable title="Histórico de alterações" empty="Nenhuma alteração registrada." rows={changes} render={(change) => <div key={change.id} className="grid gap-3 border-b border-slate-100 px-5 py-4 last:border-0 lg:grid-cols-[1.5fr_1fr_180px]"><div><p className="font-medium text-slate-950">{change.summary}</p><p className="mt-1 text-xs text-slate-500">{projectMap.get(change.project_id)?.name || "Projeto"} · {change.change_type}</p></div><div className="text-xs text-slate-600">{change.commit_sha ? `commit ${change.commit_sha.slice(0, 7)}` : "Commit não informado"}{change.reason ? ` · ${change.reason}` : ""}<div className="mt-2"><select value={change.issue_id || ""} onChange={(e) => void linkChangeToIssue(change.id, e.target.value)} className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs"><option value="">Sem problema vinculado</option>{issues.filter((item) => item.project_id === change.project_id && !["validado"].includes(item.status)).map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></div></div><div className="text-xs text-slate-400">{new Date(change.created_at).toLocaleString("pt-BR")}</div></div>} />}
 
-      {tab === "deploys" && <ListTable title="Histórico de deploys" empty="Nenhum deploy registrado." rows={deployments} render={(deployment) => <div key={deployment.id} className="grid gap-3 border-b border-slate-100 px-5 py-4 last:border-0 lg:grid-cols-[1.2fr_1fr_140px_180px]"><div><p className="font-medium text-slate-950">{projectMap.get(deployment.project_id)?.name || "Projeto"}</p><p className="mt-1 text-xs text-slate-500">{deployment.provider} · {deployment.environment}</p></div><div className="text-xs text-slate-600">{deployment.commit_sha ? deployment.commit_sha.slice(0, 7) : "Sem commit"}</div><div>{badge(deployment.status)}</div><div className="text-xs text-slate-400">{new Date(deployment.created_at).toLocaleString("pt-BR")}</div></div>} />}
+      {tab === "deploys" && <ListTable title="Histórico de deploys" empty="Nenhum deploy registrado." rows={deployments} render={(deployment) => <div key={deployment.id} className="grid gap-3 border-b border-slate-100 px-5 py-4 last:border-0 lg:grid-cols-[1.2fr_1fr_140px_180px]"><div><p className="font-medium text-slate-950">{projectMap.get(deployment.project_id)?.name || "Projeto"}</p><p className="mt-1 text-xs text-slate-500">{deployment.provider} · {deployment.environment}</p>{deployment.notes && <p className="mt-1 text-xs text-slate-500">{deployment.notes}</p>}</div><div className="text-xs text-slate-600">{deployment.commit_sha ? deployment.commit_sha.slice(0, 7) : "Sem commit"}</div><div><select value={deployment.status} onChange={(e) => void updateDeploymentStatus(deployment.id, e.target.value)} className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-900"><option value="pendente">Pendente</option><option value="em_andamento">Em andamento</option><option value="sucesso">Sucesso</option><option value="falha">Falha</option></select></div><div className="text-xs text-slate-400">{new Date(deployment.created_at).toLocaleString("pt-BR")}</div></div>} />}
 
       {tab === "contexto" && <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -356,6 +403,8 @@ export function DevelopmentWorkspace() {
       </section>}
 
       {tab === "saude" && <div className="grid gap-4 lg:grid-cols-2">{projects.map((project) => { const latest = health.find((h) => h.project_id === project.id); return <article key={project.id} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"><div className="flex items-center justify-between gap-3"><div className="flex items-center gap-3"><div className="rounded-lg bg-slate-100 p-2.5"><Activity className="h-5 w-5 text-slate-900" /></div><div><h3 className="font-semibold text-slate-950">{project.name}</h3><p className="text-xs text-slate-500">{project.production_url || "URL não configurada"}</p></div></div>{latest ? badge(latest.status) : badge("unknown")}</div>{latest && <div className="mt-5 grid grid-cols-3 gap-3 text-xs"><div className="rounded-lg bg-slate-50 p-3"><p className="text-slate-400">HTTP</p><p className="mt-1 font-medium text-slate-700">{latest.status_code ?? "—"}</p></div><div className="rounded-lg bg-slate-50 p-3"><p className="text-slate-400">Resposta</p><p className="mt-1 font-medium text-slate-700">{latest.response_ms != null ? `${latest.response_ms} ms` : "—"}</p></div><div className="rounded-lg bg-slate-50 p-3"><p className="text-slate-400">Verificado</p><p className="mt-1 font-medium text-slate-700">{new Date(latest.checked_at).toLocaleTimeString("pt-BR")}</p></div></div>}<Button type="button" size="sm" variant="outline" onClick={() => void runHealthCheck(project)} className="mt-5 gap-2 bg-white text-slate-900 hover:bg-slate-100"><Activity className="h-4 w-4" /> Testar agora</Button></article>})}</div>}
+
+      {showDeployForm && <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4"><form onSubmit={createDeployment} className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-xl"><div className="flex items-center justify-between"><div><h3 className="text-lg font-semibold text-slate-950">Registrar deploy</h3><p className="mt-1 text-sm text-slate-500">Registre o deploy real e relacione-o ao histórico de alterações.</p></div><button type="button" onClick={() => setShowDeployForm(false)} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100"><XCircle className="h-5 w-5" /></button></div><div className="mt-5 space-y-4"><select required value={deployForm.project_id} onChange={(e) => setDeployForm((v) => ({ ...v, project_id: e.target.value, change_id: "" }))} className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-950"><option value="">Selecione o projeto</option>{projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select><div className="grid gap-4 sm:grid-cols-2"><select value={deployForm.change_id} onChange={(e) => { const change = changes.find((item) => item.id === e.target.value); setDeployForm((v) => ({ ...v, change_id: e.target.value, commit_sha: change?.commit_sha || v.commit_sha })); }} className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-950"><option value="">Sem alteração vinculada</option>{changes.filter((item) => item.project_id === deployForm.project_id).slice(0, 50).map((item) => <option key={item.id} value={item.id}>{item.summary.slice(0, 70)}</option>)}</select><input value={deployForm.commit_sha} onChange={(e) => setDeployForm((v) => ({ ...v, commit_sha: e.target.value }))} placeholder="Commit SHA (opcional)" className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-950" /></div><div className="grid gap-4 sm:grid-cols-2"><input value={deployForm.provider} onChange={(e) => setDeployForm((v) => ({ ...v, provider: e.target.value }))} placeholder="Provider" className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-950" /><select value={deployForm.environment} onChange={(e) => setDeployForm((v) => ({ ...v, environment: e.target.value }))} className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-950"><option value="production">Produção</option><option value="staging">Staging</option><option value="preview">Preview</option></select></div><div className="grid gap-4 sm:grid-cols-2"><select value={deployForm.status} onChange={(e) => setDeployForm((v) => ({ ...v, status: e.target.value }))} className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-950"><option value="pendente">Pendente</option><option value="em_andamento">Em andamento</option><option value="sucesso">Sucesso</option><option value="falha">Falha</option></select><input value={deployForm.url} onChange={(e) => setDeployForm((v) => ({ ...v, url: e.target.value }))} placeholder="URL do deploy (opcional)" className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-950" /></div><textarea value={deployForm.notes} onChange={(e) => setDeployForm((v) => ({ ...v, notes: e.target.value }))} placeholder="Observações" className="min-h-24 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-950" /></div><div className="mt-6 flex justify-end gap-2"><Button type="button" variant="outline" onClick={() => setShowDeployForm(false)} className="bg-white text-slate-900 hover:bg-slate-100">Cancelar</Button><Button type="submit" className="bg-black text-white hover:bg-slate-900">Registrar deploy</Button></div></form></div>}
 
       {showIssueForm && <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4"><form onSubmit={createIssue} className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-xl"><div className="flex items-center justify-between"><div><h3 className="text-lg font-semibold text-slate-950">Registrar problema</h3><p className="mt-1 text-sm text-slate-500">Crie um registro para orientar a próxima manutenção.</p></div><button type="button" onClick={() => setShowIssueForm(false)} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100"><XCircle className="h-5 w-5" /></button></div><div className="mt-5 space-y-4"><input required value={issueForm.title} onChange={(e) => setIssueForm((v) => ({ ...v, title: e.target.value }))} placeholder="Título do problema" className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-950 outline-none focus:border-blue-500" /><div className="grid gap-4 sm:grid-cols-2"><select value={issueForm.project_id} onChange={(e) => setIssueForm((v) => ({ ...v, project_id: e.target.value }))} className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-950"><option value="">Selecione o projeto</option>{projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select><select value={issueForm.priority} onChange={(e) => setIssueForm((v) => ({ ...v, priority: e.target.value }))} className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-950"><option value="baixa">Baixa</option><option value="media">Média</option><option value="alta">Alta</option><option value="critica">Crítica</option></select></div><input value={issueForm.module} onChange={(e) => setIssueForm((v) => ({ ...v, module: e.target.value }))} placeholder="Módulo / tela / área" className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-950 outline-none focus:border-blue-500" /><textarea value={issueForm.description} onChange={(e) => setIssueForm((v) => ({ ...v, description: e.target.value }))} placeholder="Descreva o problema, comportamento atual ou contexto para desenvolvimento." className="min-h-32 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-950 outline-none focus:border-blue-500" /></div><div className="mt-6 flex justify-end gap-2"><Button type="button" variant="outline" onClick={() => setShowIssueForm(false)} className="bg-white text-slate-900 hover:bg-slate-100">Cancelar</Button><Button type="submit" className="bg-black text-white hover:bg-slate-900">Salvar problema</Button></div></form></div>}
     </section>
