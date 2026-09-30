@@ -57,7 +57,7 @@ export function AdminModulePage({
               <p className="text-xs text-blue-100">{email}</p>
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={logout} className="gap-2">
+          <Button variant="outline" size="sm" onClick={logout} className="gap-2 border-white/30 bg-transparent text-white hover:bg-blue-600 hover:text-white">
             <LogOut className="h-4 w-4" /> Sair
           </Button>
         </div>
