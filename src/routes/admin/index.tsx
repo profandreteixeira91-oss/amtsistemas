@@ -25,9 +25,11 @@ import {
   Check,
   Copy,
   RefreshCw,
+  Sparkles as SparklesIcon,
 } from "lucide-react";
 
 import { DevelopmentWorkspace } from "@/components/admin/DevelopmentWorkspace";
+import { PromptGeneratorWorkspace } from "@/components/admin/PromptGeneratorWorkspace";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAdminProfile, getAdminSession, signOutAdmin } from "@/lib/amt-admin-auth";
@@ -299,7 +301,7 @@ function ModuleWorkspace({ module }: { module: string }) {
   if (module === "Formulários") return <FormsWorkspace />;
   if (module === "Ferramentas") return <ToolsWorkspace />;
   if (module === "Auditoria") return <AuditWorkspace />;
-  if (module === "Desenvolvimento") return <DevelopmentWorkspace />;
+  if (module === "Desenvolvimento") return <DevelopmentModuleWorkspace />;
   const descriptions: Record<string, string> = {
     Sistemas: "Gerencie os sistemas e integrações do ecossistema AMT.",
     Formulários: "Acompanhe formulários e solicitações recebidas.",
@@ -832,6 +834,64 @@ function SystemsWorkspace() {
       <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"><div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between"><div><div className="flex flex-wrap items-center gap-3"><h3 className="text-xl font-semibold text-slate-950">{selected.name}</h3><span className={`rounded-full px-3 py-1 text-xs font-medium ${isIntegrated ? "bg-blue-50 text-blue-700" : "bg-slate-100 text-slate-600"}`}>{selected.status}</span></div><p className="mt-1 text-sm text-slate-500">{selected.description}</p></div><a href={selected.href} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-lg bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800">Abrir sistema <ExternalLink className="h-4 w-4" /></a></div><div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{[["Visitas hoje","—","Analytics será conectado na próxima etapa",BarChart3],["Últimos 7 dias","—","Analytics será conectado na próxima etapa",Activity],["Leads","—","Dados do módulo Leads",Users],["GitHub issues",selected.githubRepo ? (github.loading ? "…" : String(github.issues)) : "—",github.error || "Dados públicos do repositório",GitBranch]].map(([label,value,detail,Icon]) => <div key={String(label)} className="rounded-xl border border-slate-200 bg-slate-50/60 p-4"><div className="flex items-center gap-2 text-xs font-medium text-slate-500"><Icon className="h-4 w-4 text-blue-700" />{label}</div><p className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">{String(value)}</p><p className="mt-1 text-[11px] leading-4 text-slate-400">{String(detail)}</p></div>)}</div></section>
       <div className="grid gap-6 xl:grid-cols-[1fr_360px]"><section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"><h3 className="text-base font-semibold text-slate-950">Acessos operacionais</h3><p className="mt-1 text-sm text-slate-500">Acesso direto aos serviços e painéis do sistema selecionado.</p><div className="mt-5 grid gap-3 sm:grid-cols-2">{quickLinks.map(([label,href,Icon]) => <a key={label} href={href || undefined} target={href ? "_blank" : undefined} rel={href ? "noreferrer" : undefined} aria-disabled={!href} className={`flex items-center justify-between rounded-xl border p-4 ${href ? "border-slate-200 hover:border-blue-300 hover:bg-blue-50/30" : "cursor-not-allowed border-dashed border-slate-200 bg-slate-50 opacity-60"}`}><span className="flex items-center gap-3"><span className="rounded-lg bg-slate-100 p-2"><Icon className="h-4 w-4 text-blue-700" /></span><span><span className="block text-sm font-medium text-slate-950">{label}</span><span className="block text-[11px] text-slate-400">{href ? "Abrir painel" : "Ainda não configurado"}</span></span></span><ExternalLink className="h-4 w-4 text-slate-400" /></a>)}</div></section><section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"><h3 className="text-base font-semibold text-slate-950">GitHub</h3><p className="mt-1 text-sm text-slate-500">Informações públicas do repositório selecionado.</p>{selected.githubRepo ? <div className="mt-5 space-y-3"><div className="rounded-lg bg-slate-50 p-3"><p className="text-xs text-slate-500">Repositório</p><p className="mt-1 truncate text-sm font-medium text-slate-950">{github.repo?.full_name ?? selected.githubRepo}</p></div><div className="grid grid-cols-2 gap-3"><div className="rounded-lg border border-slate-200 p-3"><p className="text-xs text-slate-500">Issues abertas</p><p className="mt-1 text-lg font-semibold text-slate-950">{github.loading ? "…" : github.issues}</p></div><div className="rounded-lg border border-slate-200 p-3"><p className="text-xs text-slate-500">Pull requests</p><p className="mt-1 text-lg font-semibold text-slate-950">{github.loading ? "…" : github.prs}</p></div></div><div className="rounded-lg border border-slate-200 p-3"><p className="text-xs text-slate-500">Último commit</p><p className="mt-1 text-sm font-medium text-slate-950">{github.commit?.commit?.message ?? (github.loading ? "Carregando…" : "Não disponível")}</p>{github.commit?.sha && <p className="mt-1 font-mono text-[10px] text-slate-400">{github.commit.sha.slice(0, 7)} · {new Date(github.commit.commit.author.date).toLocaleString("pt-BR")}</p>}</div>{github.error && <p className="text-xs font-medium text-red-600">{github.error}</p>}<a href={selected.links.github} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-sm font-medium text-blue-700">Abrir GitHub <ExternalLink className="h-3.5 w-3.5" /></a></div> : <div className="mt-5 rounded-lg border border-dashed border-slate-200 p-4 text-xs leading-5 text-slate-500">Repositório ainda não configurado para este sistema.</div>}</section></div>
       <section className="rounded-xl border border-dashed border-slate-200 bg-white p-5"><div className="flex gap-3"><Activity className="mt-0.5 h-4 w-4 shrink-0 text-blue-700" /><div><p className="text-sm font-medium text-slate-950">Fase 2 — GitHub conectado</p><p className="mt-1 text-xs leading-5 text-slate-500">O Control Center já consulta dados públicos do repositório configurado. Analytics, Cloudflare e dados operacionais específicos entram nas próximas integrações.</p></div></div></section>
+    </section>
+  );
+}
+
+function DevelopmentModuleWorkspace() {
+  const [view, setView] = useState<"central" | "prompt">("central");
+  const [projects, setProjects] = useState<Array<{
+    id: string;
+    name: string;
+    description: string | null;
+    repository: string | null;
+    branch: string | null;
+    production_url: string | null;
+    stack: string | null;
+    status: string;
+  }>>([]);
+  const [issues, setIssues] = useState<Array<{
+    id: string;
+    project_id: string;
+    title: string;
+    description: string | null;
+    module: string | null;
+    priority: string;
+    status: string;
+  }>>([]);
+  const [changes, setChanges] = useState<Array<{
+    id: string;
+    project_id: string;
+    summary: string;
+    commit_sha: string | null;
+    files: string[];
+    created_at: string;
+  }>>([]);
+
+  useEffect(() => {
+    void Promise.all([
+      amtSupabase.from("development_projects").select("id,name,description,repository,branch,production_url,stack,status").order("name"),
+      amtSupabase.from("development_issues").select("id,project_id,title,description,module,priority,status").order("created_at", { ascending: false }),
+      amtSupabase.from("development_changes").select("id,project_id,summary,commit_sha,files,created_at").order("created_at", { ascending: false }).limit(100),
+    ]).then(([projectsResult, issuesResult, changesResult]) => {
+      setProjects((projectsResult.data ?? []) as typeof projects);
+      setIssues((issuesResult.data ?? []) as typeof issues);
+      setChanges((changesResult.data ?? []) as typeof changes);
+    });
+  }, []);
+
+  return (
+    <section className="space-y-6">
+      <div className="flex flex-wrap gap-2 rounded-xl border border-slate-200 bg-white p-2 shadow-sm">
+        <button type="button" onClick={() => setView("central")} className={`rounded-lg px-3 py-2 text-sm font-medium ${view === "central" ? "bg-black text-white" : "text-slate-600 hover:bg-slate-100"}`}>
+          Central de desenvolvimento
+        </button>
+        <button type="button" onClick={() => setView("prompt")} className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${view === "prompt" ? "bg-black text-white" : "text-slate-600 hover:bg-slate-100"}`}>
+          <SparklesIcon className="h-4 w-4" />
+          Gerador de prompt
+        </button>
+      </div>
+      {view === "central" ? <DevelopmentWorkspace /> : <PromptGeneratorWorkspace projects={projects} issues={issues} changes={changes} />}
     </section>
   );
 }
