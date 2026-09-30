@@ -82,6 +82,7 @@ const tabs = [
   { id: "alteracoes", label: "Histórico", icon: History },
   { id: "deploys", label: "Deploys", icon: Server },
   { id: "saude", label: "Health Check", icon: Activity },
+  { id: "contexto", label: "Contexto", icon: Wrench },
 ] as const;
 
 export function DevelopmentWorkspace() {
@@ -96,6 +97,8 @@ export function DevelopmentWorkspace() {
   const [message, setMessage] = useState("");
   const [showIssueForm, setShowIssueForm] = useState(false);
   const [syncingGitHub, setSyncingGitHub] = useState(false);
+  const [contextProjectId, setContextProjectId] = useState("");
+  const [contextText, setContextText] = useState("");
   const [issueForm, setIssueForm] = useState({ title: "", project_id: "", module: "", priority: "media", description: "" });
 
   async function loadAll() {
@@ -167,6 +170,55 @@ export function DevelopmentWorkspace() {
     } finally {
       setSyncingGitHub(false);
     }
+  }
+
+  function generateDevelopmentContext() {
+    const project = projects.find((item) => item.id === (contextProjectId || selectedProject));
+    if (!project) {
+      setMessage("Selecione um projeto para gerar o contexto.");
+      return;
+    }
+    const projectIssues = issues.filter((item) => item.project_id === project.id);
+    const projectChanges = changes.filter((item) => item.project_id === project.id).slice(0, 10);
+    const projectDeployments = deployments.filter((item) => item.project_id === project.id).slice(0, 5);
+    const latest = health.find((item) => item.project_id === project.id);
+    const lines = [
+      "# Contexto de Desenvolvimento — " + project.name,
+      "",
+      "## Projeto",
+      "- Sistema: " + project.name,
+      "- Repositório: " + (project.repository || "não configurado"),
+      "- Branch: " + (project.branch || "não configurada"),
+      "- Produção: " + (project.production_url || "não configurada"),
+      "- Stack: " + (project.stack || "não informada"),
+      "- Status: " + project.status,
+      "",
+      "## Problemas em aberto",
+      ...(projectIssues.filter((item) => !["corrigido", "validado"].includes(item.status)).map((item) => "- [" + item.priority.toUpperCase() + "] " + item.title + " — " + (item.module || "módulo não informado") + " — " + statusLabel(item.status))),
+      ...(projectIssues.filter((item) => !["corrigido", "validado"].includes(item.status)).length ? [] : ["- Nenhum problema em aberto."]),
+      "",
+      "## Últimas alterações",
+      ...(projectChanges.length ? projectChanges.map((item) => "- " + item.summary + " — commit " + (item.commit_sha ? item.commit_sha.slice(0, 7) : "não informado") + (item.files?.length ? " — arquivos: " + item.files.slice(0, 8).join(", ") : "")) : ["- Nenhuma alteração registrada."]),
+      "",
+      "## Últimos deploys",
+      ...(projectDeployments.length ? projectDeployments.map((item) => "- " + statusLabel(item.status) + " — " + (item.commit_sha ? item.commit_sha.slice(0, 7) : "sem commit") + " — " + item.environment) : ["- Nenhum deploy registrado."]),
+      "",
+      "## Health Check",
+      "- Estado: " + (latest ? statusLabel(latest.status) : "não verificado"),
+      "- HTTP: " + (latest?.status_code ?? "—"),
+      "- Resposta: " + (latest?.response_ms != null ? latest.response_ms + " ms" : "—"),
+      "",
+      "## Orientação para a próxima tarefa",
+      "Preservar as funcionalidades existentes. Alterar somente o necessário para a tarefa solicitada. Antes de modificar código, verificar os arquivos e o fluxo atual. Após concluir, registrar o commit e relacioná-lo a este projeto.",
+    ];
+    setContextText(lines.join("\\n"));
+    setTab("contexto");
+  }
+
+  async function copyDevelopmentContext() {
+    if (!contextText) return;
+    await navigator.clipboard.writeText(contextText);
+    setMessage("Contexto copiado para a área de transferência.");
   }
 
   async function createIssue(e: React.FormEvent) {
@@ -259,7 +311,7 @@ export function DevelopmentWorkspace() {
             <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-500">Organize manutenção, problemas, alterações, deploys e saúde dos sistemas em um único lugar.</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button type="button" variant="outline" onClick={() => void syncGitHubHistory()} disabled={syncingGitHub} className="gap-2"><GitBranch className="h-4 w-4" /> {syncingGitHub ? "Sincronizando..." : "Sincronizar GitHub"}</Button><Button type="button" variant="outline" onClick={() => void loadAll()} className="gap-2"><RefreshCw className="h-4 w-4" /> Atualizar</Button>
+            <Button type="button" variant="outline" onClick={() => void syncGitHubHistory()} disabled={syncingGitHub} className="gap-2"><GitBranch className="h-4 w-4" /> {syncingGitHub ? "Sincronizando..." : "Sincronizar GitHub"}</Button><Button type="button" variant="outline" onClick={generateDevelopmentContext} className="gap-2"><Wrench className="h-4 w-4" /> Contexto para desenvolvimento</Button><Button type="button" variant="outline" onClick={() => void loadAll()} className="gap-2"><RefreshCw className="h-4 w-4" /> Atualizar</Button>
             <Button type="button" onClick={() => { setIssueForm((v) => ({ ...v, project_id: selectedProject || projects[0]?.id || "" })); setShowIssueForm(true); }} className="gap-2 bg-black text-white hover:bg-slate-900"><Plus className="h-4 w-4" /> Novo problema</Button>
           </div>
         </div>
@@ -287,6 +339,14 @@ export function DevelopmentWorkspace() {
       {tab === "alteracoes" && <ListTable title="Histórico de alterações" empty="Nenhuma alteração registrada." rows={changes} render={(change) => <div key={change.id} className="grid gap-3 border-b border-slate-100 px-5 py-4 last:border-0 lg:grid-cols-[1.5fr_1fr_180px]"><div><p className="font-medium text-slate-950">{change.summary}</p><p className="mt-1 text-xs text-slate-500">{projectMap.get(change.project_id)?.name || "Projeto"} · {change.change_type}</p></div><div className="text-xs text-slate-600">{change.commit_sha ? `commit ${change.commit_sha.slice(0, 7)}` : "Commit não informado"}{change.reason ? ` · ${change.reason}` : ""}</div><div className="text-xs text-slate-400">{new Date(change.created_at).toLocaleString("pt-BR")}</div></div>} />}
 
       {tab === "deploys" && <ListTable title="Histórico de deploys" empty="Nenhum deploy registrado." rows={deployments} render={(deployment) => <div key={deployment.id} className="grid gap-3 border-b border-slate-100 px-5 py-4 last:border-0 lg:grid-cols-[1.2fr_1fr_140px_180px]"><div><p className="font-medium text-slate-950">{projectMap.get(deployment.project_id)?.name || "Projeto"}</p><p className="mt-1 text-xs text-slate-500">{deployment.provider} · {deployment.environment}</p></div><div className="text-xs text-slate-600">{deployment.commit_sha ? deployment.commit_sha.slice(0, 7) : "Sem commit"}</div><div>{badge(deployment.status)}</div><div className="text-xs text-slate-400">{new Date(deployment.created_at).toLocaleString("pt-BR")}</div></div>} />}
+
+      {tab === "contexto" && <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div><p className="text-xs font-medium uppercase tracking-[0.16em] text-blue-600">Preparação</p><h3 className="mt-1 text-lg font-semibold text-slate-950">Contexto para Desenvolvimento</h3><p className="mt-1 text-sm text-slate-500">Gere um resumo pronto para iniciar uma tarefa de manutenção ou evolução aqui.</p></div>
+          <div className="flex gap-2"><select value={contextProjectId || selectedProject} onChange={(e) => { setContextProjectId(e.target.value); setSelectedProject(e.target.value); }} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950">{projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select><Button type="button" onClick={generateDevelopmentContext} className="bg-black text-white hover:bg-slate-900">Gerar</Button></div>
+        </div>
+        {contextText ? <div className="mt-5"><textarea readOnly value={contextText} className="min-h-[420px] w-full rounded-xl border border-slate-200 bg-slate-50 p-4 font-mono text-xs leading-5 text-slate-800 outline-none" /><div className="mt-3 flex justify-end"><Button type="button" onClick={() => void copyDevelopmentContext()} className="bg-black text-white hover:bg-slate-900">Copiar contexto</Button></div></div> : <div className="mt-5 rounded-xl border border-dashed border-slate-200 p-10 text-center text-sm text-slate-500">Selecione um projeto e clique em Gerar.</div>}
+      </section>}
 
       {tab === "saude" && <div className="grid gap-4 lg:grid-cols-2">{projects.map((project) => { const latest = health.find((h) => h.project_id === project.id); return <article key={project.id} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"><div className="flex items-center justify-between gap-3"><div className="flex items-center gap-3"><div className="rounded-lg bg-slate-100 p-2.5"><Activity className="h-5 w-5 text-slate-900" /></div><div><h3 className="font-semibold text-slate-950">{project.name}</h3><p className="text-xs text-slate-500">{project.production_url || "URL não configurada"}</p></div></div>{latest ? badge(latest.status) : badge("unknown")}</div>{latest && <div className="mt-5 grid grid-cols-3 gap-3 text-xs"><div className="rounded-lg bg-slate-50 p-3"><p className="text-slate-400">HTTP</p><p className="mt-1 font-medium text-slate-700">{latest.status_code ?? "—"}</p></div><div className="rounded-lg bg-slate-50 p-3"><p className="text-slate-400">Resposta</p><p className="mt-1 font-medium text-slate-700">{latest.response_ms != null ? `${latest.response_ms} ms` : "—"}</p></div><div className="rounded-lg bg-slate-50 p-3"><p className="text-slate-400">Verificado</p><p className="mt-1 font-medium text-slate-700">{new Date(latest.checked_at).toLocaleTimeString("pt-BR")}</p></div></div>}<Button type="button" size="sm" variant="outline" onClick={() => void runHealthCheck(project)} className="mt-5 gap-2"><Activity className="h-4 w-4" /> Testar agora</Button></article>})}</div>}
 
