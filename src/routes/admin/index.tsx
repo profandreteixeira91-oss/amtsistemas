@@ -526,7 +526,7 @@ function LeadsWorkspace() {
     <section className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div><h2 className="text-lg font-semibold">Leads e CRM</h2><p className="mt-1 text-sm text-slate-500">Central comercial para captura, acompanhamento e conversão de oportunidades.</p></div>
-        <Button onClick={() => { setSelectedLead(null); setForm(emptyForm); setShowForm(true); }} className="gap-2 bg-blue-700 hover:bg-blue-800"><Plus className="h-4 w-4" /> Novo lead</Button>
+        <Button onClick={() => { setSelectedLead(null); setForm(emptyForm); setShowForm(true); }} className="gap-2 bg-blue-700 text-white hover:bg-blue-800"><Plus className="h-4 w-4" /> Novo lead</Button>
       </div>
 
       {message && <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">{message}</div>}
