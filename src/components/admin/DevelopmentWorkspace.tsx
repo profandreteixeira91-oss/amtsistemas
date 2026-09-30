@@ -99,6 +99,7 @@ export function DevelopmentWorkspace() {
   const [syncingGitHub, setSyncingGitHub] = useState(false);
   const [contextProjectId, setContextProjectId] = useState("");
   const [contextText, setContextText] = useState("");
+  const [selectedIssueId, setSelectedIssueId] = useState("");
   const [issueForm, setIssueForm] = useState({ title: "", project_id: "", module: "", priority: "media", description: "" });
 
   async function loadAll() {
@@ -107,7 +108,7 @@ export function DevelopmentWorkspace() {
     const [p, i, c, d, h] = await Promise.all([
       amtSupabase.from("development_projects").select("*").order("name"),
       amtSupabase.from("development_issues").select("id,project_id,title,description,module,priority,status,created_at").order("created_at", { ascending: false }),
-      amtSupabase.from("development_changes").select("id,project_id,summary,change_type,files,commit_sha,commit_url,reason,status,created_at").order("created_at", { ascending: false }).limit(100),
+      amtSupabase.from("development_changes").select("id,project_id,summary,change_type,files,commit_sha,commit_url,reason,status,created_at,issue_id").order("created_at", { ascending: false }).limit(100),
       amtSupabase.from("development_deployments").select("id,project_id,commit_sha,provider,environment,status,url,created_at,deployed_at").order("created_at", { ascending: false }).limit(100),
       amtSupabase.from("system_health_checks").select("id,project_id,status,response_ms,status_code,url,checked_at").order("checked_at", { ascending: false }).limit(100),
     ]);
@@ -150,6 +151,7 @@ export function DevelopmentWorkspace() {
         const detail = detailResponse.ok ? await detailResponse.json() as { files?: Array<{ filename: string }> } : { files: [] };
         const { data, error } = await amtSupabase.from("development_changes").insert({
           project_id: project.id,
+          issue_id: selectedIssueId || null,
           change_type: "github_commit",
           summary: commit.commit.message.split("\\n")[0].slice(0, 180),
           files: (detail.files ?? []).map((file) => file.filename).slice(0, 100),
@@ -219,6 +221,13 @@ export function DevelopmentWorkspace() {
     if (!contextText) return;
     await navigator.clipboard.writeText(contextText);
     setMessage("Contexto copiado para a área de transferência.");
+  }
+
+  async function linkChangeToIssue(changeId: string, issueId: string) {
+    const { data, error } = await amtSupabase.from("development_changes").update({ issue_id: issueId || null }).eq("id", changeId).select("id,project_id,summary,change_type,files,commit_sha,commit_url,reason,status,created_at,issue_id").single();
+    if (error || !data) { setMessage("Não foi possível vincular a alteração."); return; }
+    setChanges((items) => items.map((item) => item.id === changeId ? data as Change : item));
+    setMessage("Alteração vinculada ao problema.");
   }
 
   async function createIssue(e: React.FormEvent) {
@@ -336,7 +345,7 @@ export function DevelopmentWorkspace() {
 
       {tab === "problemas" && <div className="space-y-4">{issues.length === 0 ? <Empty text="Nenhum problema registrado." /> : issues.map((issue) => <article key={issue.id} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"><div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between"><div><div className="flex flex-wrap items-center gap-2"><h3 className="font-semibold text-slate-950">{issue.title}</h3>{badge(issue.priority)}</div><p className="mt-1 text-xs text-slate-500">{projectMap.get(issue.project_id)?.name || "Projeto"}{issue.module ? ` · ${issue.module}` : ""} · {new Date(issue.created_at).toLocaleString("pt-BR")}</p>{issue.description && <p className="mt-3 text-sm leading-6 text-slate-600">{issue.description}</p>}</div><select value={issue.status} onChange={(e) => void updateIssueStatus(issue.id, e.target.value)} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950"><option value="aberto">Aberto</option><option value="em_analise">Em análise</option><option value="em_desenvolvimento">Em desenvolvimento</option><option value="corrigido">Corrigido</option><option value="validado">Validado</option></select></div></article>)}</div>}
 
-      {tab === "alteracoes" && <ListTable title="Histórico de alterações" empty="Nenhuma alteração registrada." rows={changes} render={(change) => <div key={change.id} className="grid gap-3 border-b border-slate-100 px-5 py-4 last:border-0 lg:grid-cols-[1.5fr_1fr_180px]"><div><p className="font-medium text-slate-950">{change.summary}</p><p className="mt-1 text-xs text-slate-500">{projectMap.get(change.project_id)?.name || "Projeto"} · {change.change_type}</p></div><div className="text-xs text-slate-600">{change.commit_sha ? `commit ${change.commit_sha.slice(0, 7)}` : "Commit não informado"}{change.reason ? ` · ${change.reason}` : ""}</div><div className="text-xs text-slate-400">{new Date(change.created_at).toLocaleString("pt-BR")}</div></div>} />}
+      {tab === "alteracoes" && <ListTable title="Histórico de alterações" empty="Nenhuma alteração registrada." rows={changes} render={(change) => <div key={change.id} className="grid gap-3 border-b border-slate-100 px-5 py-4 last:border-0 lg:grid-cols-[1.5fr_1fr_180px]"><div><p className="font-medium text-slate-950">{change.summary}</p><p className="mt-1 text-xs text-slate-500">{projectMap.get(change.project_id)?.name || "Projeto"} · {change.change_type}</p></div><div className="text-xs text-slate-600">{change.commit_sha ? `commit ${change.commit_sha.slice(0, 7)}` : "Commit não informado"}{change.reason ? ` · ${change.reason}` : ""}<div className="mt-2"><select value={change.issue_id || ""} onChange={(e) => void linkChangeToIssue(change.id, e.target.value)} className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs"><option value="">Sem problema vinculado</option>{issues.filter((item) => item.project_id === change.project_id && !["validado"].includes(item.status)).map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></div></div><div className="text-xs text-slate-400">{new Date(change.created_at).toLocaleString("pt-BR")}</div></div>} />}
 
       {tab === "deploys" && <ListTable title="Histórico de deploys" empty="Nenhum deploy registrado." rows={deployments} render={(deployment) => <div key={deployment.id} className="grid gap-3 border-b border-slate-100 px-5 py-4 last:border-0 lg:grid-cols-[1.2fr_1fr_140px_180px]"><div><p className="font-medium text-slate-950">{projectMap.get(deployment.project_id)?.name || "Projeto"}</p><p className="mt-1 text-xs text-slate-500">{deployment.provider} · {deployment.environment}</p></div><div className="text-xs text-slate-600">{deployment.commit_sha ? deployment.commit_sha.slice(0, 7) : "Sem commit"}</div><div>{badge(deployment.status)}</div><div className="text-xs text-slate-400">{new Date(deployment.created_at).toLocaleString("pt-BR")}</div></div>} />}
 
