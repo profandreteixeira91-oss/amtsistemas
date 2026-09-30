@@ -102,6 +102,9 @@ export function DevelopmentWorkspace() {
   const [showIssueForm, setShowIssueForm] = useState(false);
   const [syncingGitHub, setSyncingGitHub] = useState(false);
   const [syncingCloudflare, setSyncingCloudflare] = useState(false);
+  const [loadingDeploymentLogs, setLoadingDeploymentLogs] = useState(false);
+  const [deploymentLogs, setDeploymentLogs] = useState<Array<{ timestamp: string | null; line: string }>>([]);
+  const [selectedDeploymentForLogs, setSelectedDeploymentForLogs] = useState<Deployment | null>(null);
   const [contextProjectId, setContextProjectId] = useState("");
   const [contextText, setContextText] = useState("");
   const [issueForm, setIssueForm] = useState({ title: "", project_id: "", module: "", priority: "media", description: "" });
@@ -130,6 +133,11 @@ export function DevelopmentWorkspace() {
   }
 
   useEffect(() => { void loadAll(); }, []);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => { void loadAll(); }, 30000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const projectMap = useMemo(() => new Map(projects.map((p) => [p.id, p])), [projects]);
   const openIssues = issues.filter((i) => !["validado", "corrigido"].includes(i.status)).length;
@@ -197,6 +205,33 @@ export function DevelopmentWorkspace() {
       setMessage(error instanceof Error ? error.message : "Falha ao sincronizar os deploys do Cloudflare.");
     } finally {
       setSyncingCloudflare(false);
+    }
+  }
+
+  async function openDeploymentLogs(deployment: Deployment) {
+    if (!deployment.external_id || deployment.provider !== "Cloudflare") {
+      setMessage("Este deploy não possui um identificador do Cloudflare para consultar os logs.");
+      return;
+    }
+    setSelectedDeploymentForLogs(deployment);
+    setDeploymentLogs([]);
+    setLoadingDeploymentLogs(true);
+    try {
+      const { data, error } = await amtSupabase.functions.invoke("sync-cloudflare-deployments", {
+        body: {
+          action: "logs",
+          project_id: deployment.project_id,
+          deployment_id: deployment.external_id,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setDeploymentLogs(Array.isArray(data?.logs) ? data.logs : []);
+    } catch (error) {
+      setSelectedDeploymentForLogs(null);
+      setMessage(error instanceof Error ? error.message : "Não foi possível carregar os logs do Cloudflare.");
+    } finally {
+      setLoadingDeploymentLogs(false);
     }
   }
 
@@ -415,7 +450,7 @@ export function DevelopmentWorkspace() {
 
       {tab === "alteracoes" && <ListTable title="Histórico de alterações" empty="Nenhuma alteração registrada." rows={changes} render={(change) => <div key={change.id} className="grid gap-3 border-b border-slate-100 px-5 py-4 last:border-0 lg:grid-cols-[1.5fr_1fr_180px]"><div><p className="font-medium text-slate-950">{change.summary}</p><p className="mt-1 text-xs text-slate-500">{projectMap.get(change.project_id)?.name || "Projeto"} · {change.change_type}</p></div><div className="text-xs text-slate-600">{change.commit_sha ? `commit ${change.commit_sha.slice(0, 7)}` : "Commit não informado"}{change.reason ? ` · ${change.reason}` : ""}<div className="mt-2"><select value={change.issue_id || ""} onChange={(e) => void linkChangeToIssue(change.id, e.target.value)} className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs"><option value="">Sem problema vinculado</option>{issues.filter((item) => item.project_id === change.project_id && !["validado"].includes(item.status)).map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></div></div><div className="text-xs text-slate-400">{new Date(change.created_at).toLocaleString("pt-BR")}</div></div>} />}
 
-      {tab === "deploys" && <ListTable title="Histórico de deploys" empty="Nenhum deploy registrado." rows={deployments} render={(deployment) => <div key={deployment.id} className="grid gap-3 border-b border-slate-100 px-5 py-4 last:border-0 lg:grid-cols-[1.2fr_1fr_140px_180px]"><div><p className="font-medium text-slate-950">{projectMap.get(deployment.project_id)?.name || "Projeto"}</p><p className="mt-1 text-xs text-slate-500">{deployment.provider} · {deployment.environment}</p>{deployment.notes && <p className="mt-1 text-xs text-slate-500">{deployment.notes}</p>}</div><div className="text-xs text-slate-600"><div>{deployment.commit_sha ? (projectMap.get(deployment.project_id)?.repository ? <a href={`https://github.com/${projectMap.get(deployment.project_id)?.repository}/commit/${deployment.commit_sha}`} target="_blank" rel="noopener noreferrer" className="font-medium text-blue-700 hover:text-blue-900">commit {deployment.commit_sha.slice(0, 7)} <ExternalLink className="inline h-3.5 w-3.5" /></a> : `commit ${deployment.commit_sha.slice(0, 7)}`) : "Sem commit"}</div>{deployment.url && <a href={deployment.url} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-1.5 font-medium text-blue-700 hover:text-blue-900">Abrir deploy <ExternalLink className="h-3.5 w-3.5" /></a>}</div><div><select value={deployment.status} onChange={(e) => void updateDeploymentStatus(deployment.id, e.target.value)} className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-900"><option value="pendente">Pendente</option><option value="em_andamento">Em andamento</option><option value="sucesso">Sucesso</option><option value="falha">Falha</option></select></div><div className="text-xs text-slate-400">{new Date(deployment.created_at).toLocaleString("pt-BR")}</div></div>} />}
+      {tab === "deploys" && <ListTable title="Histórico de deploys" empty="Nenhum deploy registrado." rows={deployments} render={(deployment) => <div key={deployment.id} className="grid gap-3 border-b border-slate-100 px-5 py-4 last:border-0 lg:grid-cols-[1.2fr_1fr_140px_180px]"><div><p className="font-medium text-slate-950">{projectMap.get(deployment.project_id)?.name || "Projeto"}</p><p className="mt-1 text-xs text-slate-500">{deployment.provider} · {deployment.environment}</p>{deployment.notes && <p className="mt-1 text-xs text-slate-500">{deployment.notes}</p>}</div><div className="text-xs text-slate-600"><div>{deployment.commit_sha ? (projectMap.get(deployment.project_id)?.repository ? <a href={`https://github.com/${projectMap.get(deployment.project_id)?.repository}/commit/${deployment.commit_sha}`} target="_blank" rel="noopener noreferrer" className="font-medium text-blue-700 hover:text-blue-900">commit {deployment.commit_sha.slice(0, 7)} <ExternalLink className="inline h-3.5 w-3.5" /></a> : `commit ${deployment.commit_sha.slice(0, 7)}`) : "Sem commit"}</div>{deployment.url && <a href={deployment.url} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-1.5 font-medium text-blue-700 hover:text-blue-900">Abrir deploy <ExternalLink className="h-3.5 w-3.5" /></a>}</div><div className="flex flex-wrap items-center gap-2"><select value={deployment.status} onChange={(e) => void updateDeploymentStatus(deployment.id, e.target.value)} className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-900"><option value="pendente">Pendente</option><option value="em_andamento">Em andamento</option><option value="sucesso">Sucesso</option><option value="falha">Falha</option></select>{deployment.provider === "Cloudflare" && deployment.external_id && <Button type="button" size="sm" variant="outline" onClick={() => void openDeploymentLogs(deployment)} className="h-7 gap-1.5 bg-white px-2 text-xs text-slate-900 hover:bg-slate-100"><Activity className="h-3.5 w-3.5" /> Logs</Button>}</div><div className="text-xs text-slate-400">{new Date(deployment.created_at).toLocaleString("pt-BR")}</div></div>} />}
 
       {tab === "contexto" && <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -429,6 +464,21 @@ export function DevelopmentWorkspace() {
 
       {showDeployForm && <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4"><form onSubmit={createDeployment} className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-xl"><div className="flex items-center justify-between"><div><h3 className="text-lg font-semibold text-slate-950">Registrar deploy</h3><p className="mt-1 text-sm text-slate-500">Registre o deploy real e relacione-o ao histórico de alterações.</p></div><button type="button" onClick={() => setShowDeployForm(false)} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100"><XCircle className="h-5 w-5" /></button></div><div className="mt-5 space-y-4"><select required value={deployForm.project_id} onChange={(e) => setDeployForm((v) => ({ ...v, project_id: e.target.value, change_id: "" }))} className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-950"><option value="">Selecione o projeto</option>{projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select><div className="grid gap-4 sm:grid-cols-2"><select value={deployForm.change_id} onChange={(e) => { const change = changes.find((item) => item.id === e.target.value); setDeployForm((v) => ({ ...v, change_id: e.target.value, commit_sha: change?.commit_sha || v.commit_sha })); }} className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-950"><option value="">Sem alteração vinculada</option>{changes.filter((item) => item.project_id === deployForm.project_id).slice(0, 50).map((item) => <option key={item.id} value={item.id}>{item.summary.slice(0, 70)}</option>)}</select><input value={deployForm.commit_sha} onChange={(e) => setDeployForm((v) => ({ ...v, commit_sha: e.target.value }))} placeholder="Commit SHA (opcional)" className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-950" /></div><div className="grid gap-4 sm:grid-cols-2"><input value={deployForm.provider} onChange={(e) => setDeployForm((v) => ({ ...v, provider: e.target.value }))} placeholder="Provider" className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-950" /><select value={deployForm.environment} onChange={(e) => setDeployForm((v) => ({ ...v, environment: e.target.value }))} className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-950"><option value="production">Produção</option><option value="staging">Staging</option><option value="preview">Preview</option></select></div><div className="grid gap-4 sm:grid-cols-2"><select value={deployForm.status} onChange={(e) => setDeployForm((v) => ({ ...v, status: e.target.value }))} className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-950"><option value="pendente">Pendente</option><option value="em_andamento">Em andamento</option><option value="sucesso">Sucesso</option><option value="falha">Falha</option></select><input value={deployForm.url} onChange={(e) => setDeployForm((v) => ({ ...v, url: e.target.value }))} placeholder="URL do deploy (opcional)" className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-950" /></div><textarea value={deployForm.notes} onChange={(e) => setDeployForm((v) => ({ ...v, notes: e.target.value }))} placeholder="Observações" className="min-h-24 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-950" /></div><div className="mt-6 flex justify-end gap-2"><Button type="button" variant="outline" onClick={() => setShowDeployForm(false)} className="bg-white text-slate-900 hover:bg-slate-100">Cancelar</Button><Button type="submit" className="bg-black text-white hover:bg-slate-900">Registrar deploy</Button></div></form></div>}
 
+      {selectedDeploymentForLogs && <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4">
+        <section className="flex max-h-[85vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+          <div className="flex items-center justify-between gap-4 border-b border-slate-200 px-6 py-4">
+            <div><p className="text-xs font-medium uppercase tracking-[0.16em] text-blue-600">Cloudflare Pages</p><h3 className="mt-1 text-lg font-semibold text-slate-950">Logs do deploy</h3><p className="mt-1 text-xs text-slate-500">{projectMap.get(selectedDeploymentForLogs.project_id)?.name || "Projeto"} · {selectedDeploymentForLogs.commit_sha?.slice(0, 7) || "sem commit"}</p></div>
+            <div className="flex items-center gap-2">{badge(selectedDeploymentForLogs.status)}<button type="button" onClick={() => setSelectedDeploymentForLogs(null)} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100"><XCircle className="h-5 w-5" /></button></div>
+          </div>
+          <div className="min-h-0 flex-1 overflow-auto bg-slate-950 p-5 font-mono text-xs leading-5 text-slate-100">
+            {loadingDeploymentLogs ? <div className="py-10 text-center text-slate-400">Carregando logs do Cloudflare...</div> : deploymentLogs.length ? deploymentLogs.map((log, index) => <div key={index} className="whitespace-pre-wrap border-b border-slate-800/70 py-1.5 last:border-0"><span className="mr-3 text-slate-500">{log.timestamp ? new Date(log.timestamp).toLocaleTimeString("pt-BR") : "--:--:--"}</span>{log.line}</div>) : <div className="py-10 text-center text-slate-400">O Cloudflare não retornou linhas de log para este deploy.</div>}
+          </div>
+          <div className="flex justify-end gap-2 border-t border-slate-200 bg-white px-6 py-4">
+            {selectedDeploymentForLogs.url && <a href={selectedDeploymentForLogs.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 hover:bg-slate-100">Abrir deploy <ExternalLink className="h-4 w-4" /></a>}
+            <Button type="button" onClick={() => setSelectedDeploymentForLogs(null)} className="bg-black text-white hover:bg-slate-900">Fechar</Button>
+          </div>
+        </section>
+      </div>}
       {showIssueForm && <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4"><form onSubmit={createIssue} className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-xl"><div className="flex items-center justify-between"><div><h3 className="text-lg font-semibold text-slate-950">Registrar problema</h3><p className="mt-1 text-sm text-slate-500">Crie um registro para orientar a próxima manutenção.</p></div><button type="button" onClick={() => setShowIssueForm(false)} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100"><XCircle className="h-5 w-5" /></button></div><div className="mt-5 space-y-4"><input required value={issueForm.title} onChange={(e) => setIssueForm((v) => ({ ...v, title: e.target.value }))} placeholder="Título do problema" className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-950 outline-none focus:border-blue-500" /><div className="grid gap-4 sm:grid-cols-2"><select value={issueForm.project_id} onChange={(e) => setIssueForm((v) => ({ ...v, project_id: e.target.value }))} className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-950"><option value="">Selecione o projeto</option>{projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select><select value={issueForm.priority} onChange={(e) => setIssueForm((v) => ({ ...v, priority: e.target.value }))} className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-950"><option value="baixa">Baixa</option><option value="media">Média</option><option value="alta">Alta</option><option value="critica">Crítica</option></select></div><input value={issueForm.module} onChange={(e) => setIssueForm((v) => ({ ...v, module: e.target.value }))} placeholder="Módulo / tela / área" className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-950 outline-none focus:border-blue-500" /><textarea value={issueForm.description} onChange={(e) => setIssueForm((v) => ({ ...v, description: e.target.value }))} placeholder="Descreva o problema, comportamento atual ou contexto para desenvolvimento." className="min-h-32 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-950 outline-none focus:border-blue-500" /></div><div className="mt-6 flex justify-end gap-2"><Button type="button" variant="outline" onClick={() => setShowIssueForm(false)} className="bg-white text-slate-900 hover:bg-slate-100">Cancelar</Button><Button type="submit" className="bg-black text-white hover:bg-slate-900">Salvar problema</Button></div></form></div>}
     </section>
   );
