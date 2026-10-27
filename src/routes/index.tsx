@@ -217,11 +217,12 @@ const solucoes: Solucao[] = [
     url: "https://dojomanager.amtfightwear.com.br",
   },
   {
-    nome: "AB Academy",
-    descricao: "Plataforma de gestão acadêmica para escola de idiomas, com portal do aluno, professores, aulas e atividades.",
-    screenshot: "/assets/screenshot-ab-academy.jpg",
+    nome: "AMT OptiOne",
+    descricao: "Gestão para óticas: vendas e PDV, receitas, pedidos de laboratório, estoque, financeiro e relacionamento. Teste grátis por 14 dias.",
+    logo: "/optione/logo-amt-optione.png",
+    screenshot: "/optione/sistema-visao-geral.webp",
     status: "Em operação",
-    url: "https://abacademyidiomas.com.br",
+    url: "/optione",
   },
 ];
 
