@@ -17,7 +17,7 @@
   // Valores públicos do Supabase do site (os mesmos do .env e do JavaScript do navegador),
   // lidos pelas funções de servidor via process.env.
   "vars": {
-    "SUPABASE_URL": "https://carhjgchujlzjpvnrxgi.supabase.co",
-    "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_iPhBniyOxvGZr7y792F6XQ_q0_72JcQ"
+    "SUPABASE_URL": "https://yqxmxevphdumyuwlvppg.supabase.co",
+    "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_jK7lhco6DQLlfjYm8LGS3g_sGBkVtK2"
   }
 }
