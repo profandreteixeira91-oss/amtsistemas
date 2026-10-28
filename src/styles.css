@@ -158,154 +158,122 @@
   }
 }
 
-/* AMT corporate landing — mobile layout safeguards */
-.amt-corp,
-.amt-corp main,
-.amt-corp section,
-.amt-corp footer,
-.amt-corp header {
-  min-width: 0;
-  max-width: 100%;
-}
+/* =========================================================================
+ * Site público (amtsistemas.com.br) — tema claro da marca AMT
+ * Navy #0A2D5E + azul-petróleo #009494, tipografia Plus Jakarta Sans.
+ * Tudo em @layer base: as classes utilitárias do Tailwind sempre prevalecem.
+ * ========================================================================= */
+@layer base {
+  .amt-site {
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.25 0.06 258);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.25 0.06 258);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.25 0.06 258);
+    --primary: oklch(0.31 0.09 259);
+    --primary-foreground: oklch(0.99 0.005 220);
+    --secondary: oklch(0.96 0.015 240);
+    --secondary-foreground: oklch(0.31 0.09 259);
+    --muted: oklch(0.965 0.01 240);
+    --muted-foreground: oklch(0.47 0.03 255);
+    --accent: oklch(0.95 0.035 195);
+    --accent-foreground: oklch(0.31 0.09 259);
+    --border: oklch(0.915 0.015 245);
+    --input: oklch(0.88 0.02 245);
+    --ring: oklch(0.6 0.105 194);
+    --destructive: oklch(0.58 0.21 25);
+    --destructive-foreground: oklch(0.99 0 0);
 
-.amt-corp {
-  width: 100%;
-  overflow-x: clip;
-}
+    --brand-navy: oklch(0.31 0.09 259);
+    --brand-teal: oklch(0.6 0.105 194);
+    --brand-teal-soft: oklch(0.95 0.035 195);
+    --section-alt: oklch(0.977 0.01 235);
+    --gradient-primary: linear-gradient(135deg, oklch(0.31 0.09 259), oklch(0.56 0.1 200));
+    --gradient-dark: linear-gradient(140deg, oklch(0.21 0.065 260) 0%, oklch(0.28 0.085 258) 55%, oklch(0.4 0.09 215) 100%);
+    --shadow-card: 0 1px 2px oklch(0.25 0.06 258 / 0.04), 0 8px 24px -12px oklch(0.25 0.06 258 / 0.18);
+    --shadow-lift: 0 2px 4px oklch(0.25 0.06 258 / 0.05), 0 24px 48px -20px oklch(0.25 0.06 258 / 0.35);
 
-.amt-corp *,
-.amt-corp *::before,
-.amt-corp *::after {
-  box-sizing: border-box;
-  min-width: 0;
-}
-
-.amt-corp img,
-.amt-corp video,
-.amt-corp iframe,
-.amt-corp svg {
-  max-width: 100%;
-}
-
-.amt-corp img {
-  height: auto;
-}
-
-.amt-corp h1,
-.amt-corp h2,
-.amt-corp h3,
-.amt-corp p,
-.amt-corp li,
-.amt-corp a,
-.amt-corp label,
-.amt-corp button,
-.amt-corp span {
-  overflow-wrap: anywhere;
-  hyphens: none;
-}
-
-.amt-corp button,
-.amt-corp [role="button"] {
-  white-space: normal;
-}
-
-.amt-corp input,
-.amt-corp textarea,
-.amt-corp select,
-.amt-corp [role="combobox"] {
-  width: 100%;
-  max-width: 100%;
-}
-
-.amt-corp .grid > *,
-.amt-corp .flex > * {
-  min-width: 0;
-}
-
-@media (max-width: 639px) {
-  .amt-corp section > div.mx-auto,
-  .amt-corp footer > div.mx-auto {
-    padding-left: 1rem;
-    padding-right: 1rem;
+    font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--background);
+    color: var(--foreground);
+    color-scheme: light;
+    overflow-x: clip;
   }
 
-  .amt-corp h1 {
-    font-size: clamp(1.8rem, 8vw, 2.5rem);
-    line-height: 1.12;
-    letter-spacing: -0.025em;
+  html:has(.amt-site),
+  body:has(.amt-site) {
+    color-scheme: light;
+    background-color: oklch(1 0 0);
+    overflow-x: clip;
   }
 
-  .amt-corp h2 {
-    font-size: clamp(1.4rem, 6vw, 1.9rem);
-    line-height: 1.2;
+  html:has(.amt-site) {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5.5rem;
   }
 
-  .amt-corp .flex-col > a,
-  .amt-corp button {
+  .amt-site h1,
+  .amt-site h2,
+  .amt-site h3 {
+    letter-spacing: -0.022em;
+    text-wrap: balance;
+  }
+
+  .amt-site p {
+    text-wrap: pretty;
+  }
+
+  .amt-site img {
     max-width: 100%;
   }
 
-  .amt-corp form,
-  .amt-corp form > *,
-  .amt-corp form .grid > * {
-    min-width: 0;
-    max-width: 100%;
+  .amt-site :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 3px;
+    border-radius: 6px;
   }
 
-  .amt-corp [data-radix-popper-content-wrapper] {
-    max-width: calc(100vw - 2rem);
+  .amt-site ::selection {
+    background: oklch(0.6 0.105 194 / 0.25);
   }
 
-  .amt-corp .aspect-\[16\/9\] {
-    max-width: 100%;
+  /* Textos jurídicos (termos, privacidade) */
+  .amt-site .legal h2 {
+    margin-top: 2.25rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--foreground);
   }
-}
-
-@media (max-width: 360px) {
-  .amt-corp .max-w-6xl,
-  .amt-corp .max-w-5xl,
-  .amt-corp .max-w-4xl {
-    max-width: 100%;
+  .amt-site .legal p,
+  .amt-site .legal li {
+    margin-top: 0.75rem;
+    line-height: 1.75;
+    color: var(--muted-foreground);
+  }
+  .amt-site .legal ul {
+    margin-top: 0.5rem;
+    padding-left: 1.25rem;
+    list-style: disc;
+  }
+  .amt-site .legal a {
+    color: var(--brand-teal);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .amt-site .legal strong {
+    color: var(--foreground);
   }
 
-  .amt-corp .gap-6 {
-    gap: 1rem;
-  }
-
-  .amt-corp .p-8 {
-    padding: 1.25rem;
-  }
-}
-
-
-
-/* Final viewport containment: animated/transformed children can overflow the page box. */
-html:has(.amt-corp),
-body:has(.amt-corp) {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: clip;
-}
-
-.amt-corp {
-  position: relative;
-  isolation: isolate;
-  contain: inline-size;
-}
-
-.amt-corp main,
-.amt-corp main > section,
-.amt-corp main > section > *,
-.amt-corp [data-state],
-.amt-corp [data-sonner-toaster] {
-  min-width: 0;
-  max-width: 100%;
-}
-
-@supports not (overflow: clip) {
-  html:has(.amt-corp),
-  body:has(.amt-corp),
-  .amt-corp {
-    overflow-x: hidden;
+  @media (prefers-reduced-motion: reduce) {
+    html:has(.amt-site) {
+      scroll-behavior: auto;
+    }
+    .amt-site *,
+    .amt-site *::before,
+    .amt-site *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }

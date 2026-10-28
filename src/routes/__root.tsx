@@ -80,19 +80,52 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "AMT Sistemas e Soluções | Sistemas personalizados, automação e IA" },
-      { name: "description", content: "A AMT Sistemas e Soluções desenvolve sistemas personalizados, plataformas White Label, automações e soluções com Inteligência Artificial para empresas." },
+      {
+        name: "description",
+        content:
+          "A AMT Sistemas e Soluções desenvolve sistemas personalizados, plataformas White Label, automações e soluções com Inteligência Artificial para empresas.",
+      },
       { name: "author", content: "AMT Sistemas e Soluções" },
-      { property: "og:title", content: "AMT Sistemas e Soluções | Sistemas personalizados, automação e IA" },
-      { property: "og:description", content: "Sistemas personalizados, plataformas White Label, automações e soluções com Inteligência Artificial para empresas." },
+      {
+        property: "og:title",
+        content: "AMT Sistemas e Soluções | Sistemas personalizados, automação e IA",
+      },
+      {
+        property: "og:description",
+        content:
+          "Sistemas personalizados, plataformas White Label, automações e soluções com Inteligência Artificial para empresas.",
+      },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "AMT Sistemas e Soluções" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "AMT Sistemas e Soluções | Sistemas personalizados, automação e IA" },
-      { name: "twitter:description", content: "Sistemas personalizados, plataformas White Label, automações e soluções com Inteligência Artificial para empresas." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/13601656-c4eb-4578-ab62-7968538b49e1" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/13601656-c4eb-4578-ab62-7968538b49e1" },
+      {
+        name: "twitter:title",
+        content: "AMT Sistemas e Soluções | Sistemas personalizados, automação e IA",
+      },
+      {
+        name: "twitter:description",
+        content:
+          "Sistemas personalizados, plataformas White Label, automações e soluções com Inteligência Artificial para empresas.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/13601656-c4eb-4578-ab62-7968538b49e1",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/13601656-c4eb-4578-ab62-7968538b49e1",
+      },
     ],
     links: [
+      // Tipografia do site público (escopo .amt-site em styles.css).
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap",
+      },
       { rel: "stylesheet", href: appCss },
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "apple-touch-icon", href: "/favicon.ico" },
@@ -105,7 +138,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@type": "Organization",
           name: "AMT Sistemas e Soluções",
           alternateName: "AMT Sistemas",
-          description: "Desenvolvimento de sistemas personalizados, plataformas White Label, automações e soluções com Inteligência Artificial para empresas.",
+          description:
+            "Desenvolvimento de sistemas personalizados, plataformas White Label, automações e soluções com Inteligência Artificial para empresas.",
           areaServed: "BR",
         }),
       },

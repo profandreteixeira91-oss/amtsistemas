@@ -316,7 +316,7 @@ function Formulario({
                   <SelectTrigger id="plan_id">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="amt-site">
                     {PLANOS.map((p) => (
                       <SelectItem key={p.slug} value={p.slug}>
                         {p.nome}

@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { motion } from "framer-motion";
 import {
   ArrowRight,
   BarChart3,
@@ -34,6 +33,7 @@ import {
   OptioneShell,
   Section,
 } from "@/components/optione/shell";
+import { Reveal } from "@/components/site/primitives";
 import { optionePlanos, type OptionePlano } from "@/lib/optione.functions";
 
 const TITLE = "AMT OptiOne | Sistema de gestão para óticas — teste grátis por 14 dias";
@@ -203,19 +203,6 @@ function brl(value: number) {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
-function Reveal({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 18 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.45, ease: "easeOut", delay }}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
 function OptioneLanding() {
   const planos = Route.useLoaderData();
   return (
@@ -249,12 +236,7 @@ function Hero() {
         }}
       />
       <div className="relative mx-auto max-w-6xl px-5 pb-14 pt-12 sm:px-6 sm:pb-20 sm:pt-16">
-        <motion.div
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="mx-auto max-w-3xl text-center"
-        >
+        <div className="mx-auto max-w-3xl text-center">
           <img
             src="/optione/logo-amt-optione-vertical.png"
             alt="AMT OptiOne — sistema de gestão para óticas"
@@ -301,7 +283,7 @@ function Hero() {
               </span>
             ))}
           </div>
-        </motion.div>
+        </div>
 
         <Reveal delay={0.15}>
           <div className="mx-auto mt-12 max-w-5xl overflow-hidden rounded-2xl border border-border bg-card shadow-xl shadow-primary/10">
