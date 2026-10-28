@@ -50,7 +50,12 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { SiteShell } from "@/components/site/layout";
-import { CONTACT_EMAIL, CTA_LG, WHATSAPP_URL } from "@/components/site/site-config";
+import {
+  CONTACT_EMAIL,
+  CTA_LG,
+  WHATSAPP_NUMBER,
+  WHATSAPP_URL,
+} from "@/components/site/site-config";
 import {
   CheckList,
   Container,
@@ -1115,6 +1120,8 @@ function FormularioContato() {
   const [form, setForm] = useState(FORM_VAZIO);
   const [enviando, setEnviando] = useState(false);
   const [enviado, setEnviado] = useState(false);
+  // Se a gravação falhar, a mesma solicitação segue pelo WhatsApp (nenhum contato se perde).
+  const [whatsappReserva, setWhatsappReserva] = useState<string | null>(null);
 
   const campo = (nome: keyof typeof FORM_VAZIO) => ({
     value: form[nome],
@@ -1126,15 +1133,15 @@ function FormularioContato() {
     e.preventDefault();
     if (enviando) return;
     setEnviando(true);
+    setWhatsappReserva(null);
+    const mensagem = [
+      `O que a empresa precisa: ${form.necessidade.trim()}`,
+      form.sistemaAtual.trim() ? `Sistema atual: ${form.sistemaAtual.trim()}` : null,
+      form.problema.trim() ? `Problema a resolver: ${form.problema.trim()}` : null,
+    ]
+      .filter(Boolean)
+      .join("\n\n");
     try {
-      const mensagem = [
-        `O que a empresa precisa: ${form.necessidade.trim()}`,
-        form.sistemaAtual.trim() ? `Sistema atual: ${form.sistemaAtual.trim()}` : null,
-        form.problema.trim() ? `Problema a resolver: ${form.problema.trim()}` : null,
-      ]
-        .filter(Boolean)
-        .join("\n\n");
-
       const { error } = await supabase.from("contatos_leads").insert({
         nome: form.nome.trim(),
         empresa: form.empresa.trim() || null,
@@ -1149,7 +1156,19 @@ function FormularioContato() {
       toast.success("Solicitação enviada! Vamos analisar seu projeto e entrar em contato.");
     } catch (err) {
       console.error("Erro ao enviar contato", err);
-      toast.error("Não foi possível enviar. Tente novamente em instantes.");
+      const texto = [
+        "Olá! Quero solicitar uma análise de projeto à AMT Sistemas.",
+        `Nome: ${form.nome.trim()}`,
+        form.empresa.trim() ? `Empresa: ${form.empresa.trim()}` : null,
+        `E-mail: ${form.email.trim()}`,
+        form.telefone.trim() ? `WhatsApp: ${form.telefone.trim()}` : null,
+        form.segmento.trim() ? `Segmento: ${form.segmento.trim()}` : null,
+        "",
+        mensagem,
+      ]
+        .filter((linha) => linha !== null)
+        .join("\n");
+      setWhatsappReserva(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(texto)}`);
     } finally {
       setEnviando(false);
     }
@@ -1264,6 +1283,25 @@ function FormularioContato() {
             <Input id="problema" maxLength={200} className="h-11" {...campo("problema")} />
           </Campo>
         </div>
+        {whatsappReserva && (
+          <div
+            role="alert"
+            className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900"
+          >
+            <p className="font-semibold">Não conseguimos registrar sua solicitação agora.</p>
+            <p className="mt-1">
+              Envie as mesmas informações pelo WhatsApp — a mensagem já vai preenchida.
+            </p>
+            <Button
+              asChild
+              className={`${CTA_LG} mt-3 w-full bg-[#1FAF5A] text-white hover:bg-[#1a964d]`}
+            >
+              <a href={whatsappReserva} target="_blank" rel="noreferrer">
+                <MessageCircle /> Enviar pelo WhatsApp
+              </a>
+            </Button>
+          </div>
+        )}
         <Button type="submit" disabled={enviando} className={`${CTA_LG} mt-1 w-full`}>
           {enviando ? "Enviando…" : "Solicitar análise do projeto"} <ArrowRight />
         </Button>
