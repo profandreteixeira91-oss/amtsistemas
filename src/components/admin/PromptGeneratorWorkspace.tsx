@@ -48,6 +48,39 @@ const fallbackPages: Record<string, PageOption[]> = {
     { label: "Sala de aula", path: "/professor/aula/:id" },
     { label: "Administração", path: "/admin" },
   ],
+  "AMT Dojo Manager": [
+    { label: "Site", path: "/dojo" },
+    { label: "Login da academia", path: "/dojo/auth" },
+    { label: "Painel da academia", path: "/dojo/app" },
+    { label: "Alunos", path: "/dojo/app/students" },
+    { label: "Turmas", path: "/dojo/app/classes" },
+    { label: "Check-in", path: "/dojo/app/checkin" },
+    { label: "Graduações", path: "/dojo/app/graduations" },
+    { label: "Financeiro", path: "/dojo/app/finance" },
+    { label: "Loja", path: "/dojo/app/store" },
+    { label: "Assinatura", path: "/dojo/app/subscription" },
+    { label: "Matrícula pública", path: "/dojo/matricula/:slug" },
+    { label: "Portal da equipe", path: "/dojo/staff" },
+    { label: "App do aluno", path: "/app" },
+  ],
+  // Aplicativo desktop (PySide6): as "páginas" são os módulos em modules/ do repositório gestao_otica.
+  "AMT OptiOne": [
+    { label: "Login e ativação (ui/windows)", path: "login" },
+    { label: "Vendas / PDV", path: "modules/sales" },
+    { label: "Caixa", path: "modules/cash" },
+    { label: "Clientes", path: "modules/customers" },
+    { label: "Receitas", path: "modules/prescriptions" },
+    { label: "Pedidos de laboratório", path: "modules/lab_orders" },
+    { label: "Agenda de exames", path: "modules/schedule" },
+    { label: "Produtos", path: "modules/products" },
+    { label: "Estoque", path: "modules/inventory" },
+    { label: "Fornecedores", path: "modules/suppliers" },
+    { label: "Financeiro", path: "modules/finance" },
+    { label: "Fiscal (NFC-e/NF-e)", path: "modules/fiscal" },
+    { label: "WhatsApp", path: "modules/whatsapp" },
+    { label: "Indicadores", path: "modules/analytics" },
+    { label: "Configurações", path: "modules/settings" },
+  ],
 };
 
 function routeFromPageFile(path: string) {
@@ -120,7 +153,10 @@ export function PromptGeneratorWorkspace({
         setPages(discovered.length ? discovered : fallback);
       })
       .catch(() => {
-        if (!cancelled) setMessage("Não foi possível descobrir as páginas pelo GitHub. Você pode informar a rota manualmente.");
+        if (cancelled) return;
+        setMessage(fallback.length
+          ? "O GitHub não liberou a estrutura do repositório (repositório privado). Usando a lista de telas cadastrada para este sistema."
+          : "Não foi possível descobrir as páginas pelo GitHub. Você pode informar a rota manualmente.");
       })
       .finally(() => {
         if (!cancelled) setLoadingPages(false);

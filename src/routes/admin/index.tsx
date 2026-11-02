@@ -2,24 +2,26 @@ import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   Activity,
-  ArrowUpRight,
-  BarChart3,
-  Bell,
   Boxes,
-  BriefcaseBusiness,
-  ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  CircleDollarSign,
+  Cloud,
   Code2,
+  Database,
+  Download,
   ExternalLink,
   FileText,
+  FlaskConical,
   GitBranch,
+  Glasses,
   Globe2,
+  KeyRound,
   LayoutDashboard,
   LogOut,
+  Package,
   Plus,
   Search,
+  Swords,
   Users,
   Wrench,
   Check,
@@ -46,11 +48,117 @@ export const Route = createFileRoute("/admin/")({
   component: AdminDashboard,
 });
 
-const systems = [
-  { id: "ab-academy", name: "AB Academy", description: "Plataforma integrada de gestão acadêmica.", status: "Integrado", href: "https://abacademyidiomas.com.br/aluno", icon: Globe2, links: { site: "https://abacademyidiomas.com.br", github: "https://github.com/profandreteixeira91-oss/ab-academy", cloudflare: "https://dash.cloudflare.com/", supabase: "https://supabase.com/dashboard/project/vwmrxdzskvwojyfddjwd", operation: "https://abacademyidiomas.com.br/admin" }, capabilities: ["Site", "GitHub", "Cloudflare", "Supabase", "Administração"], githubRepo: "profandreteixeira91-oss/ab-academy" },
-  { id: "dojo-manager", name: "AMT Dojo Manager", description: "SaaS de gestão para academias e dojos.", status: "Acesso externo", href: "https://dojomanager.amtfightwear.com.br", icon: Boxes, links: { site: "https://dojomanager.amtfightwear.com.br", github: "https://github.com/profandreteixeira91-oss", cloudflare: "https://dash.cloudflare.com/", supabase: "", operation: "https://dojomanager.amtfightwear.com.br" }, capabilities: ["Site", "GitHub", "Cloudflare", "Operação externa"] },
-  { id: "fight-wear", name: "AMT Fight Wear", description: "E-commerce e operação de fight wear.", status: "Acesso externo", href: "https://amtfightwear.com.br", icon: BriefcaseBusiness, links: { site: "https://amtfightwear.com.br", github: "https://github.com/profandreteixeira91-oss", cloudflare: "https://dash.cloudflare.com/", supabase: "", operation: "https://amtfightwear.com.br" }, capabilities: ["Site", "GitHub", "Cloudflare", "Operação externa"] },
+type IconType = React.ComponentType<{ className?: string }>;
+
+type AmtSystem = {
+  id: string;
+  /** slug em manager_sistemas: catálogo, planos e leads do site */
+  catalogSlug: string;
+  name: string;
+  platform: string;
+  description: string;
+  href: string;
+  icon: IconType;
+  githubRepo: string;
+  /** repositório público com os instaladores (só sistemas desktop) */
+  releasesRepo?: string;
+  capabilities: string[];
+  links: Array<{ label: string; hint: string; href: string; icon: IconType }>;
+};
+
+const OPTIONE_TRIAL_ORIGIN = "teste-gratis-amt-optione";
+
+const systems: AmtSystem[] = [
+  {
+    id: "optione",
+    catalogSlug: "amt-optione",
+    name: "AMT OptiOne",
+    platform: "Desktop · SaaS",
+    description: "Gestão para óticas: aplicativo desktop multi-loja, vendido com teste grátis de 14 dias pelo site.",
+    href: "https://amtsistemas.com.br/optione",
+    icon: Glasses,
+    githubRepo: "profandreteixeira91-oss/gestao_otica",
+    releasesRepo: "profandreteixeira91-oss/amt-optione-releases",
+    capabilities: ["Landing e teste grátis", "Chave de acesso", "Instalador Windows", "Supabase", "Mercado Pago"],
+    links: [
+      { label: "Landing page", hint: "amtsistemas.com.br/optione", href: "https://amtsistemas.com.br/optione", icon: Globe2 },
+      { label: "Teste grátis", hint: "Cadastro da ótica pelo site", href: "https://amtsistemas.com.br/optione/teste-gratis", icon: Plus },
+      { label: "Nova chave de acesso", hint: "O dono gera com login e senha", href: "https://amtsistemas.com.br/optione/nova-chave", icon: KeyRound },
+      { label: "Versões do instalador", hint: "Releases no GitHub", href: "https://github.com/profandreteixeira91-oss/amt-optione-releases/releases", icon: Download },
+      { label: "Código-fonte", hint: "GitHub · gestao_otica", href: "https://github.com/profandreteixeira91-oss/gestao_otica", icon: GitBranch },
+      { label: "Supabase", hint: "Projeto rragitmijwruydspafac", href: "https://supabase.com/dashboard/project/rragitmijwruydspafac", icon: Database },
+    ],
+  },
+  {
+    id: "dojo-manager",
+    catalogSlug: "amt-dojo-manager",
+    name: "AMT Dojo Manager",
+    platform: "Web · SaaS",
+    description: "Gestão para academias de artes marciais, dojos e estúdios de treino, com app do aluno.",
+    href: "https://amtdojomanager.com.br/dojo",
+    icon: Swords,
+    githubRepo: "profandreteixeira91-oss/amtdojomanager",
+    capabilities: ["Painel da academia", "App do aluno (PWA)", "Portal da equipe", "Supabase", "Cloudflare Workers"],
+    links: [
+      { label: "Site", hint: "amtdojomanager.com.br", href: "https://amtdojomanager.com.br/dojo", icon: Globe2 },
+      { label: "Painel da academia", hint: "/dojo/app", href: "https://amtdojomanager.com.br/dojo/app", icon: LayoutDashboard },
+      { label: "App do aluno", hint: "/app", href: "https://amtdojomanager.com.br/app", icon: Users },
+      { label: "Ambiente de teste", hint: "teste.amtsistemas.com.br · branch 1nov26", href: "https://teste.amtsistemas.com.br/dojo", icon: FlaskConical },
+      { label: "Código-fonte", hint: "GitHub · amtdojomanager", href: "https://github.com/profandreteixeira91-oss/amtdojomanager", icon: GitBranch },
+      { label: "Supabase", hint: "Projeto gudjmkiyprgwgxmzbgji", href: "https://supabase.com/dashboard/project/gudjmkiyprgwgxmzbgji", icon: Database },
+      { label: "Cloudflare", hint: "Workers e domínios", href: "https://dash.cloudflare.com/", icon: Cloud },
+    ],
+  },
 ];
+
+type CatalogSystem = { id: string; slug: string; nome: string; versao: string | null; trial_dias: number | null; ativo: boolean };
+type CatalogPlan = { id: string; sistema_id: string; slug: string; nome: string; preco_mensal: number | null; preco_anual: number | null; ativo: boolean; destaque: boolean };
+type CommercialLead = { id: string; nome: string; empresa: string | null; email: string | null; telefone: string | null; origem: string | null; status: string; observacoes: string | null; sistema_interesse_id: string | null; created_at: string };
+
+const commercialLeadStatuses = [
+  ["novo", "Novo"], ["contatado", "Contatado"], ["qualificado", "Qualificado"], ["proposta", "Proposta"],
+  ["negociacao", "Negociação"], ["ganho", "Ganho"], ["perdido", "Perdido"],
+] as const;
+
+const brl = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+const daysAgo = (days: number) => Date.now() - days * 86400000;
+
+// Catálogo (manager_sistemas/manager_planos) e leads comerciais (manager_leads) dos sistemas do Control Center.
+function useCommercialData() {
+  const [catalog, setCatalog] = useState<CatalogSystem[]>([]);
+  const [plans, setPlans] = useState<CatalogPlan[]>([]);
+  const [leads, setLeads] = useState<CommercialLead[]>([]);
+  const [leadsError, setLeadsError] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  async function load() {
+    setLoading(true);
+    const [catalogResult, plansResult, leadsResult] = await Promise.all([
+      amtSupabase.from("manager_sistemas").select("id,slug,nome,versao,trial_dias,ativo").in("slug", systems.map((system) => system.catalogSlug)),
+      amtSupabase.from("manager_planos").select("id,sistema_id,slug,nome,preco_mensal,preco_anual,ativo,destaque").order("ordem").order("preco_mensal"),
+      amtSupabase.from("manager_leads").select("id,nome,empresa,email,telefone,origem,status,observacoes,sistema_interesse_id,created_at").order("created_at", { ascending: false }).limit(500),
+    ]);
+    const catalogRows = (catalogResult.data ?? []) as CatalogSystem[];
+    const ids = new Set(catalogRows.map((item) => item.id));
+    setCatalog(catalogRows);
+    setPlans(((plansResult.data ?? []) as CatalogPlan[]).filter((plan) => ids.has(plan.sistema_id)));
+    setLeads(((leadsResult.data ?? []) as CommercialLead[]).filter((lead) => (lead.sistema_interesse_id && ids.has(lead.sistema_interesse_id)) || lead.origem === OPTIONE_TRIAL_ORIGIN));
+    setLeadsError(leadsResult.error ? "Leads comerciais indisponíveis: o acesso do Control Center a manager_leads ainda não foi liberado no banco." : "");
+    setLoading(false);
+  }
+
+  useEffect(() => { void load(); }, []);
+
+  return { catalog, plans, leads, setLeads, leadsError, loading, reload: load };
+}
+
+function isOptioneTrial(lead: CommercialLead) {
+  return lead.origem === OPTIONE_TRIAL_ORIGIN;
+}
+
+function pad(value: number) {
+  return String(value).padStart(2, "0");
+}
 
 const modules = [
   { label: "Sistemas", icon: Boxes, to: "/admin/sistemas" },
@@ -61,12 +169,157 @@ const modules = [
   { label: "Desenvolvimento", icon: Code2, to: "/admin/desenvolvimento" },
 ];
 
-const kpis = [
-  { label: "Sistemas", value: "03", detail: "01 integrado · 02 externos", icon: Boxes },
-  { label: "Leads", value: "12", detail: "Dados demonstrativos", icon: Users },
-  { label: "Formulários", value: "08", detail: "Últimos 30 dias · demo", icon: FileText },
-  { label: "Alertas", value: "03", detail: "Painel preparado", icon: Bell },
-];
+type AuditLog = { id: string; actor_user_id: string | null; action: string; resource_type: string | null; resource_id: string | null; metadata: Record<string, unknown>; created_at: string };
+type FormSubmission = { id: string; form_name: string; name: string; email: string | null; phone: string | null; source: string | null; status: string; notes: string | null; payload: Record<string, unknown>; created_at: string };
+
+function DashboardOverview({ onOpen }: { onOpen: (module: string) => void }) {
+  const commercial = useCommercialData();
+  const [counts, setCounts] = useState<{ leads: number | null; forms: number | null; newForms: number | null }>({ leads: null, forms: null, newForms: null });
+  const [activity, setActivity] = useState<AuditLog[]>([]);
+
+  useEffect(() => {
+    void Promise.all([
+      amtSupabase.from("leads").select("id", { count: "exact", head: true }),
+      amtSupabase.from("form_submissions").select("id", { count: "exact", head: true }),
+      amtSupabase.from("form_submissions").select("id", { count: "exact", head: true }).eq("status", "novo"),
+      amtSupabase.from("audit_logs").select("id,actor_user_id,action,resource_type,resource_id,metadata,created_at").order("created_at", { ascending: false }).limit(6),
+    ]).then(([leads, forms, newForms, logs]) => {
+      setCounts({ leads: leads.count ?? null, forms: forms.count ?? null, newForms: newForms.count ?? null });
+      setActivity((logs.data ?? []) as AuditLog[]);
+    });
+  }, []);
+
+  const trials = commercial.leads.filter(isOptioneTrial);
+  const trials30 = trials.filter((lead) => new Date(lead.created_at).getTime() >= daysAgo(30)).length;
+  const show = (value: number | null) => (value === null ? "—" : pad(value));
+  const kpis = [
+    { label: "Sistemas", value: pad(systems.length), detail: systems.map((system) => system.name.replace("AMT ", "")).join(" · "), icon: Boxes, module: "Sistemas" },
+    { label: "Testes grátis OptiOne", value: commercial.leadsError ? "—" : pad(trials30), detail: commercial.leadsError ? "Acesso aos leads comerciais pendente" : `Últimos 30 dias · ${trials.length} no total`, icon: Glasses, module: "Sistemas" },
+    { label: "Leads", value: show(counts.leads), detail: "Módulo Leads do Control Center", icon: Users, module: "Leads" },
+    { label: "Formulários novos", value: show(counts.newForms), detail: counts.forms === null ? "Formulários recebidos" : `${counts.forms} no total`, icon: FileText, module: "Formulários" },
+  ];
+
+  return (
+    <>
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {kpis.map((item) => {
+          const Icon = item.icon;
+          return (
+            <button key={item.label} type="button" onClick={() => onOpen(item.module)} className="text-left">
+              <Card className="h-full border-slate-200 bg-white text-slate-950 shadow-sm transition-colors hover:border-blue-300">
+                <CardContent className="p-5">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-sm text-slate-500">{item.label}</p>
+                      <p className="mt-2 text-3xl font-semibold tracking-tight">{item.value}</p>
+                    </div>
+                    <div className="rounded-xl bg-blue-50 p-2.5 text-blue-700"><Icon className="h-5 w-5" /></div>
+                  </div>
+                  <p className="mt-3 text-xs text-slate-400">{item.detail}</p>
+                </CardContent>
+              </Card>
+            </button>
+          );
+        })}
+      </section>
+
+      <section className="grid gap-6 xl:grid-cols-[1.35fr_0.65fr]">
+        <Card className="border-slate-200 bg-white text-slate-950 shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-lg">Sistemas</CardTitle>
+              <p className="mt-1 text-sm text-slate-500">Produtos da AMT em operação.</p>
+            </div>
+            <button type="button" onClick={() => onOpen("Sistemas")} className="text-sm font-medium text-blue-700 hover:text-blue-800">Ver todos</button>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {systems.map((system) => {
+              const Icon = system.icon;
+              const catalogItem = commercial.catalog.find((item) => item.slug === system.catalogSlug);
+              const activePlans = commercial.plans.filter((plan) => plan.sistema_id === catalogItem?.id && plan.ativo).length;
+              return (
+                <div key={system.id} className="flex items-center gap-4 rounded-xl border border-slate-200 p-4">
+                  <div className="rounded-lg bg-slate-100 p-2.5"><Icon className="h-5 w-5 text-slate-700" /></div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-medium">{system.name}</p>
+                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] text-slate-600">{system.platform}</span>
+                      {catalogItem && <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[11px] text-blue-700">{activePlans} {activePlans === 1 ? "plano" : "planos"} no catálogo</span>}
+                    </div>
+                    <p className="mt-1 text-sm text-slate-500">{system.description}</p>
+                  </div>
+                  <a href={system.href} target="_blank" rel="noreferrer" className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-blue-700" aria-label={"Abrir " + system.name}>
+                    <ExternalLink className="h-4 w-4" />
+                  </a>
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+
+        <Card className="border-slate-200 bg-white text-slate-950 shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-lg">Acessos rápidos</CardTitle>
+            <p className="mt-1 text-sm text-slate-500">Ferramentas centrais da operação.</p>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <QuickLink href="https://github.com/profandreteixeira91-oss" icon={GitBranch} label="GitHub" />
+            <QuickLink href="https://supabase.com/dashboard/project/yqxmxevphdumyuwlvppg" icon={Database} label="Supabase · AMT Sistemas" />
+            <QuickLink href="https://supabase.com/dashboard/project/rragitmijwruydspafac" icon={Glasses} label="Supabase · AMT OptiOne" />
+            <QuickLink href="https://supabase.com/dashboard/project/gudjmkiyprgwgxmzbgji" icon={Swords} label="Supabase · Dojo Manager" />
+            <QuickLink href="https://dash.cloudflare.com/" icon={Cloud} label="Cloudflare" />
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="grid gap-6 lg:grid-cols-2">
+        <Card className="border-slate-200 bg-white text-slate-950 shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-lg">Últimos testes grátis</CardTitle>
+              <p className="mt-1 text-sm text-slate-500">Óticas cadastradas no AMT OptiOne pelo site.</p>
+            </div>
+            <button type="button" onClick={() => onOpen("Sistemas")} className="text-sm font-medium text-blue-700 hover:text-blue-800">Ver todos</button>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {commercial.leadsError ? <p className="text-sm text-slate-500">{commercial.leadsError}</p> : commercial.loading ? <p className="text-sm text-slate-500">Carregando...</p> : trials.length === 0 ? <p className="text-sm text-slate-500">Nenhum teste grátis registrado ainda.</p> : trials.slice(0, 5).map((lead) => (
+              <div key={lead.id} className="flex gap-3">
+                <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-blue-600" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium">{lead.empresa || lead.nome}</p>
+                  <p className="truncate text-xs text-slate-500">{lead.nome} · {lead.email || lead.telefone || "sem contato"}</p>
+                </div>
+                <span className="shrink-0 text-xs text-slate-400">{new Date(lead.created_at).toLocaleDateString("pt-BR")}</span>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card className="border-slate-200 bg-white text-slate-950 shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-lg">Atividade recente</CardTitle>
+              <p className="mt-1 text-sm text-slate-500">Últimas ações registradas na auditoria.</p>
+            </div>
+            <button type="button" onClick={() => onOpen("Auditoria")} className="text-sm font-medium text-blue-700 hover:text-blue-800">Ver auditoria</button>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {activity.length === 0 ? <p className="text-sm text-slate-500">Nenhuma ação registrada ainda.</p> : activity.map((log) => (
+              <div key={log.id} className="flex gap-3">
+                <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-blue-600" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium">{log.action.replace(/[._]/g, " ")}</p>
+                  <p className="truncate text-xs text-slate-500">{log.resource_type || "—"}</p>
+                </div>
+                <span className="shrink-0 text-xs text-slate-400">{new Date(log.created_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}</span>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </section>
+    </>
+  );
+}
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -156,124 +409,13 @@ function AdminDashboard() {
             </div>
           </header>
 
+          <nav className="flex gap-2 overflow-x-auto border-b border-slate-200 bg-white px-5 py-3 lg:hidden">
+            {["Dashboard", ...modules.map((item) => item.label)].map((label) => <button key={label} type="button" onClick={() => setActiveModule(label)} className={`shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium ${activeModule === label ? "bg-blue-600 text-white" : "text-slate-600 hover:bg-slate-100"}`}>{label}</button>)}
+          </nav>
+
           <div className="space-y-8 p-5 sm:p-8">
             {activeModule !== "Dashboard" && <ModuleWorkspace module={activeModule} />}
-            {activeModule === "Dashboard" && <>
-            <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {kpis.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Card key={item.label} className="border-slate-200 bg-white text-slate-950 shadow-sm">
-                    <CardContent className="p-5">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="text-sm text-slate-500">{item.label}</p>
-                          <p className="mt-2 text-3xl font-semibold tracking-tight">{item.value}</p>
-                        </div>
-                        <div className="rounded-xl bg-blue-50 p-2.5 text-blue-700"><Icon className="h-5 w-5" /></div>
-                      </div>
-                      <p className="mt-3 text-xs text-slate-400">{item.detail}</p>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </section>
-
-            <section className="grid gap-6 xl:grid-cols-[1.35fr_0.65fr]">
-              <Card className="border-slate-200 bg-white text-slate-950 shadow-sm">
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div>
-                    <CardTitle className="text-lg">Sistemas</CardTitle>
-                    <p className="mt-1 text-sm text-slate-500">Visão rápida dos produtos e plataformas.</p>
-                  </div>
-                  <button type="button" onClick={() => setActiveModule("Sistemas")} className="text-sm font-medium text-blue-700 hover:text-blue-800">Ver todos</button>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {systems.map((system) => {
-                    const Icon = system.icon;
-                    return (
-                      <div key={system.name} className="flex items-center gap-4 rounded-xl border border-slate-200 p-4">
-                        <div className="rounded-lg bg-slate-100 p-2.5"><Icon className="h-5 w-5 text-slate-700" /></div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <p className="font-medium">{system.name}</p>
-                            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] text-slate-600">{system.status}</span>
-                          </div>
-                          <p className="mt-1 text-sm text-slate-500">{system.description}</p>
-                        </div>
-                        <a href={system.href} target="_blank" rel="noreferrer" className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-blue-700" aria-label={"Abrir " + system.name}>
-                          <ExternalLink className="h-4 w-4" />
-                        </a>
-                      </div>
-                    );
-                  })}
-                </CardContent>
-              </Card>
-
-              <Card className="border-slate-200 bg-white text-slate-950 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-lg">Acessos rápidos</CardTitle>
-                  <p className="mt-1 text-sm text-slate-500">Ferramentas centrais da operação.</p>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <QuickLink href="https://github.com/profandreteixeira91-oss" icon={GitBranch} label="GitHub" />
-                  <QuickLink href="https://supabase.com/dashboard" icon={Code2} label="Supabase" />
-                  <QuickLink href="https://dash.cloudflare.com/" icon={Globe2} label="Cloudflare" />
-                </CardContent>
-              </Card>
-            </section>
-
-            <section className="grid gap-6 lg:grid-cols-2">
-              <Card className="border-slate-200 bg-white text-slate-950 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-lg">Atividade recente</CardTitle>
-                  <p className="mt-1 text-sm text-slate-500">Estrutura preparada para o futuro log de auditoria.</p>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {[
-                    ["Sistema criado", "AMT Control Center", "Agora"],
-                    ["Projeto conectado", "AB Academy", "Hoje"],
-                    ["Formulário recebido", "Novo lead comercial", "Hoje"],
-                  ].map(([title, detail, time]) => (
-                    <div key={title} className="flex gap-3">
-                      <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-blue-600" />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium">{title}</p>
-                        <p className="text-xs text-slate-500">{detail}</p>
-                      </div>
-                      <span className="text-xs text-slate-400">{time}</span>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-
-              <Card className="border-slate-200 bg-white text-slate-950 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-lg">Próximos módulos</CardTitle>
-                  <p className="mt-1 text-sm text-slate-500">Áreas já previstas na arquitetura do Control Center.</p>
-                </CardHeader>
-                <CardContent className="grid gap-2 sm:grid-cols-2">
-                  {[
-                    ["Leads e CRM", Users],
-                    ["Infraestrutura", GitBranch],
-                    ["Auditoria", Activity],
-                    ["Financeiro", CircleDollarSign],
-                    ["Métricas", BarChart3],
-                  ].map(([label, Icon]) => (
-                    <div key={String(label)} className="flex items-center gap-3 rounded-lg bg-slate-50 p-3 text-sm">
-                      <Icon className="h-4 w-4 text-blue-700" /> {label}
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            </section>
-
-            </>}
-            <div className="flex items-center gap-2 text-xs text-slate-400">
-              <Activity className="h-4 w-4" />
-              Os indicadores desta primeira versão são demonstrativos e serão substituídos por dados do Supabase após a integração do backend.
-              <ArrowUpRight className="h-3.5 w-3.5" />
-            </div>
+            {activeModule === "Dashboard" && <DashboardOverview onOpen={setActiveModule} />}
           </div>
         </section>
       </div>
@@ -802,39 +944,266 @@ function AuditWorkspace() {
   );
 }
 
+type GitHubState = { loading: boolean; private: boolean; error: string; commit: { sha: string; message: string; date: string } | null; issues: number; prs: number };
+type ReleaseState = { loading: boolean; error: string; tag: string; publishedAt: string; url: string; downloads: number } | null;
+
 function SystemsWorkspace() {
-  const [selectedId, setSelectedId] = useState("ab-academy");
+  const [selectedId, setSelectedId] = useState(systems[0].id);
   const selected = systems.find((system) => system.id === selectedId) ?? systems[0];
-  const [github, setGithub] = useState<{ loading: boolean; error: string; repo: any; commit: any; issues: number; prs: number }>({ loading: false, error: "", repo: null, commit: null, issues: 0, prs: 0 });
+  const commercial = useCommercialData();
+  const [github, setGithub] = useState<GitHubState>({ loading: false, private: false, error: "", commit: null, issues: 0, prs: 0 });
+  const [release, setRelease] = useState<ReleaseState>(null);
+  const [production, setProduction] = useState<{ status: "verificando" | "no ar" | "sem resposta"; ms: number | null }>({ status: "verificando", ms: null });
+  const [leadSearch, setLeadSearch] = useState("");
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
-    if (!selected.githubRepo) { setGithub({ loading: false, error: "", repo: null, commit: null, issues: 0, prs: 0 }); return; }
     let active = true;
-    setGithub((value) => ({ ...value, loading: true, error: "" }));
     const base = "https://api.github.com/repos/" + selected.githubRepo;
-    Promise.all([
-      fetch(base).then((r) => r.ok ? r.json() : Promise.reject(new Error("Não foi possível consultar o repositório."))),
-      fetch(base + "/commits?per_page=1").then((r) => r.ok ? r.json() : Promise.reject(new Error("Não foi possível consultar os commits."))),
-      fetch(base + "/issues?state=open&per_page=100").then((r) => r.ok ? r.json() : Promise.reject(new Error("Não foi possível consultar as issues."))),
-    ]).then(([repo, commits, issues]) => {
-      if (!active) return;
-      setGithub({ loading: false, error: "", repo, commit: commits?.[0] ?? null, issues: (issues ?? []).filter((item: { pull_request?: unknown }) => !item.pull_request).length, prs: (issues ?? []).filter((item: { pull_request?: unknown }) => Boolean(item.pull_request)).length });
-    }).catch((error) => {
-      if (active) setGithub((value) => ({ ...value, loading: false, error: error instanceof Error ? error.message : "Falha ao consultar o GitHub." }));
-    });
-    return () => { active = false; };
+    setGithub({ loading: true, private: false, error: "", commit: null, issues: 0, prs: 0 });
+    (async (): Promise<GitHubState> => {
+      const repoResponse = await fetch(base);
+      // Repositório privado: a API pública responde 404 sem token.
+      if (repoResponse.status === 404) return { loading: false, private: true, error: "", commit: null, issues: 0, prs: 0 };
+      if (!repoResponse.ok) throw new Error("Não foi possível consultar o repositório.");
+      const [commits, issues] = await Promise.all([
+        fetch(base + "/commits?per_page=1").then((r) => r.ok ? r.json() : []),
+        fetch(base + "/issues?state=open&per_page=100").then((r) => r.ok ? r.json() : []),
+      ]) as [Array<{ sha: string; commit: { message: string; author?: { date?: string } } }>, Array<{ pull_request?: unknown }>];
+      const last = commits[0];
+      return {
+        loading: false, private: false, error: "",
+        commit: last ? { sha: last.sha, message: last.commit.message.split("\n")[0], date: last.commit.author?.date ?? "" } : null,
+        issues: issues.filter((item) => !item.pull_request).length,
+        prs: issues.filter((item) => Boolean(item.pull_request)).length,
+      };
+    })()
+      .then((state) => { if (active) setGithub(state); })
+      .catch((error) => { if (active) setGithub({ loading: false, private: false, error: error instanceof Error ? error.message : "Falha ao consultar o GitHub.", commit: null, issues: 0, prs: 0 }); });
+
+    if (selected.releasesRepo) {
+      setRelease({ loading: true, error: "", tag: "", publishedAt: "", url: "", downloads: 0 });
+      fetch("https://api.github.com/repos/" + selected.releasesRepo + "/releases/latest")
+        .then((r) => r.ok ? r.json() : Promise.reject(new Error("Nenhuma versão publicada encontrada.")))
+        .then((data: { tag_name: string; published_at: string; html_url: string; assets?: Array<{ download_count?: number }> }) => {
+          if (active) setRelease({ loading: false, error: "", tag: data.tag_name, publishedAt: data.published_at, url: data.html_url, downloads: (data.assets ?? []).reduce((sum, asset) => sum + (asset.download_count ?? 0), 0) });
+        })
+        .catch((error) => { if (active) setRelease({ loading: false, error: error instanceof Error ? error.message : "Falha ao consultar as versões.", tag: "", publishedAt: "", url: "", downloads: 0 }); });
+    } else {
+      setRelease(null);
+    }
+
+    // Sem CORS a resposta é opaca: só dá para saber se o endereço respondeu.
+    setProduction({ status: "verificando", ms: null });
+    const started = performance.now();
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 10000);
+    fetch(selected.href, { mode: "no-cors", cache: "no-store", signal: controller.signal })
+      .then(() => { if (active) setProduction({ status: "no ar", ms: Math.round(performance.now() - started) }); })
+      .catch(() => { if (active) setProduction({ status: "sem resposta", ms: null }); })
+      .finally(() => window.clearTimeout(timeout));
+
+    return () => { active = false; controller.abort(); };
   }, [selected]);
 
-  if (!selected) return null;
-  const isIntegrated = selected.status === "Integrado";
-  const quickLinks = [["Site", selected.links.site, Globe2], ["GitHub", selected.links.github, GitBranch], ["Cloudflare", selected.links.cloudflare, Globe2], ["Supabase", selected.links.supabase, Code2], ["Operação", selected.links.operation, Boxes]] as const;
+  const catalogItem = commercial.catalog.find((item) => item.slug === selected.catalogSlug);
+  const systemPlans = commercial.plans.filter((plan) => plan.sistema_id === catalogItem?.id);
+  const activePlans = systemPlans.filter((plan) => plan.ativo);
+  const cheapest = activePlans.reduce<number | null>((min, plan) => plan.preco_mensal !== null && (min === null || Number(plan.preco_mensal) < min) ? Number(plan.preco_mensal) : min, null);
+  const systemLeads = commercial.leads.filter((lead) => (catalogItem && lead.sistema_interesse_id === catalogItem.id) || (selected.id === "optione" && isOptioneTrial(lead)));
+  const leads30 = systemLeads.filter((lead) => new Date(lead.created_at).getTime() >= daysAgo(30)).length;
+  const filteredLeads = systemLeads.filter((lead) => [lead.nome, lead.empresa ?? "", lead.email ?? "", lead.telefone ?? "", lead.observacoes ?? ""].join(" ").toLowerCase().includes(leadSearch.toLowerCase()));
+  const isDesktop = Boolean(selected.releasesRepo);
+  const host = new URL(selected.href).host;
+
+  async function changeLeadStatus(lead: CommercialLead, status: string) {
+    const { data, error } = await amtSupabase.from("manager_leads").update({ status, updated_at: new Date().toISOString() }).eq("id", lead.id).select("id,nome,empresa,email,telefone,origem,status,observacoes,sistema_interesse_id,created_at").single();
+    if (error || !data) { setMessage("Não foi possível atualizar o status do lead."); return; }
+    commercial.setLeads((items) => items.map((item) => item.id === lead.id ? data as CommercialLead : item));
+    const session = await amtSupabase.auth.getSession();
+    if (session.data.session) await amtSupabase.from("audit_logs").insert({ actor_user_id: session.data.session.user.id, action: "manager_lead.status_changed", resource_type: "manager_lead", resource_id: lead.id, metadata: { sistema: selected.catalogSlug, from: lead.status, to: status } });
+    setMessage("Status do lead atualizado.");
+  }
+
+  const stats: Array<[string, string, string, IconType]> = [
+    ["Planos ativos", commercial.loading ? "…" : String(activePlans.length), cheapest !== null ? `A partir de ${brl.format(cheapest)}/mês` : "Catálogo comercial do site", Package],
+    [isDesktop ? "Testes grátis · 30 dias" : "Leads do site · 30 dias", commercial.leadsError ? "—" : commercial.loading ? "…" : String(leads30), commercial.leadsError ? "Acesso aos leads pendente" : `${systemLeads.length} no total`, Users],
+    isDesktop
+      ? ["Versão publicada", release?.loading ? "…" : release?.tag || "—", release?.error || (release?.publishedAt ? `${new Date(release.publishedAt).toLocaleDateString("pt-BR")} · ${release.downloads} downloads` : "Instalador Windows"), Download]
+      : ["Versão no catálogo", catalogItem?.versao || "—", "Cadastro do sistema no catálogo", Code2],
+    ["Produção", production.status === "verificando" ? "…" : production.status === "no ar" ? "No ar" : "Sem resposta", production.ms !== null ? `${host} · ${production.ms} ms` : host, Activity],
+  ];
+
   return (
     <section className="space-y-6">
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"><div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between"><div><p className="text-xs font-medium uppercase tracking-[0.16em] text-blue-600">Ecossistema AMT</p><h2 className="mt-1 text-lg font-semibold text-slate-950">Sistemas</h2><p className="mt-1 max-w-2xl text-sm leading-6 text-slate-500">Central operacional para acessar infraestrutura, código, serviços e indicadores de cada produto.</p></div><div className="flex flex-wrap gap-2 text-xs"><span className="rounded-full bg-blue-50 px-3 py-1.5 font-medium text-blue-700">{systems.length} sistemas</span><span className="rounded-full bg-slate-100 px-3 py-1.5 font-medium text-slate-700">{systems.filter((system) => system.status === "Integrado").length} integrado</span><span className="rounded-full bg-slate-100 px-3 py-1.5 font-medium text-slate-700">{systems.filter((system) => system.status !== "Integrado").length} externos</span></div></div></div>
-      <div className="grid gap-4 md:grid-cols-3">{systems.map((system) => { const Icon = system.icon; const active = system.id === selected.id; return <button key={system.id} type="button" onClick={() => setSelectedId(system.id)} className={`rounded-xl border bg-white p-5 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md ${active ? "border-blue-500 ring-1 ring-blue-500/20" : "border-slate-200"}`}><div className="flex items-start justify-between gap-3"><div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100"><Icon className="h-5 w-5 text-slate-900" /></div><span className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${system.status === "Integrado" ? "bg-blue-50 text-blue-700" : "bg-slate-100 text-slate-600"}`}>{system.status}</span></div><h3 className="mt-4 font-semibold text-slate-950">{system.name}</h3><p className="mt-1 text-sm leading-5 text-slate-500">{system.description}</p><div className="mt-4 flex flex-wrap gap-1.5">{system.capabilities.map((capability) => <span key={capability} className="rounded-md bg-slate-50 px-2 py-1 text-[10px] font-medium text-slate-500">{capability}</span>)}</div></button>; })}</div>
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"><div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between"><div><div className="flex flex-wrap items-center gap-3"><h3 className="text-xl font-semibold text-slate-950">{selected.name}</h3><span className={`rounded-full px-3 py-1 text-xs font-medium ${isIntegrated ? "bg-blue-50 text-blue-700" : "bg-slate-100 text-slate-600"}`}>{selected.status}</span></div><p className="mt-1 text-sm text-slate-500">{selected.description}</p></div><a href={selected.href} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-lg bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800">Abrir sistema <ExternalLink className="h-4 w-4" /></a></div><div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{[["Visitas hoje","—","Analytics será conectado na próxima etapa",BarChart3],["Últimos 7 dias","—","Analytics será conectado na próxima etapa",Activity],["Leads","—","Dados do módulo Leads",Users],["GitHub issues",selected.githubRepo ? (github.loading ? "…" : String(github.issues)) : "—",github.error || "Dados públicos do repositório",GitBranch]].map(([label,value,detail,Icon]) => <div key={String(label)} className="rounded-xl border border-slate-200 bg-slate-50/60 p-4"><div className="flex items-center gap-2 text-xs font-medium text-slate-500"><Icon className="h-4 w-4 text-blue-700" />{label}</div><p className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">{String(value)}</p><p className="mt-1 text-[11px] leading-4 text-slate-400">{String(detail)}</p></div>)}</div></section>
-      <div className="grid gap-6 xl:grid-cols-[1fr_360px]"><section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"><h3 className="text-base font-semibold text-slate-950">Acessos operacionais</h3><p className="mt-1 text-sm text-slate-500">Acesso direto aos serviços e painéis do sistema selecionado.</p><div className="mt-5 grid gap-3 sm:grid-cols-2">{quickLinks.map(([label,href,Icon]) => <a key={label} href={href || undefined} target={href ? "_blank" : undefined} rel={href ? "noreferrer" : undefined} aria-disabled={!href} className={`flex items-center justify-between rounded-xl border p-4 ${href ? "border-slate-200 hover:border-blue-300 hover:bg-blue-50/30" : "cursor-not-allowed border-dashed border-slate-200 bg-slate-50 opacity-60"}`}><span className="flex items-center gap-3"><span className="rounded-lg bg-slate-100 p-2"><Icon className="h-4 w-4 text-blue-700" /></span><span><span className="block text-sm font-medium text-slate-950">{label}</span><span className="block text-[11px] text-slate-400">{href ? "Abrir painel" : "Ainda não configurado"}</span></span></span><ExternalLink className="h-4 w-4 text-slate-400" /></a>)}</div></section><section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"><h3 className="text-base font-semibold text-slate-950">GitHub</h3><p className="mt-1 text-sm text-slate-500">Informações públicas do repositório selecionado.</p>{selected.githubRepo ? <div className="mt-5 space-y-3"><div className="rounded-lg bg-slate-50 p-3"><p className="text-xs text-slate-500">Repositório</p><p className="mt-1 truncate text-sm font-medium text-slate-950">{github.repo?.full_name ?? selected.githubRepo}</p></div><div className="grid grid-cols-2 gap-3"><div className="rounded-lg border border-slate-200 p-3"><p className="text-xs text-slate-500">Issues abertas</p><p className="mt-1 text-lg font-semibold text-slate-950">{github.loading ? "…" : github.issues}</p></div><div className="rounded-lg border border-slate-200 p-3"><p className="text-xs text-slate-500">Pull requests</p><p className="mt-1 text-lg font-semibold text-slate-950">{github.loading ? "…" : github.prs}</p></div></div><div className="rounded-lg border border-slate-200 p-3"><p className="text-xs text-slate-500">Último commit</p><p className="mt-1 text-sm font-medium text-slate-950">{github.commit?.commit?.message ?? (github.loading ? "Carregando…" : "Não disponível")}</p>{github.commit?.sha && <p className="mt-1 font-mono text-[10px] text-slate-400">{github.commit.sha.slice(0, 7)} · {new Date(github.commit.commit.author.date).toLocaleString("pt-BR")}</p>}</div>{github.error && <p className="text-xs font-medium text-red-600">{github.error}</p>}<a href={selected.links.github} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-sm font-medium text-blue-700">Abrir GitHub <ExternalLink className="h-3.5 w-3.5" /></a></div> : <div className="mt-5 rounded-lg border border-dashed border-slate-200 p-4 text-xs leading-5 text-slate-500">Repositório ainda não configurado para este sistema.</div>}</section></div>
-      <section className="rounded-xl border border-dashed border-slate-200 bg-white p-5"><div className="flex gap-3"><Activity className="mt-0.5 h-4 w-4 shrink-0 text-blue-700" /><div><p className="text-sm font-medium text-slate-950">Fase 2 — GitHub conectado</p><p className="mt-1 text-xs leading-5 text-slate-500">O Control Center já consulta dados públicos do repositório configurado. Analytics, Cloudflare e dados operacionais específicos entram nas próximas integrações.</p></div></div></section>
+      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.16em] text-blue-600">Ecossistema AMT</p>
+            <h2 className="mt-1 text-lg font-semibold text-slate-950">Sistemas</h2>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-500">Catálogo, leads, versões, código e infraestrutura de cada produto da AMT.</p>
+          </div>
+          <div className="flex flex-wrap gap-2 text-xs">
+            <span className="rounded-full bg-blue-50 px-3 py-1.5 font-medium text-blue-700">{systems.length} sistemas</span>
+            {systems.map((system) => <span key={system.id} className="rounded-full bg-slate-100 px-3 py-1.5 font-medium text-slate-700">{system.name.replace("AMT ", "")} · {system.platform}</span>)}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        {systems.map((system) => {
+          const Icon = system.icon;
+          const active = system.id === selected.id;
+          return (
+            <button key={system.id} type="button" onClick={() => { setSelectedId(system.id); setMessage(""); setLeadSearch(""); }} className={`rounded-xl border bg-white p-5 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md ${active ? "border-blue-500 ring-1 ring-blue-500/20" : "border-slate-200"}`}>
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100"><Icon className="h-5 w-5 text-slate-900" /></div>
+                <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-medium text-blue-700">{system.platform}</span>
+              </div>
+              <h3 className="mt-4 font-semibold text-slate-950">{system.name}</h3>
+              <p className="mt-1 text-sm leading-5 text-slate-500">{system.description}</p>
+              <div className="mt-4 flex flex-wrap gap-1.5">{system.capabilities.map((capability) => <span key={capability} className="rounded-md bg-slate-50 px-2 py-1 text-[10px] font-medium text-slate-500">{capability}</span>)}</div>
+            </button>
+          );
+        })}
+      </div>
+
+      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <div className="flex flex-wrap items-center gap-3">
+              <h3 className="text-xl font-semibold text-slate-950">{selected.name}</h3>
+              <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">{selected.platform}</span>
+              {catalogItem && !catalogItem.ativo && <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">Inativo no catálogo</span>}
+            </div>
+            <p className="mt-1 text-sm text-slate-500">{selected.description}</p>
+          </div>
+          <a href={selected.href} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-lg bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800">Abrir sistema <ExternalLink className="h-4 w-4" /></a>
+        </div>
+        <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {stats.map(([label, value, detail, Icon]) => (
+            <div key={label} className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+              <div className="flex items-center gap-2 text-xs font-medium text-slate-500"><Icon className="h-4 w-4 text-blue-700" />{label}</div>
+              <p className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">{value}</p>
+              <p className="mt-1 text-[11px] leading-4 text-slate-400">{detail}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <div className="grid gap-6 xl:grid-cols-[1fr_360px]">
+        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h3 className="text-base font-semibold text-slate-950">Acessos operacionais</h3>
+          <p className="mt-1 text-sm text-slate-500">Painéis, páginas e serviços do sistema selecionado.</p>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            {selected.links.map(({ label, hint, href, icon: Icon }) => (
+              <a key={label} href={href} target="_blank" rel="noreferrer" className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 p-4 hover:border-blue-300 hover:bg-blue-50/30">
+                <span className="flex min-w-0 items-center gap-3">
+                  <span className="rounded-lg bg-slate-100 p-2"><Icon className="h-4 w-4 text-blue-700" /></span>
+                  <span className="min-w-0"><span className="block text-sm font-medium text-slate-950">{label}</span><span className="block truncate text-[11px] text-slate-400">{hint}</span></span>
+                </span>
+                <ExternalLink className="h-4 w-4 shrink-0 text-slate-400" />
+              </a>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h3 className="text-base font-semibold text-slate-950">GitHub</h3>
+          <p className="mt-1 text-sm text-slate-500">Repositório do código-fonte.</p>
+          <div className="mt-5 space-y-3">
+            <div className="rounded-lg bg-slate-50 p-3"><p className="text-xs text-slate-500">Repositório</p><p className="mt-1 truncate text-sm font-medium text-slate-950">{selected.githubRepo}</p></div>
+            {github.loading ? <p className="text-xs text-slate-500">Consultando o GitHub…</p> : github.private ? (
+              <div className="rounded-lg border border-dashed border-slate-200 p-3 text-xs leading-5 text-slate-500">Repositório privado: a API pública do GitHub não mostra commits, issues e pull requests sem token. Abra o repositório para acompanhar.</div>
+            ) : github.error ? <p className="text-xs font-medium text-red-600">{github.error}</p> : (
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-lg border border-slate-200 p-3"><p className="text-xs text-slate-500">Issues abertas</p><p className="mt-1 text-lg font-semibold text-slate-950">{github.issues}</p></div>
+                  <div className="rounded-lg border border-slate-200 p-3"><p className="text-xs text-slate-500">Pull requests</p><p className="mt-1 text-lg font-semibold text-slate-950">{github.prs}</p></div>
+                </div>
+                <div className="rounded-lg border border-slate-200 p-3"><p className="text-xs text-slate-500">Último commit</p><p className="mt-1 text-sm font-medium text-slate-950">{github.commit?.message ?? "Não disponível"}</p>{github.commit && <p className="mt-1 font-mono text-[10px] text-slate-400">{github.commit.sha.slice(0, 7)} · {new Date(github.commit.date).toLocaleString("pt-BR")}</p>}</div>
+              </>
+            )}
+            {release && !release.loading && !release.error && (
+              <div className="rounded-lg border border-slate-200 p-3">
+                <p className="text-xs text-slate-500">Última versão do instalador</p>
+                <p className="mt-1 text-sm font-medium text-slate-950">{release.tag}</p>
+                <p className="mt-1 text-[11px] text-slate-400">Publicada em {new Date(release.publishedAt).toLocaleDateString("pt-BR")} · {release.downloads} downloads</p>
+                <a href={release.url} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-blue-700">Ver release <ExternalLink className="h-3 w-3" /></a>
+              </div>
+            )}
+            <a href={"https://github.com/" + selected.githubRepo} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-sm font-medium text-blue-700">Abrir GitHub <ExternalLink className="h-3.5 w-3.5" /></a>
+          </div>
+        </section>
+      </div>
+
+      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h3 className="text-base font-semibold text-slate-950">Planos no catálogo</h3>
+            <p className="mt-1 text-sm text-slate-500">Planos que o site exibe e vende para o {selected.name}{catalogItem?.trial_dias ? ` · teste grátis de ${catalogItem.trial_dias} dias` : ""}.</p>
+          </div>
+          {isDesktop && <p className="text-xs text-slate-400">Os códigos dos planos precisam ser os mesmos do sistema.</p>}
+        </div>
+        {commercial.loading ? <p className="mt-5 text-sm text-slate-500">Carregando…</p> : !catalogItem ? (
+          <p className="mt-5 rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-500">Sistema não encontrado no catálogo (manager_sistemas, slug {selected.catalogSlug}).</p>
+        ) : systemPlans.length === 0 ? (
+          <p className="mt-5 rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-500">Nenhum plano cadastrado para este sistema.</p>
+        ) : (
+          <div className="mt-5 overflow-x-auto">
+            <table className="w-full min-w-[560px] text-sm">
+              <thead><tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500"><th className="py-2 pr-4 font-medium">Plano</th><th className="py-2 pr-4 font-medium">Código</th><th className="py-2 pr-4 font-medium">Mensal</th><th className="py-2 pr-4 font-medium">Anual</th><th className="py-2 font-medium">Situação</th></tr></thead>
+              <tbody>
+                {systemPlans.map((plan) => (
+                  <tr key={plan.id} className="border-b border-slate-100 last:border-0">
+                    <td className="py-3 pr-4 font-medium text-slate-950">{plan.nome}{plan.destaque && <span className="ml-2 rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-700">Destaque</span>}</td>
+                    <td className="py-3 pr-4 font-mono text-xs text-slate-500">{plan.slug}</td>
+                    <td className="py-3 pr-4 text-slate-700">{plan.preco_mensal !== null ? brl.format(Number(plan.preco_mensal)) : "—"}</td>
+                    <td className="py-3 pr-4 text-slate-700">{plan.preco_anual !== null ? brl.format(Number(plan.preco_anual)) : "—"}</td>
+                    <td className="py-3"><span className={`rounded-full px-2.5 py-1 text-xs font-medium ${plan.ativo ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>{plan.ativo ? "Ativo" : "Inativo"}</span></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h3 className="text-base font-semibold text-slate-950">{isDesktop ? "Testes grátis e leads" : "Leads do site"}</h3>
+            <p className="mt-1 text-sm text-slate-500">{isDesktop ? "Cada teste grátis feito pelo site vira um lead com o código da ótica e o fim do teste." : "Contatos comerciais interessados neste sistema."}</p>
+          </div>
+          <div className="flex gap-2">
+            <label className="relative"><Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" /><input value={leadSearch} onChange={(e) => setLeadSearch(e.target.value)} placeholder="Buscar" className="w-48 rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-950 outline-none focus:border-blue-500" /></label>
+            <Button type="button" variant="outline" size="sm" onClick={() => void commercial.reload()} className="h-9 gap-2"><RefreshCw className="h-4 w-4" /> Atualizar</Button>
+          </div>
+        </div>
+        {message && <p className="mt-4 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700">{message}</p>}
+        {commercial.leadsError ? <p className="mt-5 rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-500">{commercial.leadsError}</p> : commercial.loading ? <p className="mt-5 text-sm text-slate-500">Carregando…</p> : filteredLeads.length === 0 ? (
+          <p className="mt-5 rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-500">{systemLeads.length ? "Nenhum lead encontrado para a busca." : "Nenhum lead registrado para este sistema ainda."}</p>
+        ) : (
+          <div className="mt-5 divide-y divide-slate-100">
+            {filteredLeads.map((lead) => (
+              <div key={lead.id} className="grid gap-3 py-4 sm:grid-cols-[1fr_auto] sm:items-start">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-medium text-slate-950">{lead.empresa || lead.nome}</p>
+                    {isOptioneTrial(lead) && <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-700">Teste grátis</span>}
+                  </div>
+                  <p className="mt-1 text-xs text-slate-500">{[lead.empresa ? lead.nome : null, lead.email, lead.telefone].filter(Boolean).join(" · ") || "Sem contato"} · {new Date(lead.created_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}</p>
+                  {lead.observacoes && <p className="mt-2 whitespace-pre-line text-xs leading-5 text-slate-600">{lead.observacoes}</p>}
+                </div>
+                <select value={lead.status} onChange={(e) => void changeLeadStatus(lead, e.target.value)} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950">
+                  {commercialLeadStatuses.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                  {!commercialLeadStatuses.some(([value]) => value === lead.status) && <option value={lead.status}>{lead.status}</option>}
+                </select>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
     </section>
   );
 }
