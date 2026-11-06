@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
+  AppWindow,
   ArrowRight,
   BarChart3,
   Bell,
+  Bot,
   Boxes,
   Building2,
   CalendarClock,
@@ -11,19 +13,24 @@ import {
   Clock3,
   Cpu,
   Dumbbell,
+  Globe,
   GraduationCap,
   Layers,
   LayoutDashboard,
   Mail,
   MessageCircle,
+  Monitor,
   Package,
   Palette,
   Plug,
   Repeat,
   ShieldCheck,
   ShoppingBag,
+  ShoppingCart,
+  Smartphone,
   Sparkles,
   Stethoscope,
+  TabletSmartphone,
   TrendingUp,
   Users2,
   Wallet,
@@ -68,7 +75,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const TITLE = "AMT Sistemas | Sistemas White Label Personalizados";
 const DESCRIPTION =
-  "Desenvolvemos sistemas personalizados, plataformas White Label, automações e soluções com Inteligência Artificial para empresas.";
+  "Desenvolvemos sites, sistemas personalizados, softwares para Windows, aplicativos Android e iOS, automações e soluções com Inteligência Artificial para empresas.";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -150,6 +157,80 @@ const solucoes: Solucao[] = [
     logo: "/brand/logo-fight-wear.png",
     screenshot: "/assets/screenshot-fight-wear.webp",
     url: "https://amtfightwear.com.br",
+  },
+];
+
+type Servico = Item & { entregas: string[]; exemplo?: string };
+
+const servicos: Servico[] = [
+  {
+    icon: Globe,
+    titulo: "Desenvolvimento de websites",
+    texto:
+      "Sites institucionais, landing pages e páginas de venda rápidos, responsivos e prontos para aparecer no Google.",
+    entregas: ["Sites institucionais", "Landing pages", "SEO e desempenho"],
+    exemplo: "amtsistemas.com.br",
+  },
+  {
+    icon: AppWindow,
+    titulo: "Sistemas web e SaaS",
+    texto:
+      "Sistemas online acessados pelo navegador, com login, painéis, permissões e cobrança por assinatura.",
+    entregas: ["Painéis e relatórios", "Multiempresa", "Assinaturas recorrentes"],
+    exemplo: "AMT Dojo Manager",
+  },
+  {
+    icon: Monitor,
+    titulo: "Softwares para Windows",
+    texto:
+      "Programas instalados no computador, com instalador próprio e atualização automática para toda a equipe.",
+    entregas: ["Instalador para Windows", "Atualização automática", "Ativação por chave"],
+    exemplo: "AMT OptiOne",
+  },
+  {
+    icon: Smartphone,
+    titulo: "Aplicativos Android",
+    texto:
+      "Apps para celulares e tablets Android, publicados na Google Play ou entregues direto aos seus clientes.",
+    entregas: ["Google Play ou APK", "Notificações push", "Integrado ao seu sistema"],
+    exemplo: "App do aluno do Dojo Manager",
+  },
+  {
+    icon: TabletSmartphone,
+    titulo: "Aplicativos iOS",
+    texto:
+      "Apps para iPhone e iPad com a experiência que os usuários da Apple esperam, publicados na App Store.",
+    entregas: ["iPhone e iPad", "Publicação na App Store", "Integrado ao seu sistema"],
+  },
+  {
+    icon: Workflow,
+    titulo: "Automações",
+    texto:
+      "Tarefas repetitivas feitas pelo sistema: mensagens, lembretes, cobranças e troca de dados entre ferramentas.",
+    entregas: ["WhatsApp automático", "Lembretes e cobranças", "Rotinas agendadas"],
+    exemplo: "Lembretes de aula e de fatura do Dojo Manager",
+  },
+  {
+    icon: ShoppingCart,
+    titulo: "Lojas virtuais",
+    texto:
+      "E-commerce com catálogo, carrinho, cálculo de frete, pagamento on-line e gestão de pedidos.",
+    entregas: ["Catálogo e carrinho", "Cálculo de frete", "Gestão de pedidos"],
+    exemplo: "AMT Fight Wear",
+  },
+  {
+    icon: Plug,
+    titulo: "Integrações e pagamentos",
+    texto:
+      "Conexão com meios de pagamento, emissão de notas fiscais e APIs dos sistemas que a sua empresa já usa.",
+    entregas: ["Pix, cartão e boleto", "Mercado Pago e Asaas", "NFC-e e NF-e"],
+  },
+  {
+    icon: Bot,
+    titulo: "Inteligência Artificial",
+    texto:
+      "IA aplicada onde faz diferença no dia a dia: atendimento, criação de conteúdo e leitura de dados.",
+    entregas: ["Assistentes de atendimento", "Textos e imagens", "Análise de dados"],
   },
 ];
 
@@ -329,6 +410,7 @@ function AmtLanding() {
   return (
     <SiteShell>
       <Hero />
+      <Servicos />
       <Solucoes />
       <WhiteLabel />
       <Segmentos />
@@ -372,7 +454,7 @@ function Hero() {
           </span>
           <h1
             id="hero-titulo"
-            className="mt-6 text-[2.15rem] font-extrabold leading-[1.08] text-[var(--brand-navy)] sm:text-5xl lg:text-[3.4rem]"
+            className="mt-6 text-[2.1rem] font-bold leading-[1.07] text-[var(--brand-navy)] sm:text-5xl sm:leading-[1.05] lg:text-[3.05rem]"
           >
             Sistemas sob medida para o seu negócio.{" "}
             <span
@@ -383,8 +465,9 @@ function Hero() {
             </span>
           </h1>
           <p className="mt-6 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">
-            Sistemas personalizados, plataformas White Label, automações e Inteligência Artificial
-            para transformar processos em uma operação mais simples, integrada e eficiente.
+            Sites, sistemas web, softwares para Windows, aplicativos Android e iOS, automações e
+            Inteligência Artificial para transformar processos em uma operação mais simples,
+            integrada e eficiente.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button asChild className={`${CTA_LG} shadow-lg shadow-[oklch(0.31_0.09_259/0.25)]`}>
@@ -419,7 +502,7 @@ function Hero() {
             <div key={fato.rotulo} className="bg-white px-5 py-5 sm:px-6">
               <dt className="sr-only">{fato.rotulo}</dt>
               <dd>
-                <span className="block text-xl font-extrabold text-[var(--brand-navy)] sm:text-2xl">
+                <span className="font-display block text-xl font-bold tabular-nums text-[var(--brand-navy)] sm:text-2xl">
                   {fato.valor}
                 </span>
                 <span className="mt-1 block text-xs leading-5 text-muted-foreground sm:text-sm">
@@ -517,6 +600,78 @@ function BrowserFrame({
 }
 
 /* -------------------- SEÇÕES -------------------- */
+
+function Servicos() {
+  return (
+    <Section id="servicos" labelledBy="servicos-titulo">
+      <Reveal>
+        <SectionHeader
+          id="servicos-titulo"
+          eyebrow="Serviços"
+          title="Do site ao aplicativo: o que desenvolvemos para a sua empresa."
+          description="Projetos completos, do planejamento à publicação, feitos pela mesma equipe que mantém os nossos sistemas em operação."
+        />
+      </Reveal>
+
+      <ul className="mt-10 grid gap-4 sm:mt-12 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
+        {servicos.map((s, i) => (
+          <Reveal key={s.titulo} as="li" delay={(i % 3) * 0.05} className="h-full">
+            <article className="flex h-full flex-col rounded-2xl border border-[var(--border)] bg-white p-6 shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[oklch(0.6_0.105_194/0.45)] hover:shadow-[var(--shadow-lift)] sm:p-7">
+              <IconBadge icon={s.icon} />
+              <h3 className="mt-5 text-lg font-semibold leading-snug text-[var(--brand-navy)]">
+                {s.titulo}
+              </h3>
+              <p className="mt-2 text-[15px] leading-7 text-muted-foreground">{s.texto}</p>
+              <ul className="mt-5 flex flex-wrap gap-1.5" aria-label={`Entregas: ${s.titulo}`}>
+                {s.entregas.map((e) => (
+                  <li
+                    key={e}
+                    className="rounded-full bg-[var(--section-alt)] px-2.5 py-1 text-xs font-medium text-[var(--brand-navy)] ring-1 ring-inset ring-[var(--border)]"
+                  >
+                    {e}
+                  </li>
+                ))}
+              </ul>
+              {s.exemplo && (
+                <p className="mt-auto pt-5 text-xs leading-5 text-muted-foreground">
+                  <span className="block border-t border-[var(--border)] pt-4">
+                    <span className="font-semibold text-[var(--brand-teal)]">Na prática: </span>
+                    {s.exemplo}
+                  </span>
+                </p>
+              )}
+            </article>
+          </Reveal>
+        ))}
+      </ul>
+
+      <Reveal>
+        <div
+          className="mt-10 flex flex-col items-start justify-between gap-5 rounded-2xl p-6 text-white shadow-[var(--shadow-lift)] sm:flex-row sm:items-center sm:p-7"
+          style={{ background: "var(--gradient-dark)" }}
+        >
+          <div>
+            <p className="font-display text-lg font-semibold">
+              Não encontrou exatamente o que precisa?
+            </p>
+            <p className="mt-1 text-sm text-white/75 sm:text-base">
+              Descreva o projeto e indicamos o melhor caminho: site, sistema, aplicativo ou
+              automação.
+            </p>
+          </div>
+          <Button
+            asChild
+            className={`${CTA_LG} w-full shrink-0 bg-white text-[var(--brand-navy)] hover:bg-white/90 sm:w-auto`}
+          >
+            <a href="#contato">
+              Solicitar orçamento <ArrowRight />
+            </a>
+          </Button>
+        </div>
+      </Reveal>
+    </Section>
+  );
+}
 
 function Solucoes() {
   return (

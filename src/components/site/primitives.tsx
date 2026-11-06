@@ -94,7 +94,7 @@ export function SectionHeader({
       <h2
         id={id}
         className={cn(
-          "mt-4 text-[1.75rem] font-bold leading-[1.15] sm:text-4xl lg:text-[2.6rem]",
+          "mt-4 text-[1.7rem] font-bold leading-[1.15] sm:text-4xl sm:leading-[1.12] lg:text-[2.5rem]",
           dark ? "text-white" : "text-foreground",
         )}
       >
@@ -103,7 +103,7 @@ export function SectionHeader({
       {description && (
         <p
           className={cn(
-            "mt-4 text-base leading-7 sm:text-lg",
+            "mt-4 max-w-2xl text-base leading-7 sm:text-lg sm:leading-8",
             dark ? "text-white/75" : "text-muted-foreground",
             align === "center" && "mx-auto max-w-2xl",
           )}

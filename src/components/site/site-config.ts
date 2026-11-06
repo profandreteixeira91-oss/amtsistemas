@@ -9,6 +9,7 @@ export const CONTACT_EMAIL = "contato@amtsistemas.com.br";
 export type NavItem = { label: string; href: string };
 
 export const HOME_NAV: NavItem[] = [
+  { label: "Serviços", href: "/#servicos" },
   { label: "Soluções", href: "/#solucoes" },
   { label: "White Label", href: "/#white-label" },
   { label: "Como trabalhamos", href: "/#como-funciona" },

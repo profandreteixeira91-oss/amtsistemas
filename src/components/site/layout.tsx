@@ -209,6 +209,7 @@ function SiteFooter() {
           <FooterCol
             title="Empresa"
             items={[
+              { label: "Serviços", href: "/#servicos" },
               { label: "Soluções", href: "/#solucoes" },
               { label: "White Label", href: "/#white-label" },
               { label: "Como trabalhamos", href: "/#como-funciona" },
