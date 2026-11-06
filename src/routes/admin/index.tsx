@@ -62,6 +62,8 @@ type AmtSystem = {
   githubRepo: string;
   /** repositório público com os instaladores (só sistemas desktop) */
   releasesRepo?: string;
+  /** Edge Function platform-overview do sistema: clientes, assinaturas, cobranças e uso (só leitura) */
+  overviewUrl: string;
   capabilities: string[];
   links: Array<{ label: string; hint: string; href: string; icon: IconType }>;
 };
@@ -79,6 +81,7 @@ const systems: AmtSystem[] = [
     icon: Glasses,
     githubRepo: "profandreteixeira91-oss/gestao_otica",
     releasesRepo: "profandreteixeira91-oss/amt-optione-releases",
+    overviewUrl: "https://rragitmijwruydspafac.supabase.co/functions/v1/platform-overview",
     capabilities: ["Landing e teste grátis", "Chave de acesso", "Instalador Windows", "Supabase", "Mercado Pago"],
     links: [
       { label: "Landing page", hint: "amtsistemas.com.br/optione", href: "https://amtsistemas.com.br/optione", icon: Globe2 },
@@ -98,6 +101,7 @@ const systems: AmtSystem[] = [
     href: "https://amtdojomanager.com.br/dojo",
     icon: Swords,
     githubRepo: "profandreteixeira91-oss/amtdojomanager",
+    overviewUrl: "https://gudjmkiyprgwgxmzbgji.supabase.co/functions/v1/platform-overview",
     capabilities: ["Painel da academia", "App do aluno (PWA)", "Portal da equipe", "Supabase", "Cloudflare Workers"],
     links: [
       { label: "Site", hint: "amtdojomanager.com.br", href: "https://amtdojomanager.com.br/dojo", icon: Globe2 },
@@ -247,6 +251,7 @@ function DashboardOverview({ onOpen }: { onOpen: (module: string) => void }) {
                       {catalogItem && <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[11px] text-blue-700">{activePlans} {activePlans === 1 ? "plano" : "planos"} no catálogo</span>}
                     </div>
                     <p className="mt-1 text-sm text-slate-500">{system.description}</p>
+                    <SystemSubscriptionSummary system={system} />
                   </div>
                   <a href={system.href} target="_blank" rel="noreferrer" className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-blue-700" aria-label={"Abrir " + system.name}>
                     <ExternalLink className="h-4 w-4" />
@@ -944,6 +949,244 @@ function AuditWorkspace() {
   );
 }
 
+type OverviewCustomer = {
+  id: string; name: string; code: string | null; owner_name: string | null; owner_email: string | null; phone: string | null; city?: string | null;
+  plan: string | null; plan_name: string | null; status: string | null; group: string; amount_monthly: number | null;
+  trial_ends_at: string | null; current_period_end: string | null; next_due_date?: string | null; last_payment_status?: string | null;
+  cancel_at_period_end?: boolean; payment_method?: string | null; last_payment_error?: string | null; created_at: string | null;
+  users?: number; devices?: number; last_seen_at?: string | null;
+  students?: number; active_students?: number; apk_downloads?: number; open_tickets?: number;
+};
+type PlatformOverview = {
+  system: string;
+  generated_at: string;
+  customers: OverviewCustomer[];
+  payments?: Array<{ id: string; customer_id: string; customer_name: string | null; amount: number | null; status: string; date: string }>;
+  devices?: { active: number; seen_last_7d: number; activated_last_30d: number };
+  apk?: { published_versions: number; academies_with_apk: number; downloads: number; downloads_last_30d: number };
+  support?: Array<{ id: string; customer_id: string; customer_name: string | null; subject: string; category: string | null; status: string; priority: string | null; unread: boolean; last_message_at: string }>;
+  open_tickets?: number;
+  amt_fees?: { last_30d: number; transactions_last_30d: number };
+};
+
+const customerGroups: Record<string, { label: string; className: string }> = {
+  pagante: { label: "Pagante", className: "bg-emerald-50 text-emerald-700" },
+  liberado: { label: "Liberado", className: "bg-sky-50 text-sky-700" },
+  teste: { label: "Em teste", className: "bg-blue-50 text-blue-700" },
+  teste_vencido: { label: "Teste vencido", className: "bg-amber-50 text-amber-700" },
+  pendente: { label: "Pendente", className: "bg-red-50 text-red-700" },
+  cancelado: { label: "Cancelado", className: "bg-slate-100 text-slate-500" },
+  sem_assinatura: { label: "Sem assinatura", className: "bg-slate-100 text-slate-500" },
+};
+
+// Relatório da plataforma de cada sistema (Edge Function platform-overview no projeto do sistema).
+// A função confere o token do Control Center no projeto amt-sistemas; nada privilegiado passa pelo navegador.
+function usePlatformOverview(url: string) {
+  const [state, setState] = useState<{ loading: boolean; error: string; data: PlatformOverview | null }>({ loading: true, error: "", data: null });
+
+  async function load() {
+    setState((value) => ({ ...value, loading: true, error: "" }));
+    try {
+      const { data } = await amtSupabase.auth.getSession();
+      const token = data.session?.access_token;
+      if (!token) throw new Error("Sessão expirada. Entre novamente.");
+      const response = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      const body = await response.json().catch(() => ({})) as PlatformOverview & { error?: string };
+      if (!response.ok) throw new Error(body.error ?? (response.status === 404 ? "O relatório ainda não foi publicado neste sistema." : "Não foi possível carregar o relatório."));
+      setState({ loading: false, error: "", data: body });
+    } catch (error) {
+      const message = error instanceof TypeError ? "Relatório indisponível: a função platform-overview não respondeu (ainda não publicada?)." : error instanceof Error ? error.message : "Não foi possível carregar o relatório.";
+      setState({ loading: false, error: message, data: null });
+    }
+  }
+
+  useEffect(() => { void load(); }, [url]);
+
+  return { ...state, reload: load };
+}
+
+function summarizeCustomers(customers: OverviewCustomer[]) {
+  const byGroup = (group: string) => customers.filter((customer) => customer.group === group).length;
+  return {
+    total: customers.length,
+    paying: byGroup("pagante"),
+    trial: byGroup("teste"),
+    expiredTrial: byGroup("teste_vencido"),
+    pending: byGroup("pendente"),
+    mrr: customers.filter((customer) => customer.group === "pagante").reduce((sum, customer) => sum + (customer.amount_monthly ?? 0), 0),
+  };
+}
+
+const formatDate = (value: string | null | undefined) => (value ? new Date(value.length === 10 ? value + "T12:00:00" : value).toLocaleDateString("pt-BR") : "—");
+
+function customerDeadline(customer: OverviewCustomer) {
+  if (customer.group === "teste" || customer.group === "teste_vencido") return customer.trial_ends_at ? `Teste até ${formatDate(customer.trial_ends_at)}` : "Teste sem data";
+  if (customer.next_due_date) return `Próxima cobrança ${formatDate(customer.next_due_date)}`;
+  if (customer.current_period_end) return new Date(customer.current_period_end).getFullYear() >= 2100 ? "Sem vencimento" : `Válida até ${formatDate(customer.current_period_end)}`;
+  return "—";
+}
+
+function customerUsage(customer: OverviewCustomer) {
+  if (customer.devices !== undefined) {
+    const lastSeen = customer.last_seen_at ? ` · visto em ${formatDate(customer.last_seen_at)}` : "";
+    return `${customer.devices} ${customer.devices === 1 ? "computador" : "computadores"} · ${customer.users ?? 0} usuários${lastSeen}`;
+  }
+  const tickets = customer.open_tickets ? ` · ${customer.open_tickets} chamado${customer.open_tickets === 1 ? "" : "s"}` : "";
+  return `${customer.active_students ?? 0} alunos ativos · ${customer.apk_downloads ?? 0} downloads do app${tickets}`;
+}
+
+function SystemSubscriptionSummary({ system }: { system: AmtSystem }) {
+  const overview = usePlatformOverview(system.overviewUrl);
+  if (overview.loading) return <p className="mt-2 text-xs text-slate-400">Carregando assinaturas…</p>;
+  if (!overview.data) return <p className="mt-2 text-xs text-slate-400">Assinaturas indisponíveis</p>;
+  const summary = summarizeCustomers(overview.data.customers);
+  return <p className="mt-2 text-xs text-slate-500">{summary.total} clientes · {summary.paying} pagantes · {summary.trial} em teste · {brl.format(summary.mrr)}/mês</p>;
+}
+
+function PlatformSection({ system }: { system: AmtSystem }) {
+  const overview = usePlatformOverview(system.overviewUrl);
+  const [group, setGroup] = useState("todos");
+  const [search, setSearch] = useState("");
+  const isDesktop = Boolean(system.releasesRepo);
+  const noun = isDesktop ? "Óticas" : "Academias";
+
+  const customers = overview.data?.customers ?? [];
+  const summary = summarizeCustomers(customers);
+  const filtered = customers.filter((customer) => (group === "todos" || customer.group === group) && [customer.name, customer.code ?? "", customer.owner_name ?? "", customer.owner_email ?? "", customer.phone ?? "", customer.city ?? ""].join(" ").toLowerCase().includes(search.toLowerCase()));
+  const groupsPresent = Object.keys(customerGroups).filter((key) => customers.some((customer) => customer.group === key));
+
+  const cards: Array<[string, string, string]> = [
+    [noun, String(summary.total), `${summary.pending} com pagamento pendente`],
+    ["Pagantes", String(summary.paying), "Assinatura ativa com cobrança"],
+    ["Em teste", String(summary.trial), `${summary.expiredTrial} com teste vencido`],
+    ["Receita mensal", brl.format(summary.mrr), "Soma das assinaturas pagantes"],
+  ];
+
+  return (
+    <section className="space-y-6">
+      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h3 className="text-base font-semibold text-slate-950">Clientes e assinaturas</h3>
+            <p className="mt-1 text-sm text-slate-500">{noun} cadastradas no {system.name}, direto do banco do sistema.{overview.data ? ` Atualizado às ${new Date(overview.data.generated_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}.` : ""}</p>
+          </div>
+          <div className="flex gap-2">
+            <label className="relative"><Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" /><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar" className="w-48 rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-950 outline-none focus:border-blue-500" /></label>
+            <Button type="button" variant="outline" size="sm" onClick={() => void overview.reload()} className="h-9 gap-2"><RefreshCw className="h-4 w-4" /> Atualizar</Button>
+          </div>
+        </div>
+
+        {overview.loading && !overview.data ? <p className="mt-5 text-sm text-slate-500">Carregando…</p> : overview.error ? (
+          <p className="mt-5 rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-500">{overview.error}</p>
+        ) : (
+          <>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {cards.map(([label, value, detail]) => (
+                <div key={label} className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+                  <p className="text-xs font-medium text-slate-500">{label}</p>
+                  <p className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">{value}</p>
+                  <p className="mt-1 text-[11px] leading-4 text-slate-400">{detail}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              {["todos", ...groupsPresent].map((key) => {
+                const total = key === "todos" ? customers.length : customers.filter((customer) => customer.group === key).length;
+                return <button key={key} type="button" onClick={() => setGroup(key)} className={`rounded-full px-3 py-1.5 text-xs font-medium ${group === key ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}>{key === "todos" ? "Todos" : customerGroups[key].label} · {total}</button>;
+              })}
+            </div>
+
+            {filtered.length === 0 ? <p className="mt-5 rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-500">{customers.length ? "Nenhum cliente encontrado para o filtro." : "Nenhum cliente cadastrado ainda."}</p> : (
+              <div className="mt-5 overflow-x-auto">
+                <table className="w-full min-w-[820px] text-sm">
+                  <thead><tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500"><th className="py-2 pr-4 font-medium">Cliente</th><th className="py-2 pr-4 font-medium">Situação</th><th className="py-2 pr-4 font-medium">Plano</th><th className="py-2 pr-4 font-medium">Prazo</th><th className="py-2 font-medium">Uso</th></tr></thead>
+                  <tbody>
+                    {filtered.map((customer) => {
+                      const info = customerGroups[customer.group] ?? customerGroups.sem_assinatura;
+                      return (
+                        <tr key={customer.id} className="border-b border-slate-100 align-top last:border-0">
+                          <td className="py-3 pr-4">
+                            <p className="font-medium text-slate-950">{customer.name}</p>
+                            <p className="mt-1 text-xs text-slate-500">{[customer.code, customer.owner_name, customer.owner_email, customer.phone, customer.city].filter(Boolean).join(" · ") || "Sem contato"}</p>
+                          </td>
+                          <td className="py-3 pr-4">
+                            <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${info.className}`}>{info.label}</span>
+                            {customer.cancel_at_period_end && <p className="mt-2 text-[11px] text-amber-700">Cancela no fim do período</p>}
+                            {customer.last_payment_error && <p className="mt-2 max-w-48 text-[11px] text-red-600">{customer.last_payment_error}</p>}
+                          </td>
+                          <td className="py-3 pr-4 text-slate-700">
+                            <p>{customer.plan_name ?? "—"}</p>
+                            <p className="mt-1 text-xs text-slate-500">{customer.amount_monthly !== null ? `${brl.format(customer.amount_monthly)}/mês` : ""}{customer.payment_method ? ` · ${customer.payment_method}` : ""}</p>
+                          </td>
+                          <td className="py-3 pr-4 text-xs text-slate-600">{customerDeadline(customer)}{customer.created_at && <p className="mt-1 text-slate-400">Cliente desde {formatDate(customer.created_at)}</p>}</td>
+                          <td className="py-3 text-xs text-slate-600">{customerUsage(customer)}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
+        )}
+      </section>
+
+      {overview.data && (
+        <div className="grid gap-6 xl:grid-cols-[1fr_360px]">
+          {overview.data.payments !== undefined && (
+            <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+              <h3 className="text-base font-semibold text-slate-950">Cobranças recentes</h3>
+              <p className="mt-1 text-sm text-slate-500">Mensalidades cobradas pelo Mercado Pago.</p>
+              {overview.data.payments.length === 0 ? <p className="mt-5 rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-500">Nenhuma cobrança registrada ainda.</p> : (
+                <div className="mt-5 divide-y divide-slate-100">
+                  {overview.data.payments.map((payment) => (
+                    <div key={payment.id} className="flex items-center justify-between gap-3 py-3 text-sm">
+                      <div className="min-w-0"><p className="truncate font-medium text-slate-950">{payment.customer_name ?? "Ótica removida"}</p><p className="text-xs text-slate-500">{formatDate(payment.date)} · {payment.status}</p></div>
+                      <span className="shrink-0 font-medium text-slate-950">{payment.amount !== null ? brl.format(payment.amount) : "—"}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
+
+          {overview.data.support !== undefined && (
+            <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+              <h3 className="text-base font-semibold text-slate-950">Chamados de suporte abertos</h3>
+              <p className="mt-1 text-sm text-slate-500">Respondidos no painel do Dojo Manager.</p>
+              {overview.data.support.length === 0 ? <p className="mt-5 rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-500">Nenhum chamado aberto.</p> : (
+                <div className="mt-5 divide-y divide-slate-100">
+                  {overview.data.support.map((ticket) => (
+                    <div key={ticket.id} className="py-3 text-sm">
+                      <div className="flex flex-wrap items-center gap-2"><p className="font-medium text-slate-950">{ticket.subject}</p>{ticket.unread && <span className="rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-medium text-red-700">Não lido</span>}</div>
+                      <p className="mt-1 text-xs text-slate-500">{ticket.customer_name ?? "Academia"} · {ticket.status.replace("_", " ")}{ticket.priority ? ` · prioridade ${ticket.priority}` : ""} · {formatDate(ticket.last_message_at)}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
+
+          <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h3 className="text-base font-semibold text-slate-950">{overview.data.devices ? "Instalações" : "App do aluno"}</h3>
+            <p className="mt-1 text-sm text-slate-500">{overview.data.devices ? "Computadores ativados com a chave de acesso." : "APK publicado pelas academias para os alunos."}</p>
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              {(overview.data.devices
+                ? [["Computadores ativos", overview.data.devices.active], ["Vistos em 7 dias", overview.data.devices.seen_last_7d], ["Ativados em 30 dias", overview.data.devices.activated_last_30d]]
+                : overview.data.apk
+                  ? [["Downloads do APK", overview.data.apk.downloads], ["Downloads em 30 dias", overview.data.apk.downloads_last_30d], ["Academias com APK", overview.data.apk.academies_with_apk], ["Versões publicadas", overview.data.apk.published_versions]]
+                  : []
+              ).map(([label, value]) => <div key={String(label)} className="rounded-lg border border-slate-200 p-3"><p className="text-xs text-slate-500">{label}</p><p className="mt-1 text-lg font-semibold text-slate-950">{String(value)}</p></div>)}
+            </div>
+            {overview.data.amt_fees && <p className="mt-4 text-xs text-slate-500">Taxa da AMT sobre cobranças das academias (30 dias): {brl.format(overview.data.amt_fees.last_30d)} em {overview.data.amt_fees.transactions_last_30d} transações.</p>}
+          </section>
+        </div>
+      )}
+    </section>
+  );
+}
+
 type GitHubState = { loading: boolean; private: boolean; error: string; commit: { sha: string; message: string; date: string } | null; issues: number; prs: number };
 type ReleaseState = { loading: boolean; error: string; tag: string; publishedAt: string; url: string; downloads: number } | null;
 
@@ -985,8 +1228,10 @@ function SystemsWorkspace() {
       setRelease({ loading: true, error: "", tag: "", publishedAt: "", url: "", downloads: 0 });
       fetch("https://api.github.com/repos/" + selected.releasesRepo + "/releases/latest")
         .then((r) => r.ok ? r.json() : Promise.reject(new Error("Nenhuma versão publicada encontrada.")))
-        .then((data: { tag_name: string; published_at: string; html_url: string; assets?: Array<{ download_count?: number }> }) => {
-          if (active) setRelease({ loading: false, error: "", tag: data.tag_name, publishedAt: data.published_at, url: data.html_url, downloads: (data.assets ?? []).reduce((sum, asset) => sum + (asset.download_count ?? 0), 0) });
+        .then((data: { tag_name: string; published_at: string; html_url: string; assets?: Array<{ name: string; download_count?: number }> }) => {
+          // Só os instaladores: o .sha256 é baixado também pela atualização automática para conferir o arquivo.
+          const downloads = (data.assets ?? []).filter((asset) => asset.name.toLowerCase().endsWith(".exe")).reduce((sum, asset) => sum + (asset.download_count ?? 0), 0);
+          if (active) setRelease({ loading: false, error: "", tag: data.tag_name, publishedAt: data.published_at, url: data.html_url, downloads });
         })
         .catch((error) => { if (active) setRelease({ loading: false, error: error instanceof Error ? error.message : "Falha ao consultar as versões.", tag: "", publishedAt: "", url: "", downloads: 0 }); });
     } else {
@@ -1090,6 +1335,8 @@ function SystemsWorkspace() {
           ))}
         </div>
       </section>
+
+      <PlatformSection key={selected.id} system={selected} />
 
       <div className="grid gap-6 xl:grid-cols-[1fr_360px]">
         <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
