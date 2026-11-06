@@ -18,6 +18,7 @@ import {
   KeyRound,
   LayoutDashboard,
   LogOut,
+  MessageCircle,
   Package,
   Plus,
   Search,
@@ -33,6 +34,7 @@ import {
 import { DevelopmentWorkspace } from "@/components/admin/DevelopmentWorkspace";
 import { PromptGeneratorWorkspace } from "@/components/admin/PromptGeneratorWorkspace";
 import { DevelopmentAgentWorkspace } from "@/components/admin/DevelopmentAgentWorkspace";
+import { SupportWhatsAppWorkspace } from "@/components/admin/SupportWhatsAppWorkspace";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAdminProfile, getAdminSession, signOutAdmin } from "@/lib/amt-admin-auth";
@@ -166,6 +168,7 @@ function pad(value: number) {
 
 const modules = [
   { label: "Sistemas", icon: Boxes, to: "/admin/sistemas" },
+  { label: "WhatsApp", icon: MessageCircle, to: "/admin/whatsapp" },
   { label: "Leads", icon: Users, to: "/admin/leads" },
   { label: "Formulários", icon: FileText, to: "/admin/formularios" },
   { label: "Ferramentas", icon: Wrench, to: "/admin/ferramentas" },
@@ -444,6 +447,7 @@ function SidebarButton({ icon: Icon, label, active, collapsed, onClick }: {
 }
 
 function ModuleWorkspace({ module }: { module: string }) {
+  if (module === "WhatsApp") return <SupportWhatsAppWorkspace />;
   if (module === "Leads") return <LeadsWorkspace />;
   if (module === "Sistemas") return <SystemsWorkspace />;
   if (module === "Formulários") return <FormsWorkspace />;
