@@ -94,7 +94,7 @@ function SiteHeader({ nav }: { nav: NavItem[] }) {
             <a
               key={item.href}
               href={item.href}
-              className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-[var(--section-alt)] hover:text-foreground"
+              className="whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-[var(--section-alt)] hover:text-foreground"
             >
               {item.label}
             </a>
@@ -113,7 +113,7 @@ function SiteHeader({ nav }: { nav: NavItem[] }) {
           </Button>
           <Button asChild className={cn(CTA_MD, "hidden sm:inline-flex")}>
             <a href="/#contato">
-              Solicitar análise <ArrowRight />
+              Solicitar orçamento <ArrowRight />
             </a>
           </Button>
           <MobileMenu nav={nav} />
@@ -176,7 +176,7 @@ function MobileMenu({ nav }: { nav: NavItem[] }) {
           <SheetClose asChild>
             <Button asChild className={CTA_MD}>
               <a href="/#contato">
-                Solicitar análise do projeto <ArrowRight />
+                Solicitar orçamento <ArrowRight />
               </a>
             </Button>
           </SheetClose>
@@ -201,17 +201,17 @@ function SiteFooter() {
               <AmtBrand inverted />
             </Link>
             <p className="mt-5 max-w-xs text-sm leading-6 text-white/70">
-              Sistemas White Label personalizados, automações e Inteligência Artificial para
-              empresas. Tecnologia que conecta. Soluções que transformam.
+              Sistemas White Label com a marca da sua empresa, sites, softwares e aplicativos sob
+              medida.
             </p>
           </div>
           <FooterCol title="Sistemas" items={SISTEMAS} />
           <FooterCol
             title="Empresa"
             items={[
-              { label: "Serviços", href: "/#servicos" },
-              { label: "Soluções", href: "/#solucoes" },
               { label: "White Label", href: "/#white-label" },
+              { label: "Serviços", href: "/#servicos" },
+              { label: "Sistemas em operação", href: "/#sistemas" },
               { label: "Como trabalhamos", href: "/#como-funciona" },
               { label: "Dúvidas frequentes", href: "/#faq" },
             ]}
@@ -244,7 +244,7 @@ function SiteFooter() {
                   href="/#contato"
                   className="inline-flex items-center gap-2 text-white/85 hover:text-white"
                 >
-                  <ArrowRight className="h-4 w-4" /> Solicitar análise
+                  <ArrowRight className="h-4 w-4" /> Solicitar orçamento
                 </a>
               </li>
             </ul>
