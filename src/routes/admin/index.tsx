@@ -234,7 +234,7 @@ function DashboardOverview({ onOpen }: { onOpen: (module: string) => void }) {
               <CardTitle className="text-lg">Sistemas</CardTitle>
               <p className="mt-1 text-sm text-slate-500">Produtos da AMT em operação.</p>
             </div>
-            <button type="button" onClick={() => onOpen("Sistemas")} className="text-sm font-medium text-blue-700 hover:text-blue-800">Ver todos</button>
+            <button type="button" onClick={() => onOpen("Sistemas")} className="shrink-0 whitespace-nowrap text-sm font-medium text-blue-700 hover:text-blue-800">Ver todos</button>
           </CardHeader>
           <CardContent className="space-y-3">
             {systems.map((system) => {
@@ -253,7 +253,7 @@ function DashboardOverview({ onOpen }: { onOpen: (module: string) => void }) {
                     <p className="mt-1 text-sm text-slate-500">{system.description}</p>
                     <SystemSubscriptionSummary system={system} />
                   </div>
-                  <a href={system.href} target="_blank" rel="noreferrer" className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-blue-700" aria-label={"Abrir " + system.name}>
+                  <a href={system.href} target="_blank" rel="noreferrer" className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-blue-700" aria-label={"Abrir " + system.name}>
                     <ExternalLink className="h-4 w-4" />
                   </a>
                 </div>
@@ -284,7 +284,7 @@ function DashboardOverview({ onOpen }: { onOpen: (module: string) => void }) {
               <CardTitle className="text-lg">Últimos testes grátis</CardTitle>
               <p className="mt-1 text-sm text-slate-500">Óticas cadastradas no AMT OptiOne pelo site.</p>
             </div>
-            <button type="button" onClick={() => onOpen("Sistemas")} className="text-sm font-medium text-blue-700 hover:text-blue-800">Ver todos</button>
+            <button type="button" onClick={() => onOpen("Sistemas")} className="shrink-0 whitespace-nowrap text-sm font-medium text-blue-700 hover:text-blue-800">Ver todos</button>
           </CardHeader>
           <CardContent className="space-y-4">
             {commercial.leadsError ? <p className="text-sm text-slate-500">{commercial.leadsError}</p> : commercial.loading ? <p className="text-sm text-slate-500">Carregando...</p> : trials.length === 0 ? <p className="text-sm text-slate-500">Nenhum teste grátis registrado ainda.</p> : trials.slice(0, 5).map((lead) => (
@@ -306,7 +306,7 @@ function DashboardOverview({ onOpen }: { onOpen: (module: string) => void }) {
               <CardTitle className="text-lg">Atividade recente</CardTitle>
               <p className="mt-1 text-sm text-slate-500">Últimas ações registradas na auditoria.</p>
             </div>
-            <button type="button" onClick={() => onOpen("Auditoria")} className="text-sm font-medium text-blue-700 hover:text-blue-800">Ver auditoria</button>
+            <button type="button" onClick={() => onOpen("Auditoria")} className="shrink-0 whitespace-nowrap text-sm font-medium text-blue-700 hover:text-blue-800">Ver auditoria</button>
           </CardHeader>
           <CardContent className="space-y-4">
             {activity.length === 0 ? <p className="text-sm text-slate-500">Nenhuma ação registrada ainda.</p> : activity.map((log) => (
@@ -368,11 +368,11 @@ function AdminDashboard() {
   }
 
   if (loading) {
-    return <div className="flex min-h-screen items-center justify-center bg-white text-sm text-slate-500">Validando sessão...</div>;
+    return <div className="amt-admin flex min-h-screen items-center justify-center bg-white text-sm text-slate-500">Validando sessão...</div>;
   }
 
   return (
-    <main className="min-h-screen bg-white text-slate-950">
+    <main className="amt-admin min-h-screen bg-white text-slate-950">
       <div className="flex min-h-screen">
         <aside className={`fixed inset-y-0 left-0 z-40 hidden shrink-0 flex-col border-r border-slate-800 bg-slate-950 text-white transition-[width] duration-200 lg:flex ${sidebarCollapsed ? "w-20" : "w-72"}`}>
           <div className="flex h-20 items-center gap-3 border-b border-white/10 px-6">

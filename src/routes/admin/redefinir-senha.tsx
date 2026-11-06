@@ -100,12 +100,12 @@ function ResetAdminPassword() {
   }
 
   if (loading) {
-    return <div className="flex min-h-screen items-center justify-center bg-slate-950 text-sm text-slate-400">Validando recuperação...</div>;
+    return <div className="amt-admin flex min-h-screen items-center justify-center bg-slate-950 text-sm text-slate-400">Validando recuperação...</div>;
   }
 
   if (!ready) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-950 px-5">
+      <main className="amt-admin flex min-h-screen items-center justify-center bg-slate-950 px-5">
         <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-2xl">
           <CheckCircle2 className="mx-auto h-10 w-10 text-blue-600" />
           <h1 className="mt-5 text-2xl font-semibold text-slate-950">Link de recuperação inválido</h1>
@@ -121,7 +121,7 @@ function ResetAdminPassword() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-950 px-5 py-10">
+    <main className="amt-admin flex min-h-screen items-center justify-center bg-slate-950 px-5 py-10">
       <section className="w-full max-w-md rounded-2xl bg-white p-7 shadow-2xl sm:p-9">
         <div className="mb-7">
           <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-700">

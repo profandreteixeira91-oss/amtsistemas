@@ -38,11 +38,11 @@ export function AdminModulePage({
   }
 
   if (loading) {
-    return <div className="flex min-h-screen items-center justify-center bg-white text-sm text-slate-500">Validando sessão...</div>;
+    return <div className="amt-admin flex min-h-screen items-center justify-center bg-white text-sm text-slate-500">Validando sessão...</div>;
   }
 
   return (
-    <main className="min-h-screen bg-white text-slate-950">
+    <main className="amt-admin min-h-screen bg-white text-slate-950">
       <header className="border-b border-blue-700 bg-blue-700 text-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
           <div className="flex items-center gap-3">
