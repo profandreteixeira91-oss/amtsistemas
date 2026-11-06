@@ -6,6 +6,27 @@ export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURICo
 )}`;
 export const CONTACT_EMAIL = "contato@amtsistemas.com.br";
 
+/** WhatsApp do suporte (instância amt-suporte): atende o chat do site, no celular e no /admin. */
+export const SUPPORT_WHATSAPP_NUMBER = "551151040791";
+export const SUPPORT_WHATSAPP_URL = `https://wa.me/${SUPPORT_WHATSAPP_NUMBER}`;
+
+/** Evento que abre o chat do site (components/site/site-chat.tsx). */
+export const SITE_CHAT_EVENT = "amt:site-chat-open";
+
+/**
+ * Clique num botão "WhatsApp" do site: abre o chat na própria página. Sem o chat carregado (JavaScript
+ * desligado, erro), o link segue para o WhatsApp normalmente.
+ */
+export function openSiteChat(event?: { preventDefault(): void }) {
+  if (
+    typeof window === "undefined" ||
+    !(window as unknown as { __amtSiteChat?: boolean }).__amtSiteChat
+  )
+    return;
+  event?.preventDefault();
+  window.dispatchEvent(new Event(SITE_CHAT_EVENT));
+}
+
 export type NavItem = { label: string; href: string };
 
 export const HOME_NAV: NavItem[] = [

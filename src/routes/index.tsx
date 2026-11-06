@@ -41,6 +41,7 @@ import {
   CTA_LG,
   WHATSAPP_NUMBER,
   WHATSAPP_URL,
+  openSiteChat,
 } from "@/components/site/site-config";
 import { Container, IconBadge, Reveal, Section, SectionHeader } from "@/components/site/primitives";
 import { supabase } from "@/integrations/supabase/client";
@@ -552,7 +553,7 @@ function Faq() {
             description="Não encontrou a sua dúvida? Fale direto com a nossa equipe."
           />
           <Button asChild variant="outline" className={`${CTA_LG} mt-8`}>
-            <a href={WHATSAPP_URL} target="_blank" rel="noreferrer">
+            <a href={WHATSAPP_URL} target="_blank" rel="noreferrer" onClick={openSiteChat}>
               <MessageCircle /> Perguntar pelo WhatsApp
             </a>
           </Button>
@@ -629,6 +630,7 @@ function Contato() {
               href={WHATSAPP_URL}
               target="_blank"
               rel="noreferrer"
+              onClick={openSiteChat}
               className="flex items-center gap-3 rounded-xl border border-white/15 bg-white/[0.06] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/[0.12]"
             >
               <MessageCircle className="h-5 w-5 text-[oklch(0.82_0.09_195)]" /> Falar pelo WhatsApp

@@ -19,8 +19,10 @@ import {
   HOME_NAV,
   SISTEMAS,
   WHATSAPP_URL,
+  openSiteChat,
   type NavItem,
 } from "./site-config";
+import { SiteChat } from "./site-chat";
 
 // Casca do site público: cabeçalho, rodapé e tema .amt-site (styles.css).
 
@@ -50,6 +52,7 @@ export function SiteShell({
           {children}
         </main>
         <SiteFooter />
+        <SiteChat />
       </div>
     </MotionConfig>
   );
@@ -107,7 +110,7 @@ function SiteHeader({ nav }: { nav: NavItem[] }) {
             variant="ghost"
             className="hidden h-10 rounded-lg px-3 text-sm font-semibold sm:inline-flex"
           >
-            <a href={WHATSAPP_URL} target="_blank" rel="noreferrer">
+            <a href={WHATSAPP_URL} target="_blank" rel="noreferrer" onClick={openSiteChat}>
               <MessageCircle /> WhatsApp
             </a>
           </Button>
@@ -180,11 +183,13 @@ function MobileMenu({ nav }: { nav: NavItem[] }) {
               </a>
             </Button>
           </SheetClose>
-          <Button asChild variant="outline" className={CTA_MD}>
-            <a href={WHATSAPP_URL} target="_blank" rel="noreferrer">
-              <MessageCircle /> Falar pelo WhatsApp
-            </a>
-          </Button>
+          <SheetClose asChild>
+            <Button asChild variant="outline" className={CTA_MD}>
+              <a href={WHATSAPP_URL} target="_blank" rel="noreferrer" onClick={openSiteChat}>
+                <MessageCircle /> Falar pelo WhatsApp
+              </a>
+            </Button>
+          </SheetClose>
         </div>
       </SheetContent>
     </Sheet>
@@ -226,6 +231,7 @@ function SiteFooter() {
                   href={WHATSAPP_URL}
                   target="_blank"
                   rel="noreferrer"
+                  onClick={openSiteChat}
                   className="inline-flex items-center gap-2 text-white/85 hover:text-white"
                 >
                   <MessageCircle className="h-4 w-4" /> WhatsApp

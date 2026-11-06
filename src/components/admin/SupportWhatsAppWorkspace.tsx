@@ -26,33 +26,13 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { amtSupabase } from "@/integrations/amt-supabase/client";
+import { inbox } from "@/lib/support-inbox";
 
-// Caixa de entrada do WhatsApp do suporte AMT (número do suporte do Dojo Manager), no mesmo esquema da caixa
-// da loja na AMT Fight Wear. Tudo passa pela Edge Function support-inbox do projeto do Dojo, que confere o
-// login do Control Center; as respostas a chamados citando o aviso continuam funcionando (a função repassa).
+// Caixa de entrada do WhatsApp do suporte AMT (instância amt-suporte, o número 551151040791), no mesmo esquema
+// da caixa da loja na AMT Fight Wear. Recebe também as conversas iniciadas pelo chat do site (etiqueta "Site").
+// Tudo passa pela Edge Function support-inbox do projeto do Dojo, que confere o login do Control Center.
 
-const SUPPORT_INBOX_URL = "https://gudjmkiyprgwgxmzbgji.supabase.co/functions/v1/support-inbox";
 const DOJO_SUPPORT_URL = "https://amtdojomanager.com.br";
-
-async function inbox<T>(action: string, body: Record<string, unknown> = {}): Promise<T> {
-  const { data } = await amtSupabase.auth.getSession();
-  const token = data.session?.access_token;
-  if (!token) throw new Error("Sessão expirada. Entre novamente.");
-  let response: Response;
-  try {
-    response = await fetch(SUPPORT_INBOX_URL, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}`, "content-type": "application/json" },
-      body: JSON.stringify({ action, ...body }),
-    });
-  } catch {
-    throw new Error("A caixa de entrada do suporte não respondeu (função support-inbox não publicada?).");
-  }
-  const result = (await response.json().catch(() => ({}))) as T & { error?: string };
-  if (!response.ok) throw new Error(result.error ?? "Não foi possível concluir a operação.");
-  return result;
-}
 
 type Status = {
   configured: boolean;
@@ -62,7 +42,7 @@ type Status = {
   number: string | null;
   profileName: string | null;
   webhookActive: boolean;
-  forwarding: boolean;
+  ticketReplies: boolean;
   chats: number;
   error: string | null;
 };
@@ -73,7 +53,7 @@ type Chat = {
   name: string | null;
   academy_owner_id: string | null;
   academy: { owner_id: string; name: string } | null;
-  is_team: boolean;
+  is_self: boolean;
   last_message_at: string | null;
   last_message_preview: string | null;
   last_message_from_me: boolean | null;
@@ -119,7 +99,7 @@ const FILTERS: Array<{ key: Filter; label: string }> = [
   { key: "retorno", label: "Retorno agendado" },
   { key: "arquivadas", label: "Arquivadas" },
 ];
-const CHAT_TAGS = ["Dúvida", "Erro", "Financeiro", "Implantação", "Comercial", "Urgente"];
+const CHAT_TAGS = ["Site", "Dúvida", "Erro", "Financeiro", "Implantação", "Comercial", "Urgente"];
 const GROUP_LABEL: Record<string, { label: string; className: string }> = {
   pagante: { label: "Pagante", className: "bg-emerald-50 text-emerald-700" },
   liberado: { label: "Liberado", className: "bg-sky-50 text-sky-700" },
@@ -135,7 +115,7 @@ const todayISO = () => new Date().toLocaleDateString("sv-SE");
 const formatBR = (value: string | null | undefined) =>
   value ? new Date(value.length === 10 ? `${value}T12:00:00` : value).toLocaleDateString("pt-BR") : "";
 const chatTitle = (c: Chat) =>
-  c.is_team ? "Equipe AMT · avisos de chamados" : c.academy?.name || c.name || (c.phone_normalized ? `+${c.phone_normalized}` : "Contato do WhatsApp");
+  c.is_self ? "Você (mensagens para si mesmo)" : c.academy?.name || c.name || (c.phone_normalized ? `+${c.phone_normalized}` : "Contato do WhatsApp");
 const time = (iso: string | null) => {
   if (!iso) return "";
   const d = new Date(iso);
@@ -258,7 +238,7 @@ export function SupportWhatsAppWorkspace() {
                   onClick={() => setSelected(c.id)}
                   className={`flex w-full gap-3 border-b border-slate-100 px-3 py-2.5 text-left hover:bg-slate-50 ${selected === c.id ? "bg-blue-50/60" : ""}`}
                 >
-                  <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-full text-sm font-bold ${c.is_team ? "bg-slate-200 text-slate-700" : "bg-emerald-100 text-emerald-800"}`}>
+                  <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-full text-sm font-bold ${c.is_self ? "bg-slate-200 text-slate-700" : "bg-emerald-100 text-emerald-800"}`}>
                     {chatTitle(c).replace(/[^A-Za-zÀ-ú0-9]/g, "").slice(0, 1).toUpperCase() || "#"}
                   </span>
                   <span className="min-w-0 flex-1">
@@ -343,7 +323,7 @@ function InboxSetup({ status, onChanged, onNotice }: { status: Status; onChanged
   const activate = () =>
     run(async () => {
       await inbox("activate");
-      onNotice("Caixa de entrada ativada: as mensagens do número do suporte chegam aqui. As respostas a chamados citando o aviso continuam funcionando.");
+      onNotice("Caixa de entrada ativada: as mensagens do número do suporte e do chat do site chegam aqui.");
       onChanged();
     });
   const runImport = async () => {
@@ -383,16 +363,13 @@ function InboxSetup({ status, onChanged, onNotice }: { status: Status; onChanged
             </>
           ) : !status.webhookActive ? (
             <>
-              <b>Ative a caixa de entrada</b> para as mensagens do número do suporte chegarem aqui. Os avisos de chamado e as respostas citando o aviso continuam como estão.
+              <b>Ative a caixa de entrada</b> para as mensagens do número do suporte (e do chat do site) chegarem aqui. O seu celular continua recebendo tudo normalmente.
             </>
           ) : (
             <>
               <b>Importe o histórico</b> das conversas dos últimos 90 dias (até 40 mensagens cada).
             </>
           )}
-          {status.configured && status.connected && status.webhookActive && !status.forwarding ? (
-            <div className="mt-1 text-xs text-amber-800">Repasse aos chamados desligado (falta o segredo SUPPORT_WHATSAPP_WEBHOOK_SECRET na função).</div>
-          ) : null}
           {status.error ? <div className="mt-1 text-xs text-red-700">{status.error}</div> : null}
           {error ? <div className="mt-1 text-xs text-red-700">{error}</div> : null}
         </div>
@@ -455,7 +432,7 @@ function InboxSetup({ status, onChanged, onNotice }: { status: Status; onChanged
 function DisconnectButton({ onDone }: { onDone: () => void }) {
   const [busy, setBusy] = useState(false);
   async function logout() {
-    if (!window.confirm("Desconectar o número do suporte? Avisos de chamado e esta caixa param até conectar de novo.")) return;
+    if (!window.confirm("Desconectar o número do suporte? Esta caixa e o chat do site param até conectar de novo.")) return;
     setBusy(true);
     try {
       await inbox("logout");
@@ -881,12 +858,10 @@ function AcademyPanel({ chat, onChanged }: { chat: Chat; onChanged: () => void }
 
   return (
     <aside className="hidden min-h-0 flex-col overflow-y-auto border-l border-slate-200 p-3 xl:flex">
-      {chat.is_team ? (
+      {chat.is_self ? (
         <div className="space-y-2 text-sm">
-          <div className="font-semibold text-slate-950">Avisos de chamados</div>
-          <p className="text-xs leading-5 text-slate-500">
-            Conversa com o número da equipe: cada chamado aberto no Dojo Manager chega aqui. Responda <b>no celular da equipe, citando o aviso</b>, para a resposta ir ao chamado.
-          </p>
+          <div className="font-semibold text-slate-950">Mensagens para si mesmo</div>
+          <p className="text-xs leading-5 text-slate-500">Conversa do número do suporte com ele mesmo (anotações do WhatsApp).</p>
         </div>
       ) : !ownerId || summary === null ? (
         <div className="space-y-3 text-sm">
