@@ -1043,12 +1043,109 @@ function SystemSubscriptionSummary({ system }: { system: AmtSystem }) {
   return <p className="mt-2 text-xs text-slate-500">{summary.total} clientes · {summary.paying} pagantes · {summary.trial} em teste · {brl.format(summary.mrr)}/mês</p>;
 }
 
+type DeletionPreview = { owner_id: string; name: string | null; email: string | null; subscription_status?: string | null; rows: number; tables: Record<string, number>; logins: number; files: number };
+type DeletionSummary = { name: string | null; email: string | null; rows: number; logins_deleted: number; logins_kept: number; files_deleted: number; files_failed: number };
+
+// Ações do relatório da plataforma (POST na mesma Edge Function), com o token do Control Center.
+async function platformAction<T>(url: string, body: Record<string, unknown>): Promise<T> {
+  const { data } = await amtSupabase.auth.getSession();
+  const token = data.session?.access_token;
+  if (!token) throw new Error("Sessão expirada. Entre novamente.");
+  const response = await fetch(url, { method: "POST", headers: { Authorization: `Bearer ${token}`, "content-type": "application/json" }, body: JSON.stringify(body) });
+  const result = await response.json().catch(() => ({})) as T & { error?: string };
+  if (!response.ok) throw new Error(result.error ?? "Não foi possível concluir a operação.");
+  return result;
+}
+
+function DeleteDojoAccountModal({ system, customer, onClose, onDeleted }: { system: AmtSystem; customer: OverviewCustomer; onClose: () => void; onDeleted: () => void }) {
+  const [preview, setPreview] = useState<DeletionPreview | null>(null);
+  const [error, setError] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [summary, setSummary] = useState<DeletionSummary | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    platformAction<DeletionPreview>(system.overviewUrl, { action: "delete_preview", owner_id: customer.id })
+      .then((data) => { if (active) setPreview(data); })
+      .catch((err) => { if (active) setError(err instanceof Error ? err.message : "Não foi possível carregar a prévia."); });
+    return () => { active = false; };
+  }, [system.overviewUrl, customer.id]);
+
+  const accepted = [preview?.name, preview?.email].filter(Boolean).map((value) => String(value).trim().toLowerCase());
+  const canDelete = Boolean(preview) && accepted.includes(confirm.trim().toLowerCase()) && !deleting;
+  const topTables = preview ? Object.entries(preview.tables).sort((a, b) => b[1] - a[1]).slice(0, 8) : [];
+
+  async function remove() {
+    if (!canDelete) return;
+    setDeleting(true);
+    setError("");
+    try {
+      const result = await platformAction<DeletionSummary>(system.overviewUrl, { action: "delete_account", owner_id: customer.id, confirm });
+      setSummary(result);
+      const session = await amtSupabase.auth.getSession();
+      if (session.data.session) await amtSupabase.from("audit_logs").insert({ actor_user_id: session.data.session.user.id, action: "dojo_account.deleted", resource_type: "dojo_account", resource_id: customer.id, metadata: { sistema: system.catalogSlug, name: result.name, email: result.email, rows: result.rows, logins_deleted: result.logins_deleted, logins_kept: result.logins_kept, files_deleted: result.files_deleted, files_failed: result.files_failed } });
+      onDeleted();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Não foi possível excluir a conta.");
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4" role="dialog" aria-modal="true" aria-labelledby="delete-account-title" onKeyDown={(e) => { if (e.key === "Escape" && !deleting) onClose(); }}>
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 text-slate-950 shadow-xl">
+        <h3 id="delete-account-title" className="text-lg font-semibold">{summary ? "Conta excluída" : "Excluir conta da academia"}</h3>
+        <p className="mt-1 text-sm text-slate-500">{customer.name}{customer.owner_email ? ` · ${customer.owner_email}` : ""}</p>
+
+        {summary ? (
+          <div className="mt-5 space-y-2 text-sm text-slate-700">
+            <p>{summary.rows} registros removidos do {system.name}.</p>
+            <p>{summary.logins_deleted} {summary.logins_deleted === 1 ? "login excluído" : "logins excluídos"}{summary.logins_kept ? ` · ${summary.logins_kept} mantido${summary.logins_kept === 1 ? "" : "s"} por estar em uso em outro lugar (outra academia ou loja Fight Wear)` : ""}.</p>
+            <p>{summary.files_deleted} arquivos removidos{summary.files_failed ? ` · ${summary.files_failed} não puderam ser removidos do Storage` : ""}.</p>
+            <div className="pt-3"><Button type="button" onClick={onClose} className="bg-black text-white hover:bg-slate-900">Fechar</Button></div>
+          </div>
+        ) : (
+          <>
+            {!preview && !error && <p className="mt-5 text-sm text-slate-500">Calculando o que será removido…</p>}
+            {preview && (
+              <div className="mt-5 space-y-4 text-sm">
+                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">
+                  <p className="font-medium">Esta ação é definitiva e não pode ser desfeita.</p>
+                  <p className="mt-1 text-xs leading-5">Apaga todos os dados da academia (alunos, turmas, presenças, financeiro, contratos, certificados e demais registros), os arquivos enviados e os logins que não estiverem em uso em outro lugar.</p>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  {[["Registros", preview.rows], ["Logins", preview.logins], ["Arquivos", preview.files]].map(([label, value]) => <div key={String(label)} className="rounded-lg border border-slate-200 p-3"><p className="text-xs text-slate-500">{label}</p><p className="mt-1 text-lg font-semibold">{String(value)}</p></div>)}
+                </div>
+                {topTables.length > 0 && <p className="text-xs leading-5 text-slate-500">Maiores volumes: {topTables.map(([table, count]) => `${table.replace(/^(dojo|academy)_/, "").replaceAll("_", " ")} (${count})`).join(", ")}.</p>}
+                <label className="block text-sm font-medium text-slate-700">
+                  Para confirmar, digite o nome ou o e-mail da academia
+                  <input value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder={preview.name ?? preview.email ?? ""} autoFocus className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-950 outline-none focus:border-red-400" />
+                </label>
+              </div>
+            )}
+            {error && <p className="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+            <div className="mt-6 flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={onClose} disabled={deleting}>Cancelar</Button>
+              <Button type="button" onClick={() => void remove()} disabled={!canDelete} className="bg-red-600 text-white hover:bg-red-700">{deleting ? "Excluindo…" : "Excluir definitivamente"}</Button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function PlatformSection({ system }: { system: AmtSystem }) {
   const overview = usePlatformOverview(system.overviewUrl);
   const [group, setGroup] = useState("todos");
   const [search, setSearch] = useState("");
   const isDesktop = Boolean(system.releasesRepo);
   const noun = isDesktop ? "Óticas" : "Academias";
+  // Exclusão de contas inativas: por enquanto só o Dojo Manager oferece a ação.
+  const canDeleteAccounts = system.id === "dojo-manager";
+  const [deleting, setDeleting] = useState<OverviewCustomer | null>(null);
 
   const customers = overview.data?.customers ?? [];
   const summary = summarizeCustomers(customers);
@@ -1100,7 +1197,7 @@ function PlatformSection({ system }: { system: AmtSystem }) {
             {filtered.length === 0 ? <p className="mt-5 rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-500">{customers.length ? "Nenhum cliente encontrado para o filtro." : "Nenhum cliente cadastrado ainda."}</p> : (
               <div className="mt-5 overflow-x-auto">
                 <table className="w-full min-w-[820px] text-sm">
-                  <thead><tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500"><th className="py-2 pr-4 font-medium">Cliente</th><th className="py-2 pr-4 font-medium">Situação</th><th className="py-2 pr-4 font-medium">Plano</th><th className="py-2 pr-4 font-medium">Prazo</th><th className="py-2 font-medium">Uso</th></tr></thead>
+                  <thead><tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500"><th className="py-2 pr-4 font-medium">Cliente</th><th className="py-2 pr-4 font-medium">Situação</th><th className="py-2 pr-4 font-medium">Plano</th><th className="py-2 pr-4 font-medium">Prazo</th><th className="py-2 font-medium">Uso</th>{canDeleteAccounts && <th className="py-2 pl-4 font-medium"><span className="sr-only">Ações</span></th>}</tr></thead>
                   <tbody>
                     {filtered.map((customer) => {
                       const info = customerGroups[customer.group] ?? customerGroups.sem_assinatura;
@@ -1121,6 +1218,11 @@ function PlatformSection({ system }: { system: AmtSystem }) {
                           </td>
                           <td className="py-3 pr-4 text-xs text-slate-600">{customerDeadline(customer)}{customer.created_at && <p className="mt-1 text-slate-400">Cliente desde {formatDate(customer.created_at)}</p>}</td>
                           <td className="py-3 text-xs text-slate-600">{customerUsage(customer)}</td>
+                          {canDeleteAccounts && (
+                            <td className="py-3 pl-4 text-right">
+                              <button type="button" onClick={() => setDeleting(customer)} disabled={customer.group === "pagante"} title={customer.group === "pagante" ? "Academia pagante: cancele a assinatura antes de excluir" : "Excluir conta"} className="rounded-lg px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent">Excluir</button>
+                            </td>
+                          )}
                         </tr>
                       );
                     })}
@@ -1131,6 +1233,8 @@ function PlatformSection({ system }: { system: AmtSystem }) {
           </>
         )}
       </section>
+
+      {deleting && <DeleteDojoAccountModal system={system} customer={deleting} onClose={() => setDeleting(null)} onDeleted={() => void overview.reload()} />}
 
       {overview.data && (
         <div className="grid gap-6 xl:grid-cols-[1fr_360px]">
