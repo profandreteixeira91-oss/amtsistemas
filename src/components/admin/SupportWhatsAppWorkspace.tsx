@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { TicketRow, TicketThread, type Ticket } from "@/components/admin/SupportTicket";
 import { inbox } from "@/lib/support-inbox";
 
 // Caixa de entrada do WhatsApp do suporte AMT (instância amt-suporte, o número 551151040791), no mesmo esquema
@@ -90,10 +91,11 @@ type AcademySummary = {
   open_tickets: Array<{ id: string; code: string; subject: string; status: string; priority: string | null; last_message_at: string }>;
 };
 
-type Filter = "todas" | "nao_lidas" | "academias" | "sem_academia" | "retorno" | "arquivadas";
+type Filter = "todas" | "nao_lidas" | "chamados" | "academias" | "sem_academia" | "retorno" | "arquivadas";
 const FILTERS: Array<{ key: Filter; label: string }> = [
   { key: "todas", label: "Todas" },
   { key: "nao_lidas", label: "Não lidas" },
+  { key: "chamados", label: "Chamados" },
   { key: "academias", label: "Academias" },
   { key: "sem_academia", label: "Sem academia" },
   { key: "retorno", label: "Retorno agendado" },
@@ -132,11 +134,15 @@ function fillName(body: string, firstName: string) {
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
+const CLOSED_TICKET = ["resolvido", "fechado"];
+type ListItem = { kind: "chat"; key: string; at: string; chat: Chat } | { kind: "ticket"; key: string; at: string; ticket: Ticket };
+
 export function SupportWhatsAppWorkspace() {
   const [status, setStatus] = useState<Status | null>(null);
   const [statusError, setStatusError] = useState("");
   const [filter, setFilter] = useState<Filter>("todas");
   const [chats, setChats] = useState<Chat[] | null>(null);
+  const [tickets, setTickets] = useState<Ticket[] | null>(null);
   const [listError, setListError] = useState("");
   const [q, setQ] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
@@ -152,7 +158,19 @@ export function SupportWhatsAppWorkspace() {
   }
   async function loadChats(current: Filter = filter) {
     try {
-      setChats(await inbox<Chat[]>("list", { filter: current }));
+      // Filtro "Chamados" mostra só os chamados; as conversas usam o filtro equivalente do WhatsApp.
+      const [chatRows, ticketRows] = await Promise.all([
+        current === "chamados" ? Promise.resolve([] as Chat[]) : inbox<Chat[]>("list", { filter: current }),
+        ["todas", "nao_lidas", "chamados", "academias", "arquivadas"].includes(current)
+          ? inbox<Ticket[]>("tickets_list", { filter: current === "arquivadas" ? "todos" : "abertos" })
+          : Promise.resolve([] as Ticket[]),
+      ]);
+      setChats(chatRows);
+      setTickets(
+        ticketRows.filter((t) =>
+          current === "arquivadas" ? CLOSED_TICKET.includes(t.status) : current === "nao_lidas" ? t.unread_by_admin > 0 : true,
+        ),
+      );
       setListError("");
     } catch (e) {
       setListError(errorText(e, "Não foi possível carregar as conversas."));
@@ -166,6 +184,7 @@ export function SupportWhatsAppWorkspace() {
   }, []);
   useEffect(() => {
     setChats(null);
+    setTickets(null);
     void loadChats(filter);
     const timer = window.setInterval(() => void loadChats(filter), 8000);
     return () => window.clearInterval(timer);
@@ -175,15 +194,24 @@ export function SupportWhatsAppWorkspace() {
   const visible = useMemo(() => {
     const term = q.trim().toLowerCase();
     const digits = term.replace(/\D/g, "");
-    return (chats ?? []).filter(
-      (c) =>
-        !term ||
-        chatTitle(c).toLowerCase().includes(term) ||
-        (c.last_message_preview ?? "").toLowerCase().includes(term) ||
-        (digits.length >= 4 && (c.phone_normalized ?? "").includes(digits)),
-    );
-  }, [chats, q]);
-  const unread = (chats ?? []).filter((c) => c.unread_count > 0).length;
+    const items: ListItem[] = [
+      ...(chats ?? [])
+        .filter(
+          (c) =>
+            !term ||
+            chatTitle(c).toLowerCase().includes(term) ||
+            (c.last_message_preview ?? "").toLowerCase().includes(term) ||
+            (digits.length >= 4 && (c.phone_normalized ?? "").includes(digits)),
+        )
+        .map((c) => ({ kind: "chat" as const, key: c.id, at: c.last_message_at ?? "", chat: c })),
+      ...(tickets ?? [])
+        .filter((t) => !term || [t.academy_name, t.subject, t.code].some((v) => v.toLowerCase().includes(term.replace(/^#/, ""))))
+        .map((t) => ({ kind: "ticket" as const, key: `t:${t.id}`, at: t.last_message_at ?? t.created_at, ticket: t })),
+    ];
+    return items.sort((a, b) => b.at.localeCompare(a.at));
+  }, [chats, tickets, q]);
+  const unread = (chats ?? []).filter((c) => c.unread_count > 0).length + (tickets ?? []).filter((t) => t.unread_by_admin > 0).length;
+  const selectedTicket = selected?.startsWith("t:") ? (tickets ?? []).find((t) => `t:${t.id}` === selected) ?? null : null;
 
   return (
     <section className="space-y-4">
@@ -192,8 +220,8 @@ export function SupportWhatsAppWorkspace() {
           <h2 className="text-lg font-semibold text-slate-950">WhatsApp do suporte</h2>
           <p className="mt-1 text-sm text-slate-500">
             {status?.connected
-              ? `Atendimento pelo número do suporte${status.number ? ` (+${status.number})` : ""} · ${unread} conversa(s) não lida(s)`
-              : "Atendimento das academias do Dojo Manager pelo número do suporte."}
+              ? `Número do suporte${status.number ? ` (+${status.number})` : ""} e chamados do Dojo Manager · ${unread} não lida(s)`
+              : "Conversas do número do suporte e chamados abertos pelas academias no Dojo Manager."}
           </p>
         </div>
         {status?.connected ? <DisconnectButton onDone={() => void loadStatus()} /> : null}
@@ -226,12 +254,14 @@ export function SupportWhatsAppWorkspace() {
           <div className="min-h-0 flex-1 overflow-y-auto">
             {listError ? (
               <p className="p-4 text-sm text-red-600">{listError}</p>
-            ) : chats === null ? (
+            ) : chats === null || tickets === null ? (
               <p className="p-4 text-sm text-slate-500">Carregando conversas…</p>
             ) : visible.length === 0 ? (
               <p className="p-4 text-sm text-slate-500">Nenhuma conversa.</p>
             ) : (
-              visible.map((c) => (
+              visible.map((item) => item.kind === "ticket" ? (
+                <TicketRow key={item.key} ticket={item.ticket} selected={selected === item.key} onSelect={() => setSelected(item.key)} />
+              ) : ((c) => (
                 <button
                   key={c.id}
                   type="button"
@@ -268,17 +298,22 @@ export function SupportWhatsAppWorkspace() {
                     ) : null}
                   </span>
                 </button>
-              ))
+              ))(item.chat))
             )}
           </div>
         </aside>
 
-        {selected ? (
+        {selected?.startsWith("t:") ? (
+          <>
+            <TicketThread key={selected} id={selected.slice(2)} onBack={() => setSelected(null)} onChanged={() => void loadChats()} />
+            <TicketAcademyPanel ownerId={selectedTicket?.owner_id ?? null} />
+          </>
+        ) : selected ? (
           <Conversation key={selected} chatId={selected} onBack={() => setSelected(null)} onChanged={() => void loadChats()} />
         ) : (
           <div className="hidden min-h-0 flex-col items-center justify-center gap-2 p-6 text-center text-sm text-slate-500 lg:flex xl:col-span-2">
             <MessageCircle className="h-10 w-10 text-emerald-600/40" />
-            Escolha uma conversa para responder pelo admin.
+            Escolha uma conversa ou um chamado para responder pelo admin.
           </div>
         )}
       </div>
@@ -884,7 +919,33 @@ function AcademyPanel({ chat, onChanged }: { chat: Chat; onChanged: () => void }
   );
 }
 
-function AcademySummaryCard({ data, onUnlink }: { data: AcademySummary; onUnlink: () => void }) {
+/** Ficha da academia ao lado de um chamado. */
+function TicketAcademyPanel({ ownerId }: { ownerId: string | null }) {
+  const [summary, setSummary] = useState<AcademySummary | null | undefined>(undefined);
+  useEffect(() => {
+    if (!ownerId) return;
+    let active = true;
+    setSummary(undefined);
+    inbox<AcademySummary | null>("academy", { owner_id: ownerId })
+      .then((data) => { if (active) setSummary(data); })
+      .catch(() => { if (active) setSummary(null); });
+    return () => { active = false; };
+  }, [ownerId]);
+  if (!ownerId) return <aside className="hidden border-l border-slate-200 xl:block" />;
+  return (
+    <aside className="hidden min-h-0 flex-col overflow-y-auto border-l border-slate-200 p-3 xl:flex">
+      {summary === undefined ? (
+        <Loader2 className="mx-auto mt-6 h-5 w-5 animate-spin text-slate-400" />
+      ) : summary === null ? (
+        <p className="text-sm text-slate-500">Academia não encontrada.</p>
+      ) : (
+        <AcademySummaryCard data={summary} />
+      )}
+    </aside>
+  );
+}
+
+function AcademySummaryCard({ data, onUnlink }: { data: AcademySummary; onUnlink?: () => void }) {
   const group = GROUP_LABEL[data.subscription.group] ?? GROUP_LABEL.sem_assinatura;
   const deadline =
     data.subscription.group === "teste" || data.subscription.group === "teste_vencido"
@@ -923,7 +984,7 @@ function AcademySummaryCard({ data, onUnlink }: { data: AcademySummary; onUnlink
         <a href={`${DOJO_SUPPORT_URL}/dojo`} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50">
           Abrir Dojo Manager <ExternalLink className="h-3.5 w-3.5" />
         </a>
-        <button type="button" className="text-xs text-slate-500 hover:text-slate-800" onClick={onUnlink}>Desvincular academia</button>
+        {onUnlink ? <button type="button" className="text-xs text-slate-500 hover:text-slate-800" onClick={onUnlink}>Desvincular academia</button> : null}
       </div>
     </div>
   );

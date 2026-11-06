@@ -1,15 +1,14 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, LifeBuoy, Loader2, MessageCircle, Send } from "lucide-react";
+import { ArrowLeft, LifeBuoy, Loader2, Send } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { SupportWhatsAppWorkspace } from "@/components/admin/SupportWhatsAppWorkspace";
 import { inbox } from "@/lib/support-inbox";
 
-// Atendimento no Control Center: WhatsApp do suporte e chamados do Dojo Manager.
-// Os chamados são lidos do banco do Dojo pela Edge Function support-inbox; a resposta vai pelo endpoint
-// support-reply do Dojo, que grava a mensagem no chamado e avisa a academia (push).
+// Chamados do Dojo Manager dentro da caixa do WhatsApp do /admin. São lidos do banco do Dojo pela Edge
+// Function support-inbox; a resposta vai pelo endpoint support-reply do Dojo, que grava a mensagem no chamado
+// (o dono vê em Suporte, no Dojo) e avisa a academia por push.
 
-type Ticket = {
+export type Ticket = {
   id: string;
   code: string;
   owner_id: string;
@@ -41,122 +40,37 @@ const when = (iso: string | null) => {
     : d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
 };
 
-export function SupportAttendanceWorkspace() {
-  const [tab, setTab] = useState<"whatsapp" | "chamados">("whatsapp");
+/** Linha do chamado na lista de conversas do WhatsApp. */
+export function TicketRow({ ticket: t, selected, onSelect }: { ticket: Ticket; selected: boolean; onSelect: () => void }) {
+  const s = statusInfo(t.status);
   return (
-    <section className="space-y-5">
-      <div className="flex flex-wrap gap-2 rounded-xl border border-slate-200 bg-white p-2 shadow-sm">
-        {[
-          { id: "whatsapp" as const, label: "WhatsApp", icon: MessageCircle },
-          { id: "chamados" as const, label: "Chamados do Dojo Manager", icon: LifeBuoy },
-        ].map(({ id, label, icon: Icon }) => (
-          <button
-            key={id}
-            type="button"
-            onClick={() => setTab(id)}
-            className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${tab === id ? "bg-black text-white" : "text-slate-600 hover:bg-slate-100"}`}
-          >
-            <Icon className="h-4 w-4" /> {label}
-          </button>
-        ))}
-      </div>
-      {tab === "whatsapp" ? <SupportWhatsAppWorkspace /> : <SupportTicketsWorkspace />}
-    </section>
+    <button
+      type="button"
+      onClick={onSelect}
+      className={`flex w-full gap-3 border-b border-slate-100 px-3 py-2.5 text-left hover:bg-slate-50 ${selected ? "bg-blue-50/60" : ""}`}
+    >
+      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-blue-100 text-blue-700">
+        <LifeBuoy className="h-5 w-5" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="flex items-baseline justify-between gap-2">
+          <span className={`truncate text-sm text-slate-950 ${t.unread_by_admin ? "font-bold" : "font-medium"}`}>{t.academy_name}</span>
+          <span className={`shrink-0 text-[11px] ${t.unread_by_admin ? "font-semibold text-blue-700" : "text-slate-500"}`}>{when(t.last_message_at ?? t.created_at)}</span>
+        </span>
+        <span className="flex items-center justify-between gap-2">
+          <span className="truncate text-xs text-slate-500">#{t.code} · {t.subject}</span>
+          {t.unread_by_admin ? <span className="grid h-5 min-w-5 shrink-0 place-items-center rounded-full bg-blue-600 px-1 text-[11px] font-bold text-white">{t.unread_by_admin}</span> : null}
+        </span>
+        <span className="mt-0.5 flex flex-wrap gap-1">
+          <span className="rounded bg-blue-600 px-1.5 text-[10px] font-medium text-white">Chamado</span>
+          <span className={`rounded px-1.5 text-[10px] font-medium ${s.className}`}>{s.label}</span>
+        </span>
+      </span>
+    </button>
   );
 }
 
-function SupportTicketsWorkspace() {
-  const [filter, setFilter] = useState<"abertos" | "todos">("abertos");
-  const [tickets, setTickets] = useState<Ticket[] | null>(null);
-  const [error, setError] = useState("");
-  const [selected, setSelected] = useState<string | null>(null);
-
-  async function load(current = filter) {
-    try {
-      setTickets(await inbox<Ticket[]>("tickets_list", { filter: current }));
-      setError("");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Não foi possível carregar os chamados.");
-    }
-  }
-  useEffect(() => {
-    setTickets(null);
-    void load(filter);
-    const timer = window.setInterval(() => void load(filter), 15000);
-    return () => window.clearInterval(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter]);
-
-  const unread = (tickets ?? []).filter((t) => t.unread_by_admin > 0).length;
-
-  return (
-    <section className="space-y-4">
-      <div>
-        <h2 className="text-lg font-semibold text-slate-950">Chamados do Dojo Manager</h2>
-        <p className="mt-1 text-sm text-slate-500">
-          Abertos pelas academias em Suporte, no Dojo Manager. A resposta aparece na tela do chamado e a academia recebe um aviso. {unread ? `${unread} chamado(s) com mensagem nova.` : ""}
-        </p>
-      </div>
-      <div className="grid h-[calc(100dvh-17rem)] min-h-[520px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm lg:grid-cols-[340px_minmax(0,1fr)]">
-        <aside className={`flex min-h-0 flex-col border-r border-slate-200 ${selected ? "hidden lg:flex" : "flex"}`}>
-          <div className="flex gap-1 border-b border-slate-200 p-3">
-            {(["abertos", "todos"] as const).map((f) => (
-              <button
-                key={f}
-                type="button"
-                onClick={() => setFilter(f)}
-                className={`rounded-full border px-2.5 py-1 text-xs font-medium ${filter === f ? "border-blue-600 bg-blue-600 text-white" : "border-slate-200 text-slate-600 hover:bg-slate-50"}`}
-              >
-                {f === "abertos" ? "Em aberto" : "Todos"}
-              </button>
-            ))}
-          </div>
-          <div className="min-h-0 flex-1 overflow-y-auto">
-            {error ? (
-              <p className="p-4 text-sm text-red-600">{error}</p>
-            ) : tickets === null ? (
-              <p className="p-4 text-sm text-slate-500">Carregando chamados…</p>
-            ) : tickets.length === 0 ? (
-              <p className="p-4 text-sm text-slate-500">Nenhum chamado {filter === "abertos" ? "em aberto" : ""}.</p>
-            ) : (
-              tickets.map((t) => {
-                const s = statusInfo(t.status);
-                return (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => setSelected(t.id)}
-                    className={`block w-full border-b border-slate-100 px-3 py-2.5 text-left hover:bg-slate-50 ${selected === t.id ? "bg-blue-50/60" : ""}`}
-                  >
-                    <span className="flex items-baseline justify-between gap-2">
-                      <span className={`truncate text-sm text-slate-950 ${t.unread_by_admin ? "font-bold" : "font-medium"}`}>{t.subject}</span>
-                      <span className="shrink-0 text-[11px] text-slate-500">{when(t.last_message_at ?? t.created_at)}</span>
-                    </span>
-                    <span className="mt-0.5 flex items-center justify-between gap-2">
-                      <span className="truncate text-xs text-slate-500">{t.academy_name} · #{t.code}</span>
-                      {t.unread_by_admin ? <span className="grid h-5 min-w-5 shrink-0 place-items-center rounded-full bg-blue-600 px-1 text-[11px] font-bold text-white">{t.unread_by_admin}</span> : null}
-                    </span>
-                    <span className={`mt-1 inline-block rounded px-1.5 text-[10px] font-medium ${s.className}`}>{s.label}</span>
-                  </button>
-                );
-              })
-            )}
-          </div>
-        </aside>
-        {selected ? (
-          <TicketThread key={selected} id={selected} onBack={() => setSelected(null)} onChanged={() => void load()} />
-        ) : (
-          <div className="hidden flex-col items-center justify-center gap-2 p-6 text-center text-sm text-slate-500 lg:flex">
-            <LifeBuoy className="h-10 w-10 text-blue-600/30" />
-            Escolha um chamado para responder.
-          </div>
-        )}
-      </div>
-    </section>
-  );
-}
-
-function TicketThread({ id, onBack, onChanged }: { id: string; onBack: () => void; onChanged: () => void }) {
+export function TicketThread({ id, onBack, onChanged }: { id: string; onBack: () => void; onChanged: () => void }) {
   const [data, setData] = useState<{ ticket: Ticket; messages: TicketMessage[] } | null>(null);
   const [error, setError] = useState("");
   const [text, setText] = useState("");
@@ -209,7 +123,7 @@ function TicketThread({ id, onBack, onChanged }: { id: string; onBack: () => voi
           <ArrowLeft className="h-4 w-4" />
         </button>
         <div className="min-w-0 flex-1">
-          <div className="truncate font-semibold text-slate-950">{t.subject}</div>
+          <div className="truncate font-semibold text-slate-950">Chamado #{t.code} · {t.subject}</div>
           <div className="truncate text-xs text-slate-500">
             {t.academy_name} · #{t.code} · {CATEGORY[t.category ?? ""] ?? t.category ?? "—"}{t.priority ? ` · prioridade ${t.priority}` : ""}
           </div>
