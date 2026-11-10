@@ -35,6 +35,8 @@ type PlatformOverview = {
   support?: Array<{ id: string; customer_id: string; customer_name: string | null; subject: string; category: string | null; status: string; priority: string | null; unread: boolean; last_message_at: string }>;
   open_tickets?: number;
   amt_fees?: { last_30d: number; transactions_last_30d: number };
+  /** Clientes por plano (Dojo Manager: Essencial, Profissional, Premium e Legado). */
+  plans?: Array<{ code: string; name: string; price: number | null; customers: number; paying: number; trial: number; mrr: number }>;
 };
 
 const customerGroups: Record<string, { label: string; className: string }> = {
@@ -208,6 +210,7 @@ function DeleteDojoAccountModal({ system, customer, onClose, onDeleted }: { syst
 function PlatformSection({ system }: { system: AmtSystem }) {
   const overview = usePlatformOverview(system.overviewUrl);
   const [group, setGroup] = useState("todos");
+  const [planFilter, setPlanFilter] = useState("todos");
   const [search, setSearch] = useState("");
   const isDesktop = Boolean(system.releasesRepo);
   const noun = isDesktop ? "Óticas" : "Academias";
@@ -217,7 +220,8 @@ function PlatformSection({ system }: { system: AmtSystem }) {
 
   const customers = overview.data?.customers ?? [];
   const summary = summarizeCustomers(customers);
-  const filtered = customers.filter((customer) => (group === "todos" || customer.group === group) && [customer.name, customer.code ?? "", customer.owner_name ?? "", customer.owner_email ?? "", customer.phone ?? "", customer.city ?? ""].join(" ").toLowerCase().includes(search.toLowerCase()));
+  const plans = (overview.data?.plans ?? []).filter((plan) => plan.customers > 0 || plan.code !== "legacy");
+  const filtered = customers.filter((customer) => (group === "todos" || customer.group === group) && (planFilter === "todos" || customer.plan === planFilter) && [customer.name, customer.code ?? "", customer.owner_name ?? "", customer.owner_email ?? "", customer.phone ?? "", customer.city ?? ""].join(" ").toLowerCase().includes(search.toLowerCase()));
   const groupsPresent = Object.keys(customerGroups).filter((key) => customers.some((customer) => customer.group === key));
 
   const cards: Array<[string, string, string]> = [
@@ -255,6 +259,33 @@ function PlatformSection({ system }: { system: AmtSystem }) {
               ))}
             </div>
 
+            {plans.length > 0 && (
+              <div className="mt-5">
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Por plano</p>
+                <div className="mt-2 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                  {plans.map((plan) => {
+                    const active = planFilter === plan.code;
+                    return (
+                      <button
+                        key={plan.code}
+                        type="button"
+                        onClick={() => setPlanFilter(active ? "todos" : plan.code)}
+                        title={active ? "Mostrar todos os planos" : `Mostrar só ${plan.name}`}
+                        className={`rounded-xl border p-4 text-left transition-colors ${active ? "border-blue-600 bg-blue-50" : "border-slate-200 bg-white hover:border-slate-300"}`}
+                      >
+                        <div className="flex items-baseline justify-between gap-2">
+                          <p className="font-semibold text-slate-950">{plan.name}</p>
+                          <p className="text-xs text-slate-500">{plan.price !== null ? `${brl.format(plan.price)}/mês` : "valor de antes"}</p>
+                        </div>
+                        <p className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">{plan.customers}</p>
+                        <p className="mt-1 text-[11px] leading-4 text-slate-500">{plan.paying} pagante{plan.paying === 1 ? "" : "s"} · {plan.trial} em teste · {brl.format(plan.mrr)}/mês</p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             <div className="mt-5 flex flex-wrap gap-2">
               {["todos", ...groupsPresent].map((key) => {
                 const total = key === "todos" ? customers.length : customers.filter((customer) => customer.group === key).length;
@@ -281,7 +312,7 @@ function PlatformSection({ system }: { system: AmtSystem }) {
                             {customer.last_payment_error && <p className="mt-2 max-w-48 text-[11px] text-red-600">{customer.last_payment_error}</p>}
                           </td>
                           <td className="py-3 pr-4 text-slate-700">
-                            <p>{customer.plan_name ?? "—"}</p>
+                            <p className="font-medium text-slate-950">{customer.plan_name ?? "—"}</p>
                             <p className="mt-1 text-xs text-slate-500">{customer.amount_monthly !== null ? `${brl.format(customer.amount_monthly)}/mês` : ""}{customer.payment_method ? ` · ${customer.payment_method}` : ""}</p>
                           </td>
                           <td className="py-3 pr-4 text-xs text-slate-600">{customerDeadline(customer)}{customer.created_at && <p className="mt-1 text-slate-400">Cliente desde {formatDate(customer.created_at)}</p>}</td>
@@ -578,7 +609,7 @@ export function SystemsWorkspace({ selectedId, onSelect }: { selectedId: string;
                     <td className="py-3 pr-4 font-medium text-slate-950">{plan.nome}{plan.destaque && <span className="ml-2 rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-700">Destaque</span>}</td>
                     <td className="py-3 pr-4 font-mono text-xs text-slate-500">{plan.slug}</td>
                     <td className="py-3 pr-4 text-slate-700">{plan.preco_mensal !== null ? brl.format(Number(plan.preco_mensal)) : "—"}</td>
-                    <td className="py-3 pr-4 text-slate-700">{plan.preco_anual !== null ? brl.format(Number(plan.preco_anual)) : "—"}</td>
+                    <td className="py-3 pr-4 text-slate-700">{plan.preco_anual ? brl.format(Number(plan.preco_anual)) : "—"}</td>
                     <td className="py-3"><span className={`rounded-full px-2.5 py-1 text-xs font-medium ${plan.ativo ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>{plan.ativo ? "Ativo" : "Inativo"}</span></td>
                   </tr>
                 ))}

@@ -85,7 +85,7 @@ type AcademySummary = {
   email: string | null;
   phone: string | null;
   city: string | null;
-  subscription: { status: string | null; group: string; amount_monthly: number | null; trial_ends_at: string | null; current_period_end: string | null; next_due_date: string | null };
+  subscription: { status: string | null; group: string; plan_name?: string | null; payment_method?: string | null; amount_monthly: number | null; trial_ends_at: string | null; current_period_end: string | null; next_due_date: string | null };
   students: number;
   active_students: number;
   open_tickets: Array<{ id: string; code: string; subject: string; status: string; priority: string | null; last_message_at: string }>;
@@ -961,8 +961,11 @@ function AcademySummaryCard({ data, onUnlink }: { data: AcademySummary; onUnlink
       </div>
       <div className="grid grid-cols-2 gap-2 text-xs">
         <div className="rounded-lg bg-slate-50 p-2">
-          <div className="text-slate-500">Mensalidade</div>
-          <div className="font-semibold text-slate-950">{data.subscription.amount_monthly !== null ? brl.format(data.subscription.amount_monthly) : "—"}</div>
+          <div className="text-slate-500">{data.subscription.plan_name ? `Plano ${data.subscription.plan_name}` : "Mensalidade"}</div>
+          <div className="font-semibold text-slate-950">
+            {data.subscription.amount_monthly !== null ? brl.format(data.subscription.amount_monthly) : "—"}
+            {data.subscription.payment_method ? <span className="font-normal text-slate-500"> · {data.subscription.payment_method}</span> : null}
+          </div>
         </div>
         <div className="rounded-lg bg-slate-50 p-2">
           <div className="text-slate-500">Alunos ativos</div>
