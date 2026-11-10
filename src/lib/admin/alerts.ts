@@ -22,8 +22,30 @@ function keyBytes(base64url: string): Uint8Array<ArrayBuffer> {
   return bytes;
 }
 
+const SW_SCOPE = "/admin";
+const SW_BROKEN_MESSAGE =
+  "O navegador não conseguiu instalar os alertas. Feche todas as janelas dele, abra de novo e tente outra vez. Se continuar, apague os dados do site: cadeado ao lado do endereço › Configurações do site › Excluir dados. Depois entre no /admin e ative de novo.";
+
 async function registration() {
-  return (await navigator.serviceWorker.getRegistration(SW_URL)) ?? navigator.serviceWorker.register(SW_URL, { scope: "/admin" });
+  const existing = await navigator.serviceWorker.getRegistration(SW_SCOPE);
+  if (existing) return existing;
+  try {
+    return await navigator.serviceWorker.register(SW_URL, { scope: SW_SCOPE });
+  } catch (error) {
+    // "Operation has been aborted" (AbortError) costuma ser registro antigo travado ou armazenamento do navegador
+    // com problema: remove o que houver para o /admin e tenta mais uma vez.
+    console.warn("Registro do service worker falhou, tentando de novo", error);
+    for (const reg of await navigator.serviceWorker.getRegistrations()) {
+      if (new URL(reg.scope).pathname.startsWith(SW_SCOPE)) await reg.unregister().catch(() => false);
+    }
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    try {
+      return await navigator.serviceWorker.register(SW_URL, { scope: SW_SCOPE, updateViaCache: "none" });
+    } catch (retryError) {
+      console.error(retryError);
+      throw new Error(SW_BROKEN_MESSAGE);
+    }
+  }
 }
 
 /** Situação dos alertas neste aparelho. */
@@ -32,7 +54,7 @@ export async function alertsState(): Promise<AlertsState> {
     return isIos() && !isStandalone() ? "ios-install" : "unsupported";
   }
   if (Notification.permission === "denied") return "blocked";
-  const reg = await navigator.serviceWorker.getRegistration(SW_URL);
+  const reg = await navigator.serviceWorker.getRegistration(SW_SCOPE);
   const sub = await reg?.pushManager.getSubscription();
   return sub && Notification.permission === "granted" ? "on" : "off";
 }
@@ -65,7 +87,7 @@ export async function enableAlerts(): Promise<void> {
 
 /** Desliga os alertas só neste aparelho. */
 export async function disableAlerts(): Promise<void> {
-  const reg = await navigator.serviceWorker.getRegistration(SW_URL);
+  const reg = await navigator.serviceWorker.getRegistration(SW_SCOPE);
   const sub = await reg?.pushManager.getSubscription();
   if (!sub) return;
   await amtSupabase.from("admin_push_subscriptions").update({ active: false }).eq("endpoint", sub.endpoint);
