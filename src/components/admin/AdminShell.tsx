@@ -18,7 +18,9 @@ export function AdminShell() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const current = moduleForPath(pathname);
   const counters = useAdminCounters();
-  const badge = (to: string) => (to === "/admin/whatsapp" ? counters.whatsapp : to === "/admin/leads" ? counters.leads : 0);
+  const badge = (to: string) =>
+    to === "/admin/whatsapp" ? counters.whatsapp : to === "/admin/leads" ? counters.leads : to === "/admin/monitor" ? (counters.monitorDown ?? 0) : 0;
+  const badgeColor = (to: string) => (to === "/admin/monitor" ? "bg-red-500" : "bg-emerald-500");
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState("");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -109,11 +111,11 @@ export function AdminShell() {
                 >
                   <span className="relative">
                     <Icon className="h-4 w-4 shrink-0" />
-                    {sidebarCollapsed && badge(item.to) ? <span className="absolute -right-1.5 -top-1.5 h-2.5 w-2.5 rounded-full bg-emerald-500" /> : null}
+                    {sidebarCollapsed && badge(item.to) ? <span className={`absolute -right-1.5 -top-1.5 h-2.5 w-2.5 rounded-full ${badgeColor(item.to)}`} /> : null}
                   </span>
                   {!sidebarCollapsed && <span className="flex-1">{item.label}</span>}
                   {!sidebarCollapsed && badge(item.to) ? (
-                    <span className="grid h-5 min-w-5 place-items-center rounded-full bg-emerald-500 px-1.5 text-[11px] font-bold text-white">{badge(item.to)}</span>
+                    <span className={`grid h-5 min-w-5 place-items-center rounded-full px-1.5 text-[11px] font-bold text-white ${badgeColor(item.to)}`}>{badge(item.to)}</span>
                   ) : null}
                 </Link>
               );
@@ -137,7 +139,14 @@ export function AdminShell() {
               <h1 className="mt-1 text-xl font-semibold tracking-tight sm:text-2xl">{current.label}</h1>
             </div>
             <div className="flex items-center gap-2">
-              <span className="hidden rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 sm:inline-flex">Sistema operacional</span>
+              <Link
+                to="/admin/monitor"
+                title="Abrir o Monitor"
+                className={`hidden items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium sm:inline-flex ${counters.monitorDown ? "bg-red-50 text-red-700 hover:bg-red-100" : counters.monitorDown === 0 ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+              >
+                <span className={`h-2 w-2 rounded-full ${counters.monitorDown ? "bg-red-500" : counters.monitorDown === 0 ? "bg-emerald-500" : "bg-slate-400"}`} />
+                {counters.monitorDown ? `${counters.monitorDown} ${counters.monitorDown === 1 ? "item fora do ar" : "itens fora do ar"}` : counters.monitorDown === 0 ? "Tudo no ar" : "Monitor"}
+              </Link>
               <AdminAlerts />
               <Button size="sm" variant="outline" onClick={handleLogout} className="gap-2 lg:hidden">
                 <LogOut className="h-4 w-4" /> Sair
@@ -149,7 +158,7 @@ export function AdminShell() {
             {ADMIN_MODULES.map((item) => (
               <Link key={item.to} to={item.to} className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium ${current.to === item.to ? "bg-blue-600 text-white" : "text-slate-600 hover:bg-slate-100"}`}>
                 {item.label}
-                {badge(item.to) ? <span className="grid h-5 min-w-5 place-items-center rounded-full bg-emerald-500 px-1.5 text-[11px] font-bold text-white">{badge(item.to)}</span> : null}
+                {badge(item.to) ? <span className={`grid h-5 min-w-5 place-items-center rounded-full px-1.5 text-[11px] font-bold text-white ${badgeColor(item.to)}`}>{badge(item.to)}</span> : null}
               </Link>
             ))}
           </nav>

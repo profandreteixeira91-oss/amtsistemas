@@ -72,6 +72,7 @@ import { Route as AdminPainelIndexRouteImport } from './routes/admin/_painel/ind
 import { Route as CrmLeadsIdRouteImport } from './routes/crm.leads.$id'
 import { Route as AdminPainelWhatsappRouteImport } from './routes/admin/_painel/whatsapp'
 import { Route as AdminPainelSistemasRouteImport } from './routes/admin/_painel/sistemas'
+import { Route as AdminPainelMonitorRouteImport } from './routes/admin/_painel/monitor'
 import { Route as AdminPainelLeadsRouteImport } from './routes/admin/_painel/leads'
 import { Route as AdminPainelFormulariosRouteImport } from './routes/admin/_painel/formularios'
 import { Route as AdminPainelFerramentasRouteImport } from './routes/admin/_painel/ferramentas'
@@ -404,6 +405,11 @@ const AdminPainelSistemasRoute = AdminPainelSistemasRouteImport.update({
   path: '/sistemas',
   getParentRoute: () => AdminPainelRoute,
 } as any)
+const AdminPainelMonitorRoute = AdminPainelMonitorRouteImport.update({
+  id: '/monitor',
+  path: '/monitor',
+  getParentRoute: () => AdminPainelRoute,
+} as any)
 const AdminPainelLeadsRoute = AdminPainelLeadsRouteImport.update({
   id: '/leads',
   path: '/leads',
@@ -558,6 +564,7 @@ export interface FileRoutesByFullPath {
   '/admin/ferramentas': typeof AdminPainelFerramentasRoute
   '/admin/formularios': typeof AdminPainelFormulariosRoute
   '/admin/leads': typeof AdminPainelLeadsRoute
+  '/admin/monitor': typeof AdminPainelMonitorRoute
   '/admin/sistemas': typeof AdminPainelSistemasRoute
   '/admin/whatsapp': typeof AdminPainelWhatsappRoute
   '/crm/leads/$id': typeof CrmLeadsIdRoute
@@ -636,6 +643,7 @@ export interface FileRoutesByTo {
   '/admin/ferramentas': typeof AdminPainelFerramentasRoute
   '/admin/formularios': typeof AdminPainelFormulariosRoute
   '/admin/leads': typeof AdminPainelLeadsRoute
+  '/admin/monitor': typeof AdminPainelMonitorRoute
   '/admin/sistemas': typeof AdminPainelSistemasRoute
   '/admin/whatsapp': typeof AdminPainelWhatsappRoute
   '/crm/leads/$id': typeof CrmLeadsIdRoute
@@ -718,6 +726,7 @@ export interface FileRoutesById {
   '/admin/_painel/ferramentas': typeof AdminPainelFerramentasRoute
   '/admin/_painel/formularios': typeof AdminPainelFormulariosRoute
   '/admin/_painel/leads': typeof AdminPainelLeadsRoute
+  '/admin/_painel/monitor': typeof AdminPainelMonitorRoute
   '/admin/_painel/sistemas': typeof AdminPainelSistemasRoute
   '/admin/_painel/whatsapp': typeof AdminPainelWhatsappRoute
   '/crm/leads/$id': typeof CrmLeadsIdRoute
@@ -801,6 +810,7 @@ export interface FileRouteTypes {
     | '/admin/ferramentas'
     | '/admin/formularios'
     | '/admin/leads'
+    | '/admin/monitor'
     | '/admin/sistemas'
     | '/admin/whatsapp'
     | '/crm/leads/$id'
@@ -879,6 +889,7 @@ export interface FileRouteTypes {
     | '/admin/ferramentas'
     | '/admin/formularios'
     | '/admin/leads'
+    | '/admin/monitor'
     | '/admin/sistemas'
     | '/admin/whatsapp'
     | '/crm/leads/$id'
@@ -960,6 +971,7 @@ export interface FileRouteTypes {
     | '/admin/_painel/ferramentas'
     | '/admin/_painel/formularios'
     | '/admin/_painel/leads'
+    | '/admin/_painel/monitor'
     | '/admin/_painel/sistemas'
     | '/admin/_painel/whatsapp'
     | '/crm/leads/$id'
@@ -1452,6 +1464,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPainelSistemasRouteImport
       parentRoute: typeof AdminPainelRoute
     }
+    '/admin/_painel/monitor': {
+      id: '/admin/_painel/monitor'
+      path: '/monitor'
+      fullPath: '/admin/monitor'
+      preLoaderRoute: typeof AdminPainelMonitorRouteImport
+      parentRoute: typeof AdminPainelRoute
+    }
     '/admin/_painel/leads': {
       id: '/admin/_painel/leads'
       path: '/leads'
@@ -1685,6 +1704,7 @@ interface AdminPainelRouteChildren {
   AdminPainelFerramentasRoute: typeof AdminPainelFerramentasRoute
   AdminPainelFormulariosRoute: typeof AdminPainelFormulariosRoute
   AdminPainelLeadsRoute: typeof AdminPainelLeadsRoute
+  AdminPainelMonitorRoute: typeof AdminPainelMonitorRoute
   AdminPainelSistemasRoute: typeof AdminPainelSistemasRoute
   AdminPainelWhatsappRoute: typeof AdminPainelWhatsappRoute
   AdminPainelIndexRoute: typeof AdminPainelIndexRoute
@@ -1696,6 +1716,7 @@ const AdminPainelRouteChildren: AdminPainelRouteChildren = {
   AdminPainelFerramentasRoute: AdminPainelFerramentasRoute,
   AdminPainelFormulariosRoute: AdminPainelFormulariosRoute,
   AdminPainelLeadsRoute: AdminPainelLeadsRoute,
+  AdminPainelMonitorRoute: AdminPainelMonitorRoute,
   AdminPainelSistemasRoute: AdminPainelSistemasRoute,
   AdminPainelWhatsappRoute: AdminPainelWhatsappRoute,
   AdminPainelIndexRoute: AdminPainelIndexRoute,

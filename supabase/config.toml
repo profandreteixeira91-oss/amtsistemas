@@ -3,3 +3,7 @@ project_id = "yqxmxevphdumyuwlvppg"
 [functions.admin-push]
 # Gatilhos dos bancos (x-admin-push-secret) e teste pelo painel (token do Control Center): sem JWT no gateway.
 verify_jwt = false
+
+[functions.admin-monitor]
+# pg_cron (x-admin-push-secret) e "Verificar agora" do painel (token do Control Center): sem JWT no gateway.
+verify_jwt = false
