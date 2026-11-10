@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { ChevronsLeft, ChevronsRight, LogOut } from "lucide-react";
 
+import { AdminAlerts } from "@/components/admin/AdminAlerts";
 import { Button } from "@/components/ui/button";
+import { useAdminCounters } from "@/lib/admin/counters";
 import { ADMIN_MODULES, moduleForPath } from "@/lib/admin/modules";
 import { getAdminProfile, getAdminSession, signOutAdmin } from "@/lib/amt-admin-auth";
 
@@ -15,6 +17,8 @@ export function AdminShell() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const current = moduleForPath(pathname);
+  const counters = useAdminCounters();
+  const badge = (to: string) => (to === "/admin/whatsapp" ? counters.whatsapp : to === "/admin/leads" ? counters.leads : 0);
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState("");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -103,8 +107,14 @@ export function AdminShell() {
                   title={sidebarCollapsed ? item.label : undefined}
                   className={`flex w-full items-center rounded-xl text-left text-sm transition-colors ${sidebarCollapsed ? "justify-center px-2 py-3" : "gap-3 px-3 py-2.5"} ${active ? "bg-blue-600 text-white" : "text-slate-300 hover:bg-white/10 hover:text-white"}`}
                 >
-                  <Icon className="h-4 w-4 shrink-0" />
-                  {!sidebarCollapsed && item.label}
+                  <span className="relative">
+                    <Icon className="h-4 w-4 shrink-0" />
+                    {sidebarCollapsed && badge(item.to) ? <span className="absolute -right-1.5 -top-1.5 h-2.5 w-2.5 rounded-full bg-emerald-500" /> : null}
+                  </span>
+                  {!sidebarCollapsed && <span className="flex-1">{item.label}</span>}
+                  {!sidebarCollapsed && badge(item.to) ? (
+                    <span className="grid h-5 min-w-5 place-items-center rounded-full bg-emerald-500 px-1.5 text-[11px] font-bold text-white">{badge(item.to)}</span>
+                  ) : null}
                 </Link>
               );
             })}
@@ -128,6 +138,7 @@ export function AdminShell() {
             </div>
             <div className="flex items-center gap-2">
               <span className="hidden rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 sm:inline-flex">Sistema operacional</span>
+              <AdminAlerts />
               <Button size="sm" variant="outline" onClick={handleLogout} className="gap-2 lg:hidden">
                 <LogOut className="h-4 w-4" /> Sair
               </Button>
@@ -136,8 +147,9 @@ export function AdminShell() {
 
           <nav className="flex gap-2 overflow-x-auto border-b border-slate-200 bg-white px-5 py-3 lg:hidden">
             {ADMIN_MODULES.map((item) => (
-              <Link key={item.to} to={item.to} className={`shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium ${current.to === item.to ? "bg-blue-600 text-white" : "text-slate-600 hover:bg-slate-100"}`}>
+              <Link key={item.to} to={item.to} className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium ${current.to === item.to ? "bg-blue-600 text-white" : "text-slate-600 hover:bg-slate-100"}`}>
                 {item.label}
+                {badge(item.to) ? <span className="grid h-5 min-w-5 place-items-center rounded-full bg-emerald-500 px-1.5 text-[11px] font-bold text-white">{badge(item.to)}</span> : null}
               </Link>
             ))}
           </nav>

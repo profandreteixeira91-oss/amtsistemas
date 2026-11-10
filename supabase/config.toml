@@ -1,1 +1,5 @@
 project_id = "yqxmxevphdumyuwlvppg"
+
+[functions.admin-push]
+# Gatilhos dos bancos (x-admin-push-secret) e teste pelo painel (token do Control Center): sem JWT no gateway.
+verify_jwt = false
