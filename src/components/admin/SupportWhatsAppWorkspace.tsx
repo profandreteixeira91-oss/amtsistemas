@@ -137,7 +137,8 @@ function fillName(body: string, firstName: string) {
 const CLOSED_TICKET = ["resolvido", "fechado"];
 type ListItem = { kind: "chat"; key: string; at: string; chat: Chat } | { kind: "ticket"; key: string; at: string; ticket: Ticket };
 
-export function SupportWhatsAppWorkspace() {
+/** `selected`: conversa aberta (id) ou chamado ("t:" + id), vindo do endereço (?conversa=). */
+export function SupportWhatsAppWorkspace({ selected, onSelect }: { selected: string | null; onSelect: (id: string | null) => void }) {
   const [status, setStatus] = useState<Status | null>(null);
   const [statusError, setStatusError] = useState("");
   const [filter, setFilter] = useState<Filter>("todas");
@@ -145,7 +146,7 @@ export function SupportWhatsAppWorkspace() {
   const [tickets, setTickets] = useState<Ticket[] | null>(null);
   const [listError, setListError] = useState("");
   const [q, setQ] = useState("");
-  const [selected, setSelected] = useState<string | null>(null);
+  const setSelected = onSelect;
   const [notice, setNotice] = useState("");
 
   async function loadStatus() {

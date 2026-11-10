@@ -18,7 +18,6 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as OptioneIndexRouteImport } from './routes/optione.index'
 import { Route as CrmIndexRouteImport } from './routes/crm.index'
 import { Route as AmtAdminIndexRouteImport } from './routes/amt-admin.index'
-import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as WidgetSuporteRouteImport } from './routes/widget.suporte'
 import { Route as PortalTokenRouteImport } from './routes/portal.$token'
 import { Route as OptioneTesteGratisRouteImport } from './routes/optione.teste-gratis'
@@ -63,17 +62,21 @@ import { Route as AmtAdminComercialRouteImport } from './routes/amt-admin.comerc
 import { Route as AmtAdminClientesRouteImport } from './routes/amt-admin.clientes'
 import { Route as AmtAdminAuditoriaRouteImport } from './routes/amt-admin.auditoria'
 import { Route as AmtAdminAsaasRouteImport } from './routes/amt-admin.asaas'
-import { Route as AdminSistemasRouteImport } from './routes/admin/sistemas'
 import { Route as AdminSegurancaRouteImport } from './routes/admin/seguranca'
 import { Route as AdminRedefinirSenhaRouteImport } from './routes/admin/redefinir-senha'
 import { Route as AdminPrimeiroAcessoRouteImport } from './routes/admin/primeiro-acesso'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
-import { Route as AdminLeadsRouteImport } from './routes/admin/leads'
-import { Route as AdminFormulariosRouteImport } from './routes/admin/formularios'
-import { Route as AdminFerramentasRouteImport } from './routes/admin/ferramentas'
 import { Route as AdminConfiguracoesRouteImport } from './routes/admin/configuracoes'
-import { Route as AdminAuditoriaRouteImport } from './routes/admin/auditoria'
+import { Route as AdminPainelRouteImport } from './routes/admin/_painel'
+import { Route as AdminPainelIndexRouteImport } from './routes/admin/_painel/index'
 import { Route as CrmLeadsIdRouteImport } from './routes/crm.leads.$id'
+import { Route as AdminPainelWhatsappRouteImport } from './routes/admin/_painel/whatsapp'
+import { Route as AdminPainelSistemasRouteImport } from './routes/admin/_painel/sistemas'
+import { Route as AdminPainelLeadsRouteImport } from './routes/admin/_painel/leads'
+import { Route as AdminPainelFormulariosRouteImport } from './routes/admin/_painel/formularios'
+import { Route as AdminPainelFerramentasRouteImport } from './routes/admin/_painel/ferramentas'
+import { Route as AdminPainelDesenvolvimentoRouteImport } from './routes/admin/_painel/desenvolvimento'
+import { Route as AdminPainelAuditoriaRouteImport } from './routes/admin/_painel/auditoria'
 import { Route as ApiPublicPlanosSlugRouteImport } from './routes/api.public.planos.$slug'
 import { Route as ApiPublicHooksScraperAutoRouteImport } from './routes/api.public.hooks.scraper-auto'
 import { Route as ApiPublicHooksCrmWorkflowsTickRouteImport } from './routes/api.public.hooks.crm-workflows-tick'
@@ -130,11 +133,6 @@ const AmtAdminIndexRoute = AmtAdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AmtAdminRoute,
-} as any)
-const AdminIndexRoute = AdminIndexRouteImport.update({
-  id: '/admin/',
-  path: '/admin/',
-  getParentRoute: () => rootRouteImport,
 } as any)
 const WidgetSuporteRoute = WidgetSuporteRouteImport.update({
   id: '/widget/suporte',
@@ -356,11 +354,6 @@ const AmtAdminAsaasRoute = AmtAdminAsaasRouteImport.update({
   path: '/asaas',
   getParentRoute: () => AmtAdminRoute,
 } as any)
-const AdminSistemasRoute = AdminSistemasRouteImport.update({
-  id: '/admin/sistemas',
-  path: '/admin/sistemas',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AdminSegurancaRoute = AdminSegurancaRouteImport.update({
   id: '/admin/seguranca',
   path: '/admin/seguranca',
@@ -381,35 +374,61 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
   path: '/admin/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminLeadsRoute = AdminLeadsRouteImport.update({
-  id: '/admin/leads',
-  path: '/admin/leads',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminFormulariosRoute = AdminFormulariosRouteImport.update({
-  id: '/admin/formularios',
-  path: '/admin/formularios',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminFerramentasRoute = AdminFerramentasRouteImport.update({
-  id: '/admin/ferramentas',
-  path: '/admin/ferramentas',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AdminConfiguracoesRoute = AdminConfiguracoesRouteImport.update({
   id: '/admin/configuracoes',
   path: '/admin/configuracoes',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminAuditoriaRoute = AdminAuditoriaRouteImport.update({
-  id: '/admin/auditoria',
-  path: '/admin/auditoria',
+const AdminPainelRoute = AdminPainelRouteImport.update({
+  id: '/admin/_painel',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminPainelIndexRoute = AdminPainelIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminPainelRoute,
 } as any)
 const CrmLeadsIdRoute = CrmLeadsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => CrmLeadsRoute,
+} as any)
+const AdminPainelWhatsappRoute = AdminPainelWhatsappRouteImport.update({
+  id: '/whatsapp',
+  path: '/whatsapp',
+  getParentRoute: () => AdminPainelRoute,
+} as any)
+const AdminPainelSistemasRoute = AdminPainelSistemasRouteImport.update({
+  id: '/sistemas',
+  path: '/sistemas',
+  getParentRoute: () => AdminPainelRoute,
+} as any)
+const AdminPainelLeadsRoute = AdminPainelLeadsRouteImport.update({
+  id: '/leads',
+  path: '/leads',
+  getParentRoute: () => AdminPainelRoute,
+} as any)
+const AdminPainelFormulariosRoute = AdminPainelFormulariosRouteImport.update({
+  id: '/formularios',
+  path: '/formularios',
+  getParentRoute: () => AdminPainelRoute,
+} as any)
+const AdminPainelFerramentasRoute = AdminPainelFerramentasRouteImport.update({
+  id: '/ferramentas',
+  path: '/ferramentas',
+  getParentRoute: () => AdminPainelRoute,
+} as any)
+const AdminPainelDesenvolvimentoRoute =
+  AdminPainelDesenvolvimentoRouteImport.update({
+    id: '/desenvolvimento',
+    path: '/desenvolvimento',
+    getParentRoute: () => AdminPainelRoute,
+  } as any)
+const AdminPainelAuditoriaRoute = AdminPainelAuditoriaRouteImport.update({
+  id: '/auditoria',
+  path: '/auditoria',
+  getParentRoute: () => AdminPainelRoute,
 } as any)
 const ApiPublicPlanosSlugRoute = ApiPublicPlanosSlugRouteImport.update({
   id: '/api/public/planos/$slug',
@@ -481,16 +500,12 @@ export interface FileRoutesByFullPath {
   '/privacidade': typeof PrivacidadeRoute
   '/suporte': typeof SuporteRoute
   '/termos': typeof TermosRoute
-  '/admin/auditoria': typeof AdminAuditoriaRoute
+  '/admin': typeof AdminPainelRouteWithChildren
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
-  '/admin/ferramentas': typeof AdminFerramentasRoute
-  '/admin/formularios': typeof AdminFormulariosRoute
-  '/admin/leads': typeof AdminLeadsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/primeiro-acesso': typeof AdminPrimeiroAcessoRoute
   '/admin/redefinir-senha': typeof AdminRedefinirSenhaRoute
   '/admin/seguranca': typeof AdminSegurancaRoute
-  '/admin/sistemas': typeof AdminSistemasRoute
   '/amt-admin/asaas': typeof AmtAdminAsaasRoute
   '/amt-admin/auditoria': typeof AmtAdminAuditoriaRoute
   '/amt-admin/clientes': typeof AmtAdminClientesRoute
@@ -535,11 +550,18 @@ export interface FileRoutesByFullPath {
   '/optione/teste-gratis': typeof OptioneTesteGratisRoute
   '/portal/$token': typeof PortalTokenRoute
   '/widget/suporte': typeof WidgetSuporteRoute
-  '/admin/': typeof AdminIndexRoute
   '/amt-admin/': typeof AmtAdminIndexRoute
   '/crm/': typeof CrmIndexRoute
   '/optione/': typeof OptioneIndexRoute
+  '/admin/auditoria': typeof AdminPainelAuditoriaRoute
+  '/admin/desenvolvimento': typeof AdminPainelDesenvolvimentoRoute
+  '/admin/ferramentas': typeof AdminPainelFerramentasRoute
+  '/admin/formularios': typeof AdminPainelFormulariosRoute
+  '/admin/leads': typeof AdminPainelLeadsRoute
+  '/admin/sistemas': typeof AdminPainelSistemasRoute
+  '/admin/whatsapp': typeof AdminPainelWhatsappRoute
   '/crm/leads/$id': typeof CrmLeadsIdRoute
+  '/admin/': typeof AdminPainelIndexRoute
   '/api/public/hooks/asaas': typeof ApiPublicHooksAsaasRoute
   '/api/public/hooks/asaas-tick': typeof ApiPublicHooksAsaasTickRoute
   '/api/public/hooks/crm-alertas-tick': typeof ApiPublicHooksCrmAlertasTickRoute
@@ -557,16 +579,11 @@ export interface FileRoutesByTo {
   '/privacidade': typeof PrivacidadeRoute
   '/suporte': typeof SuporteRoute
   '/termos': typeof TermosRoute
-  '/admin/auditoria': typeof AdminAuditoriaRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
-  '/admin/ferramentas': typeof AdminFerramentasRoute
-  '/admin/formularios': typeof AdminFormulariosRoute
-  '/admin/leads': typeof AdminLeadsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/primeiro-acesso': typeof AdminPrimeiroAcessoRoute
   '/admin/redefinir-senha': typeof AdminRedefinirSenhaRoute
   '/admin/seguranca': typeof AdminSegurancaRoute
-  '/admin/sistemas': typeof AdminSistemasRoute
   '/amt-admin/asaas': typeof AmtAdminAsaasRoute
   '/amt-admin/auditoria': typeof AmtAdminAuditoriaRoute
   '/amt-admin/clientes': typeof AmtAdminClientesRoute
@@ -611,11 +628,18 @@ export interface FileRoutesByTo {
   '/optione/teste-gratis': typeof OptioneTesteGratisRoute
   '/portal/$token': typeof PortalTokenRoute
   '/widget/suporte': typeof WidgetSuporteRoute
-  '/admin': typeof AdminIndexRoute
   '/amt-admin': typeof AmtAdminIndexRoute
   '/crm': typeof CrmIndexRoute
   '/optione': typeof OptioneIndexRoute
+  '/admin/auditoria': typeof AdminPainelAuditoriaRoute
+  '/admin/desenvolvimento': typeof AdminPainelDesenvolvimentoRoute
+  '/admin/ferramentas': typeof AdminPainelFerramentasRoute
+  '/admin/formularios': typeof AdminPainelFormulariosRoute
+  '/admin/leads': typeof AdminPainelLeadsRoute
+  '/admin/sistemas': typeof AdminPainelSistemasRoute
+  '/admin/whatsapp': typeof AdminPainelWhatsappRoute
   '/crm/leads/$id': typeof CrmLeadsIdRoute
+  '/admin': typeof AdminPainelIndexRoute
   '/api/public/hooks/asaas': typeof ApiPublicHooksAsaasRoute
   '/api/public/hooks/asaas-tick': typeof ApiPublicHooksAsaasTickRoute
   '/api/public/hooks/crm-alertas-tick': typeof ApiPublicHooksCrmAlertasTickRoute
@@ -636,16 +660,12 @@ export interface FileRoutesById {
   '/privacidade': typeof PrivacidadeRoute
   '/suporte': typeof SuporteRoute
   '/termos': typeof TermosRoute
-  '/admin/auditoria': typeof AdminAuditoriaRoute
+  '/admin/_painel': typeof AdminPainelRouteWithChildren
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
-  '/admin/ferramentas': typeof AdminFerramentasRoute
-  '/admin/formularios': typeof AdminFormulariosRoute
-  '/admin/leads': typeof AdminLeadsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/primeiro-acesso': typeof AdminPrimeiroAcessoRoute
   '/admin/redefinir-senha': typeof AdminRedefinirSenhaRoute
   '/admin/seguranca': typeof AdminSegurancaRoute
-  '/admin/sistemas': typeof AdminSistemasRoute
   '/amt-admin/asaas': typeof AmtAdminAsaasRoute
   '/amt-admin/auditoria': typeof AmtAdminAuditoriaRoute
   '/amt-admin/clientes': typeof AmtAdminClientesRoute
@@ -690,11 +710,18 @@ export interface FileRoutesById {
   '/optione/teste-gratis': typeof OptioneTesteGratisRoute
   '/portal/$token': typeof PortalTokenRoute
   '/widget/suporte': typeof WidgetSuporteRoute
-  '/admin/': typeof AdminIndexRoute
   '/amt-admin/': typeof AmtAdminIndexRoute
   '/crm/': typeof CrmIndexRoute
   '/optione/': typeof OptioneIndexRoute
+  '/admin/_painel/auditoria': typeof AdminPainelAuditoriaRoute
+  '/admin/_painel/desenvolvimento': typeof AdminPainelDesenvolvimentoRoute
+  '/admin/_painel/ferramentas': typeof AdminPainelFerramentasRoute
+  '/admin/_painel/formularios': typeof AdminPainelFormulariosRoute
+  '/admin/_painel/leads': typeof AdminPainelLeadsRoute
+  '/admin/_painel/sistemas': typeof AdminPainelSistemasRoute
+  '/admin/_painel/whatsapp': typeof AdminPainelWhatsappRoute
   '/crm/leads/$id': typeof CrmLeadsIdRoute
+  '/admin/_painel/': typeof AdminPainelIndexRoute
   '/api/public/hooks/asaas': typeof ApiPublicHooksAsaasRoute
   '/api/public/hooks/asaas-tick': typeof ApiPublicHooksAsaasTickRoute
   '/api/public/hooks/crm-alertas-tick': typeof ApiPublicHooksCrmAlertasTickRoute
@@ -716,16 +743,12 @@ export interface FileRouteTypes {
     | '/privacidade'
     | '/suporte'
     | '/termos'
-    | '/admin/auditoria'
+    | '/admin'
     | '/admin/configuracoes'
-    | '/admin/ferramentas'
-    | '/admin/formularios'
-    | '/admin/leads'
     | '/admin/login'
     | '/admin/primeiro-acesso'
     | '/admin/redefinir-senha'
     | '/admin/seguranca'
-    | '/admin/sistemas'
     | '/amt-admin/asaas'
     | '/amt-admin/auditoria'
     | '/amt-admin/clientes'
@@ -770,11 +793,18 @@ export interface FileRouteTypes {
     | '/optione/teste-gratis'
     | '/portal/$token'
     | '/widget/suporte'
-    | '/admin/'
     | '/amt-admin/'
     | '/crm/'
     | '/optione/'
+    | '/admin/auditoria'
+    | '/admin/desenvolvimento'
+    | '/admin/ferramentas'
+    | '/admin/formularios'
+    | '/admin/leads'
+    | '/admin/sistemas'
+    | '/admin/whatsapp'
     | '/crm/leads/$id'
+    | '/admin/'
     | '/api/public/hooks/asaas'
     | '/api/public/hooks/asaas-tick'
     | '/api/public/hooks/crm-alertas-tick'
@@ -792,16 +822,11 @@ export interface FileRouteTypes {
     | '/privacidade'
     | '/suporte'
     | '/termos'
-    | '/admin/auditoria'
     | '/admin/configuracoes'
-    | '/admin/ferramentas'
-    | '/admin/formularios'
-    | '/admin/leads'
     | '/admin/login'
     | '/admin/primeiro-acesso'
     | '/admin/redefinir-senha'
     | '/admin/seguranca'
-    | '/admin/sistemas'
     | '/amt-admin/asaas'
     | '/amt-admin/auditoria'
     | '/amt-admin/clientes'
@@ -846,11 +871,18 @@ export interface FileRouteTypes {
     | '/optione/teste-gratis'
     | '/portal/$token'
     | '/widget/suporte'
-    | '/admin'
     | '/amt-admin'
     | '/crm'
     | '/optione'
+    | '/admin/auditoria'
+    | '/admin/desenvolvimento'
+    | '/admin/ferramentas'
+    | '/admin/formularios'
+    | '/admin/leads'
+    | '/admin/sistemas'
+    | '/admin/whatsapp'
     | '/crm/leads/$id'
+    | '/admin'
     | '/api/public/hooks/asaas'
     | '/api/public/hooks/asaas-tick'
     | '/api/public/hooks/crm-alertas-tick'
@@ -870,16 +902,12 @@ export interface FileRouteTypes {
     | '/privacidade'
     | '/suporte'
     | '/termos'
-    | '/admin/auditoria'
+    | '/admin/_painel'
     | '/admin/configuracoes'
-    | '/admin/ferramentas'
-    | '/admin/formularios'
-    | '/admin/leads'
     | '/admin/login'
     | '/admin/primeiro-acesso'
     | '/admin/redefinir-senha'
     | '/admin/seguranca'
-    | '/admin/sistemas'
     | '/amt-admin/asaas'
     | '/amt-admin/auditoria'
     | '/amt-admin/clientes'
@@ -924,11 +952,18 @@ export interface FileRouteTypes {
     | '/optione/teste-gratis'
     | '/portal/$token'
     | '/widget/suporte'
-    | '/admin/'
     | '/amt-admin/'
     | '/crm/'
     | '/optione/'
+    | '/admin/_painel/auditoria'
+    | '/admin/_painel/desenvolvimento'
+    | '/admin/_painel/ferramentas'
+    | '/admin/_painel/formularios'
+    | '/admin/_painel/leads'
+    | '/admin/_painel/sistemas'
+    | '/admin/_painel/whatsapp'
     | '/crm/leads/$id'
+    | '/admin/_painel/'
     | '/api/public/hooks/asaas'
     | '/api/public/hooks/asaas-tick'
     | '/api/public/hooks/crm-alertas-tick'
@@ -949,22 +984,17 @@ export interface RootRouteChildren {
   PrivacidadeRoute: typeof PrivacidadeRoute
   SuporteRoute: typeof SuporteRoute
   TermosRoute: typeof TermosRoute
-  AdminAuditoriaRoute: typeof AdminAuditoriaRoute
+  AdminPainelRoute: typeof AdminPainelRouteWithChildren
   AdminConfiguracoesRoute: typeof AdminConfiguracoesRoute
-  AdminFerramentasRoute: typeof AdminFerramentasRoute
-  AdminFormulariosRoute: typeof AdminFormulariosRoute
-  AdminLeadsRoute: typeof AdminLeadsRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminPrimeiroAcessoRoute: typeof AdminPrimeiroAcessoRoute
   AdminRedefinirSenhaRoute: typeof AdminRedefinirSenhaRoute
   AdminSegurancaRoute: typeof AdminSegurancaRoute
-  AdminSistemasRoute: typeof AdminSistemasRoute
   LpSlugRoute: typeof LpSlugRoute
   OptioneNovaChaveRoute: typeof OptioneNovaChaveRoute
   OptioneTesteGratisRoute: typeof OptioneTesteGratisRoute
   PortalTokenRoute: typeof PortalTokenRoute
   WidgetSuporteRoute: typeof WidgetSuporteRoute
-  AdminIndexRoute: typeof AdminIndexRoute
   OptioneIndexRoute: typeof OptioneIndexRoute
   ApiPublicHooksAsaasRoute: typeof ApiPublicHooksAsaasRoute
   ApiPublicHooksAsaasTickRoute: typeof ApiPublicHooksAsaasTickRoute
@@ -1043,13 +1073,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/amt-admin/'
       preLoaderRoute: typeof AmtAdminIndexRouteImport
       parentRoute: typeof AmtAdminRoute
-    }
-    '/admin/': {
-      id: '/admin/'
-      path: '/admin'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/widget/suporte': {
       id: '/widget/suporte'
@@ -1359,13 +1382,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AmtAdminAsaasRouteImport
       parentRoute: typeof AmtAdminRoute
     }
-    '/admin/sistemas': {
-      id: '/admin/sistemas'
-      path: '/admin/sistemas'
-      fullPath: '/admin/sistemas'
-      preLoaderRoute: typeof AdminSistemasRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/admin/seguranca': {
       id: '/admin/seguranca'
       path: '/admin/seguranca'
@@ -1394,27 +1410,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/leads': {
-      id: '/admin/leads'
-      path: '/admin/leads'
-      fullPath: '/admin/leads'
-      preLoaderRoute: typeof AdminLeadsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/formularios': {
-      id: '/admin/formularios'
-      path: '/admin/formularios'
-      fullPath: '/admin/formularios'
-      preLoaderRoute: typeof AdminFormulariosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/ferramentas': {
-      id: '/admin/ferramentas'
-      path: '/admin/ferramentas'
-      fullPath: '/admin/ferramentas'
-      preLoaderRoute: typeof AdminFerramentasRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/admin/configuracoes': {
       id: '/admin/configuracoes'
       path: '/admin/configuracoes'
@@ -1422,12 +1417,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminConfiguracoesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/auditoria': {
-      id: '/admin/auditoria'
-      path: '/admin/auditoria'
-      fullPath: '/admin/auditoria'
-      preLoaderRoute: typeof AdminAuditoriaRouteImport
+    '/admin/_painel': {
+      id: '/admin/_painel'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminPainelRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/_painel/': {
+      id: '/admin/_painel/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminPainelIndexRouteImport
+      parentRoute: typeof AdminPainelRoute
     }
     '/crm/leads/$id': {
       id: '/crm/leads/$id'
@@ -1435,6 +1437,55 @@ declare module '@tanstack/react-router' {
       fullPath: '/crm/leads/$id'
       preLoaderRoute: typeof CrmLeadsIdRouteImport
       parentRoute: typeof CrmLeadsRoute
+    }
+    '/admin/_painel/whatsapp': {
+      id: '/admin/_painel/whatsapp'
+      path: '/whatsapp'
+      fullPath: '/admin/whatsapp'
+      preLoaderRoute: typeof AdminPainelWhatsappRouteImport
+      parentRoute: typeof AdminPainelRoute
+    }
+    '/admin/_painel/sistemas': {
+      id: '/admin/_painel/sistemas'
+      path: '/sistemas'
+      fullPath: '/admin/sistemas'
+      preLoaderRoute: typeof AdminPainelSistemasRouteImport
+      parentRoute: typeof AdminPainelRoute
+    }
+    '/admin/_painel/leads': {
+      id: '/admin/_painel/leads'
+      path: '/leads'
+      fullPath: '/admin/leads'
+      preLoaderRoute: typeof AdminPainelLeadsRouteImport
+      parentRoute: typeof AdminPainelRoute
+    }
+    '/admin/_painel/formularios': {
+      id: '/admin/_painel/formularios'
+      path: '/formularios'
+      fullPath: '/admin/formularios'
+      preLoaderRoute: typeof AdminPainelFormulariosRouteImport
+      parentRoute: typeof AdminPainelRoute
+    }
+    '/admin/_painel/ferramentas': {
+      id: '/admin/_painel/ferramentas'
+      path: '/ferramentas'
+      fullPath: '/admin/ferramentas'
+      preLoaderRoute: typeof AdminPainelFerramentasRouteImport
+      parentRoute: typeof AdminPainelRoute
+    }
+    '/admin/_painel/desenvolvimento': {
+      id: '/admin/_painel/desenvolvimento'
+      path: '/desenvolvimento'
+      fullPath: '/admin/desenvolvimento'
+      preLoaderRoute: typeof AdminPainelDesenvolvimentoRouteImport
+      parentRoute: typeof AdminPainelRoute
+    }
+    '/admin/_painel/auditoria': {
+      id: '/admin/_painel/auditoria'
+      path: '/auditoria'
+      fullPath: '/admin/auditoria'
+      preLoaderRoute: typeof AdminPainelAuditoriaRouteImport
+      parentRoute: typeof AdminPainelRoute
     }
     '/api/public/planos/$slug': {
       id: '/api/public/planos/$slug'
@@ -1628,6 +1679,32 @@ const CrmRouteChildren: CrmRouteChildren = {
 
 const CrmRouteWithChildren = CrmRoute._addFileChildren(CrmRouteChildren)
 
+interface AdminPainelRouteChildren {
+  AdminPainelAuditoriaRoute: typeof AdminPainelAuditoriaRoute
+  AdminPainelDesenvolvimentoRoute: typeof AdminPainelDesenvolvimentoRoute
+  AdminPainelFerramentasRoute: typeof AdminPainelFerramentasRoute
+  AdminPainelFormulariosRoute: typeof AdminPainelFormulariosRoute
+  AdminPainelLeadsRoute: typeof AdminPainelLeadsRoute
+  AdminPainelSistemasRoute: typeof AdminPainelSistemasRoute
+  AdminPainelWhatsappRoute: typeof AdminPainelWhatsappRoute
+  AdminPainelIndexRoute: typeof AdminPainelIndexRoute
+}
+
+const AdminPainelRouteChildren: AdminPainelRouteChildren = {
+  AdminPainelAuditoriaRoute: AdminPainelAuditoriaRoute,
+  AdminPainelDesenvolvimentoRoute: AdminPainelDesenvolvimentoRoute,
+  AdminPainelFerramentasRoute: AdminPainelFerramentasRoute,
+  AdminPainelFormulariosRoute: AdminPainelFormulariosRoute,
+  AdminPainelLeadsRoute: AdminPainelLeadsRoute,
+  AdminPainelSistemasRoute: AdminPainelSistemasRoute,
+  AdminPainelWhatsappRoute: AdminPainelWhatsappRoute,
+  AdminPainelIndexRoute: AdminPainelIndexRoute,
+}
+
+const AdminPainelRouteWithChildren = AdminPainelRoute._addFileChildren(
+  AdminPainelRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AmtAdminRoute: AmtAdminRouteWithChildren,
@@ -1635,22 +1712,17 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacidadeRoute: PrivacidadeRoute,
   SuporteRoute: SuporteRoute,
   TermosRoute: TermosRoute,
-  AdminAuditoriaRoute: AdminAuditoriaRoute,
+  AdminPainelRoute: AdminPainelRouteWithChildren,
   AdminConfiguracoesRoute: AdminConfiguracoesRoute,
-  AdminFerramentasRoute: AdminFerramentasRoute,
-  AdminFormulariosRoute: AdminFormulariosRoute,
-  AdminLeadsRoute: AdminLeadsRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminPrimeiroAcessoRoute: AdminPrimeiroAcessoRoute,
   AdminRedefinirSenhaRoute: AdminRedefinirSenhaRoute,
   AdminSegurancaRoute: AdminSegurancaRoute,
-  AdminSistemasRoute: AdminSistemasRoute,
   LpSlugRoute: LpSlugRoute,
   OptioneNovaChaveRoute: OptioneNovaChaveRoute,
   OptioneTesteGratisRoute: OptioneTesteGratisRoute,
   PortalTokenRoute: PortalTokenRoute,
   WidgetSuporteRoute: WidgetSuporteRoute,
-  AdminIndexRoute: AdminIndexRoute,
   OptioneIndexRoute: OptioneIndexRoute,
   ApiPublicHooksAsaasRoute: ApiPublicHooksAsaasRoute,
   ApiPublicHooksAsaasTickRoute: ApiPublicHooksAsaasTickRoute,
