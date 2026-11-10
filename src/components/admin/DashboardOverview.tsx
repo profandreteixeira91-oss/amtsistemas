@@ -25,9 +25,10 @@ export function DashboardOverview({ onOpen }: { onOpen: (module: string) => void
 
   useEffect(() => {
     void Promise.all([
-      amtSupabase.from("leads").select("id", { count: "exact", head: true }),
-      amtSupabase.from("form_submissions").select("id", { count: "exact", head: true }),
-      amtSupabase.from("form_submissions").select("id", { count: "exact", head: true }).eq("status", "novo"),
+      // Leads em aberto no funil e contatos do formulário do site (últimos 30 dias / total).
+      amtSupabase.from("manager_leads").select("id", { count: "exact", head: true }).not("status", "in", "(ganho,perdido)"),
+      amtSupabase.from("contatos_leads").select("id", { count: "exact", head: true }),
+      amtSupabase.from("contatos_leads").select("id", { count: "exact", head: true }).gte("created_at", new Date(daysAgo(30)).toISOString()),
       amtSupabase.from("audit_logs").select("id,actor_user_id,action,resource_type,resource_id,metadata,created_at").order("created_at", { ascending: false }).limit(6),
     ]).then(([leads, forms, newForms, logs]) => {
       setCounts({ leads: leads.count ?? null, forms: forms.count ?? null, newForms: newForms.count ?? null });
@@ -41,8 +42,8 @@ export function DashboardOverview({ onOpen }: { onOpen: (module: string) => void
   const kpis = [
     { label: "Sistemas", value: pad(systems.length), detail: systems.map((system) => system.name.replace("AMT ", "")).join(" · "), icon: Boxes, module: "Sistemas" },
     { label: "Testes grátis OptiOne", value: commercial.leadsError ? "—" : pad(trials30), detail: commercial.leadsError ? "Acesso aos leads comerciais pendente" : `Últimos 30 dias · ${trials.length} no total`, icon: Glasses, module: "Sistemas" },
-    { label: "Leads", value: show(counts.leads), detail: "Módulo Leads do Control Center", icon: Users, module: "Leads" },
-    { label: "Formulários novos", value: show(counts.newForms), detail: counts.forms === null ? "Formulários recebidos" : `${counts.forms} no total`, icon: FileText, module: "Formulários" },
+    { label: "Leads em aberto", value: show(counts.leads), detail: "Funil: site, chat, testes e cadastros", icon: Users, module: "Leads" },
+    { label: "Contatos pelo site", value: show(counts.newForms), detail: counts.forms === null ? "Formulário de contato" : `Últimos 30 dias · ${counts.forms} no total`, icon: FileText, module: "Formulários" },
   ];
 
   return (

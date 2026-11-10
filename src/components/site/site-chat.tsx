@@ -3,6 +3,7 @@ import { ArrowRight, Loader2, MessageCircle, Send, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { registrarLeadDoChat } from "@/lib/site-chat-lead.functions";
 import { siteChat } from "@/lib/support-inbox";
 import { cn } from "@/lib/utils";
 import { SITE_CHAT_EVENT, SUPPORT_WHATSAPP_URL } from "./site-config";
@@ -126,6 +127,10 @@ export function SiteChat() {
       setToken(r.token);
       setMessages(r.messages);
       writeStored({ token: r.token, seen: "" });
+      // O visitante também entra no funil de leads do /admin (não atrasa nem bloqueia o chat).
+      void registrarLeadDoChat({
+        data: { token: r.token, name: form.name, phone: form.phone, message: form.message },
+      }).catch(() => undefined);
       setForm({ name: "", phone: "", message: "", website: "" });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Não foi possível iniciar a conversa.");
