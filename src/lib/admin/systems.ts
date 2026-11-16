@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   Cloud,
   Database,
+  Apple,
   Download,
   FlaskConical,
   GitBranch,
@@ -32,6 +33,9 @@ export type AmtSystem = {
   githubRepo: string;
   /** repositório público com os instaladores (só sistemas desktop) */
   releasesRepo?: string;
+  /** Sistema offline (banco no computador do cliente): sem catálogo, planos, leads nem relatório da plataforma.
+   *  Nele catalogSlug e overviewUrl ficam vazios e o painel mostra só versão, download e acessos. */
+  offline?: boolean;
   /** Edge Function platform-overview do sistema: clientes, assinaturas, cobranças e uso (só leitura) */
   overviewUrl: string;
   capabilities: string[];
@@ -60,6 +64,25 @@ export const systems: AmtSystem[] = [
       { label: "Versões do instalador", hint: "Releases no GitHub", href: "https://github.com/profandreteixeira91-oss/amt-optione-releases/releases", icon: Download },
       { label: "Código-fonte", hint: "GitHub · gestao_otica", href: "https://github.com/profandreteixeira91-oss/gestao_otica", icon: GitBranch },
       { label: "Supabase", hint: "Projeto rragitmijwruydspafac", href: "https://supabase.com/dashboard/project/rragitmijwruydspafac", icon: Database },
+    ],
+  },
+  {
+    id: "kelly-nutri",
+    catalogSlug: "",
+    name: "Kelly Nutri",
+    platform: "Desktop · Offline",
+    description: "Gestão para nutricionista (cliente Kelly Fernandes): pacientes, agenda, financeiro, plano alimentar e WhatsApp. Banco de dados local no computador da cliente.",
+    href: "https://github.com/profandreteixeira91-oss/kelly-nutri-releases/releases/latest",
+    icon: Apple,
+    githubRepo: "profandreteixeira91-oss/kelly-nutri",
+    releasesRepo: "profandreteixeira91-oss/kelly-nutri-releases",
+    offline: true,
+    overviewUrl: "",
+    capabilities: ["Instalador Windows", "Atualização automática", "Banco local (SQLite)", "WhatsApp (Evolution API)"],
+    links: [
+      { label: "Baixar instalador", hint: "Última versão (releases no GitHub)", href: "https://github.com/profandreteixeira91-oss/kelly-nutri-releases/releases/latest", icon: Download },
+      { label: "Todas as versões", hint: "Histórico de releases", href: "https://github.com/profandreteixeira91-oss/kelly-nutri-releases/releases", icon: GitBranch },
+      { label: "Código-fonte", hint: "GitHub privado · kelly-nutri", href: "https://github.com/profandreteixeira91-oss/kelly-nutri", icon: GitBranch },
     ],
   },
   {
@@ -108,7 +131,7 @@ export function useCommercialData() {
   async function load() {
     setLoading(true);
     const [catalogResult, plansResult, leadsResult] = await Promise.all([
-      amtSupabase.from("manager_sistemas").select("id,slug,nome,versao,trial_dias,ativo").in("slug", systems.map((system) => system.catalogSlug)),
+      amtSupabase.from("manager_sistemas").select("id,slug,nome,versao,trial_dias,ativo").in("slug", systems.map((system) => system.catalogSlug).filter(Boolean)),
       amtSupabase.from("manager_planos").select("id,sistema_id,slug,nome,preco_mensal,preco_anual,ativo,destaque").order("ordem").order("preco_mensal"),
       amtSupabase.from("manager_leads").select("id,nome,empresa,email,telefone,origem,status,observacoes,sistema_interesse_id,created_at").order("created_at", { ascending: false }).limit(500),
     ]);

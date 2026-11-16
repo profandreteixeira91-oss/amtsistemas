@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   Activity,
   Code2,
+  Database,
   Download,
   ExternalLink,
   Package,
@@ -55,6 +56,7 @@ function usePlatformOverview(url: string) {
   const [state, setState] = useState<{ loading: boolean; error: string; data: PlatformOverview | null }>({ loading: true, error: "", data: null });
 
   async function load() {
+    if (!url) { setState({ loading: false, error: "", data: null }); return; } // sistema offline: sem relatório
     setState((value) => ({ ...value, loading: true, error: "" }));
     try {
       const { data } = await amtSupabase.auth.getSession();
@@ -107,6 +109,7 @@ function customerUsage(customer: OverviewCustomer) {
 
 export function SystemSubscriptionSummary({ system }: { system: AmtSystem }) {
   const overview = usePlatformOverview(system.overviewUrl);
+  if (system.offline) return <p className="mt-2 text-xs text-slate-500">Cliente única · banco local · atualização automática pelo GitHub</p>;
   if (overview.loading) return <p className="mt-2 text-xs text-slate-400">Carregando assinaturas…</p>;
   if (!overview.data) return <p className="mt-2 text-xs text-slate-400">Assinaturas indisponíveis</p>;
   const summary = summarizeCustomers(overview.data.customers);
@@ -391,7 +394,7 @@ function PlatformSection({ system }: { system: AmtSystem }) {
 }
 
 type GitHubState = { loading: boolean; private: boolean; error: string; commit: { sha: string; message: string; date: string } | null; issues: number; prs: number };
-type ReleaseState = { loading: boolean; error: string; tag: string; publishedAt: string; url: string; downloads: number } | null;
+type ReleaseState = { loading: boolean; error: string; tag: string; publishedAt: string; url: string; installer: string; downloads: number } | null;
 
 export function SystemsWorkspace({ selectedId, onSelect }: { selectedId: string; onSelect: (id: string) => void }) {
   const setSelectedId = onSelect;
@@ -428,15 +431,16 @@ export function SystemsWorkspace({ selectedId, onSelect }: { selectedId: string;
       .catch((error) => { if (active) setGithub({ loading: false, private: false, error: error instanceof Error ? error.message : "Falha ao consultar o GitHub.", commit: null, issues: 0, prs: 0 }); });
 
     if (selected.releasesRepo) {
-      setRelease({ loading: true, error: "", tag: "", publishedAt: "", url: "", downloads: 0 });
+      setRelease({ loading: true, error: "", tag: "", publishedAt: "", url: "", installer: "", downloads: 0 });
       fetch("https://api.github.com/repos/" + selected.releasesRepo + "/releases/latest")
         .then((r) => r.ok ? r.json() : Promise.reject(new Error("Nenhuma versão publicada encontrada.")))
-        .then((data: { tag_name: string; published_at: string; html_url: string; assets?: Array<{ name: string; download_count?: number }> }) => {
+        .then((data: { tag_name: string; published_at: string; html_url: string; assets?: Array<{ name: string; download_count?: number; browser_download_url?: string }> }) => {
           // Só os instaladores: o .sha256 é baixado também pela atualização automática para conferir o arquivo.
           const downloads = (data.assets ?? []).filter((asset) => asset.name.toLowerCase().endsWith(".exe")).reduce((sum, asset) => sum + (asset.download_count ?? 0), 0);
-          if (active) setRelease({ loading: false, error: "", tag: data.tag_name, publishedAt: data.published_at, url: data.html_url, downloads });
+          const installer = (data.assets ?? []).find((asset) => asset.name.toLowerCase().endsWith(".exe"))?.browser_download_url ?? "";
+          if (active) setRelease({ loading: false, error: "", tag: data.tag_name, publishedAt: data.published_at, url: data.html_url, installer, downloads });
         })
-        .catch((error) => { if (active) setRelease({ loading: false, error: error instanceof Error ? error.message : "Falha ao consultar as versões.", tag: "", publishedAt: "", url: "", downloads: 0 }); });
+        .catch((error) => { if (active) setRelease({ loading: false, error: error instanceof Error ? error.message : "Falha ao consultar as versões.", tag: "", publishedAt: "", url: "", installer: "", downloads: 0 }); });
     } else {
       setRelease(null);
     }
@@ -473,7 +477,14 @@ export function SystemsWorkspace({ selectedId, onSelect }: { selectedId: string;
     setMessage("Status do lead atualizado.");
   }
 
-  const stats: Array<[string, string, string, IconType]> = [
+  const versionStat: [string, string, string, IconType] = ["Versão publicada", release?.loading ? "…" : release?.tag || "—", release?.error || (release?.publishedAt ? `${new Date(release.publishedAt).toLocaleDateString("pt-BR")} · ${release.downloads} downloads` : "Instalador Windows"), Download];
+  const offlineStats: Array<[string, string, string, IconType]> = [
+    versionStat,
+    ["Downloads do instalador", release?.loading ? "…" : String(release?.downloads ?? 0), "Soma de todos os instaladores da última versão", Download],
+    ["Dados", "Offline", "Banco SQLite no computador da cliente", Database],
+    ["Atualização", "Automática", "O sistema instalado consulta o GitHub ao abrir", RefreshCw],
+  ];
+  const stats: Array<[string, string, string, IconType]> = selected.offline ? offlineStats : [
     ["Planos ativos", commercial.loading ? "…" : String(activePlans.length), cheapest !== null ? `A partir de ${brl.format(cheapest)}/mês` : "Catálogo comercial do site", Package],
     [isDesktop ? "Testes grátis · 30 dias" : "Leads do site · 30 dias", commercial.leadsError ? "—" : commercial.loading ? "…" : String(leads30), commercial.leadsError ? "Acesso aos leads pendente" : `${systemLeads.length} no total`, Users],
     isDesktop
@@ -526,7 +537,11 @@ export function SystemsWorkspace({ selectedId, onSelect }: { selectedId: string;
             </div>
             <p className="mt-1 text-sm text-slate-500">{selected.description}</p>
           </div>
-          <a href={selected.href} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-lg bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800">Abrir sistema <ExternalLink className="h-4 w-4" /></a>
+          {selected.offline ? (
+            <a href={release?.installer || selected.href} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-lg bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800">Baixar instalador{release?.tag ? ` ${release.tag}` : ""} <Download className="h-4 w-4" /></a>
+          ) : (
+            <a href={selected.href} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-lg bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800">Abrir sistema <ExternalLink className="h-4 w-4" /></a>
+          )}
         </div>
         <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {stats.map(([label, value, detail, Icon]) => (
@@ -539,7 +554,7 @@ export function SystemsWorkspace({ selectedId, onSelect }: { selectedId: string;
         </div>
       </section>
 
-      <PlatformSection key={selected.id} system={selected} />
+      {!selected.offline && <PlatformSection key={selected.id} system={selected} />}
 
       <div className="grid gap-6 xl:grid-cols-[1fr_360px]">
         <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -587,6 +602,7 @@ export function SystemsWorkspace({ selectedId, onSelect }: { selectedId: string;
         </section>
       </div>
 
+      {!selected.offline && (<>
       <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -654,6 +670,7 @@ export function SystemsWorkspace({ selectedId, onSelect }: { selectedId: string;
           </div>
         )}
       </section>
+      </>)}
     </section>
   );
 }
