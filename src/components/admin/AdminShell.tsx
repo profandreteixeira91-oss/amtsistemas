@@ -19,7 +19,7 @@ export function AdminShell() {
   const current = moduleForPath(pathname);
   const counters = useAdminCounters();
   const badge = (to: string) =>
-    to === "/admin/whatsapp" ? counters.whatsapp : to === "/admin/leads" ? counters.leads : to === "/admin/monitor" ? (counters.monitorDown ?? 0) : 0;
+    to === "/admin/whatsapp" ? counters.whatsapp : to === "/admin/leads" ? counters.leads : to === "/admin/implantacoes" ? counters.implementations : to === "/admin/monitor" ? (counters.monitorDown ?? 0) : 0;
   const badgeColor = (to: string) => (to === "/admin/monitor" ? "bg-red-500" : "bg-emerald-500");
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState("");
