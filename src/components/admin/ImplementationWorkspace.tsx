@@ -426,7 +426,18 @@ function ImplementationDetailPanel({ id, onChanged }: { id: string; onChanged: (
 
       {tab === "Alunos" && (
         <SimpleTable
-          head={["Nome", "CPF", "Nasc.", "Telefone", "Plano", "Turmas", "Faixa", "Venc.", "Status"]}
+          head={[
+            "Nome",
+            "CPF",
+            "Nasc.",
+            "Telefone",
+            "Plano",
+            "Turmas",
+            "Horário (informativo)",
+            "Faixa",
+            "Venc.",
+            "Status",
+          ]}
           rows={(p.students ?? []).map((s) => [
             s.full_name,
             s.cpf ?? "",
@@ -434,6 +445,8 @@ function ImplementationDetailPanel({ id, onChanged }: { id: string; onChanged: (
             s.phone ?? "",
             s.plan ?? "",
             s.classes ?? "",
+            // "Kids → Seg/Qua 09:00–10:00; ...": vai para as observações do aluno ao aplicar.
+            s.class_times ?? "",
             [s.belt, s.degree ? `${s.degree}º` : ""].filter(Boolean).join(" "),
             s.due_day ?? "",
             s.status ?? "active",
