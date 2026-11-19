@@ -88,12 +88,14 @@ export const Route = createFileRoute("/")({
               "@type": "Offer",
               itemOffered: { "@type": "Service", name: s.titulo, description: s.texto },
             })),
-            owns: sistemas.map((s) => ({
-              "@type": "SoftwareApplication",
-              name: s.nome,
-              url: absoluteUrl(s.url),
-              description: s.descricao,
-            })),
+            owns: sistemas
+              .filter((s) => !s.cliente && s.url)
+              .map((s) => ({
+                "@type": "SoftwareApplication",
+                name: s.nome,
+                url: absoluteUrl(s.url!),
+                description: s.descricao,
+              })),
           },
           websiteLd(),
           {
@@ -148,8 +150,11 @@ type Sistema = {
   logo: string;
   screenshot: string;
   screenshotSrcSet: string;
-  url: string;
+  /** Sem url: projeto de cliente sem página pública (o card não é link). */
+  url?: string;
   interno?: boolean;
+  /** Sistema feito sob medida para um cliente (portfólio), não um produto da AMT. */
+  cliente?: boolean;
 };
 
 const sistemas: Sistema[] = [
@@ -173,6 +178,17 @@ const sistemas: Sistema[] = [
     screenshotSrcSet:
       "/assets/screenshot-dojo-manager-painel-640.webp 640w, /assets/screenshot-dojo-manager-painel.webp 1284w",
     url: "https://amtdojomanager.com.br/dojo",
+  },
+  {
+    nome: "Kelly Fernandes Nutrição",
+    segmento: "Nutrição · Desktop",
+    descricao:
+      "Consultório de nutrição: pacientes, agenda, anamnese, avaliações, plano alimentar, financeiro e WhatsApp.",
+    logo: "/brand/logo-kelly-nutri-96.webp",
+    screenshot: "/assets/screenshot-kelly-nutri-agenda-640.webp",
+    screenshotSrcSet:
+      "/assets/screenshot-kelly-nutri-agenda-640.webp 640w, /assets/screenshot-kelly-nutri-agenda-1280.webp 1280w",
+    cliente: true,
   },
 ];
 
@@ -429,11 +445,11 @@ function Sistemas() {
         <SectionHeader
           id="sistemas-titulo"
           eyebrow="Sistemas em operação"
-          title="Produtos próprios, usados todos os dias."
+          title="Produtos próprios e de clientes, usados todos os dias."
           description="A melhor referência do que podemos construir para você."
         />
       </Reveal>
-      <div className="mt-12 grid gap-6 md:grid-cols-2">
+      <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {sistemas.map((s, i) => (
           <Reveal key={s.nome} delay={i * 0.06} className="h-full">
             <SistemaCard sistema={s} />
@@ -451,7 +467,7 @@ function SistemaCard({ sistema: s }: { sistema: Sistema }) {
         <img
           src={s.screenshot}
           srcSet={s.screenshotSrcSet}
-          sizes="(min-width: 768px) 560px, calc(100vw - 2.5rem)"
+          sizes="(min-width: 1024px) 370px, (min-width: 768px) 50vw, calc(100vw - 2.5rem)"
           alt={`Tela do ${s.nome}`}
           loading="lazy"
           className="h-full w-full object-cover object-left-top transition-transform duration-500 group-hover:scale-[1.02]"
@@ -464,18 +480,33 @@ function SistemaCard({ sistema: s }: { sistema: Sistema }) {
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-3">
             <h3 className="text-lg font-semibold text-[var(--brand-navy)]">{s.nome}</h3>
-            <ArrowUpRight className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[var(--brand-navy)]" />
+            {s.url && (
+              <ArrowUpRight className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[var(--brand-navy)]" />
+            )}
           </div>
           <p className="mt-0.5 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--brand-teal)]">
             {s.segmento}
           </p>
           <p className="mt-3 text-[15px] leading-6 text-muted-foreground">{s.descricao}</p>
+          {s.cliente && (
+            <span className="mt-4 inline-flex rounded-full border border-[var(--border)] bg-[var(--section-alt)] px-2.5 py-1 text-xs font-semibold text-[var(--brand-navy)]">
+              Sistema sob medida para cliente
+            </span>
+          )}
         </div>
       </div>
     </>
   );
   const classe =
     "group block h-full overflow-hidden rounded-2xl border border-[var(--border)] bg-white shadow-[var(--shadow-card)] transition-shadow duration-300 hover:shadow-[var(--shadow-lift)]";
+  if (!s.url) {
+    // Projeto de cliente sem página pública: card sem link nem efeito de clique.
+    return (
+      <div className="block h-full overflow-hidden rounded-2xl border border-[var(--border)] bg-white shadow-[var(--shadow-card)]">
+        {conteudo}
+      </div>
+    );
+  }
   return s.interno ? (
     <Link to="/optione" className={classe}>
       {conteudo}
