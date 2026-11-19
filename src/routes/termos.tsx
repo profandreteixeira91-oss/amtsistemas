@@ -1,20 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import { pageHead } from "@/lib/seo";
+
 import { SiteShell } from "@/components/site/layout";
 import { Container, Eyebrow } from "@/components/site/primitives";
 
 export const Route = createFileRoute("/termos")({
-  head: () => ({
-    meta: [
-      { title: "Termos de Serviço — AMT Sistemas" },
-      {
-        name: "description",
-        content: "Termos e condições de uso dos sistemas e serviços da AMT Sistemas.",
-      },
-      { property: "og:title", content: "Termos de Serviço — AMT Sistemas" },
-      { property: "og:description", content: "Regras de uso dos sistemas AMT." },
-    ],
-  }),
+  head: () =>
+    pageHead({
+      title: "Termos de Serviço — AMT Sistemas",
+      description: "Termos e condições de uso dos sistemas e serviços da AMT Sistemas.",
+      path: "/termos",
+    }),
   component: TermosPage,
 });
 

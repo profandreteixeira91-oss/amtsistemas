@@ -82,39 +82,40 @@ function publicClient() {
   });
 }
 
-export const optionePlanos = createServerFn({ method: "GET" }).handler(
-  async (): Promise<OptionePlano[]> => {
-    try {
-      const supabase = publicClient();
-      const { data: sistema } = await supabase
-        .from("manager_sistemas")
-        .select("id")
-        .eq("slug", OPTIONE_SLUG)
-        .eq("ativo", true)
-        .maybeSingle();
-      if (!sistema) return PLANOS_PADRAO;
-      const { data: planos } = await supabase
-        .from("manager_planos")
-        .select("slug, nome, descricao, preco_mensal, recursos, destaque, badge")
-        .eq("sistema_id", sistema.id)
-        .eq("ativo", true)
-        .order("ordem")
-        .order("preco_mensal");
-      if (!planos?.length) return PLANOS_PADRAO;
-      return planos.map((p) => ({
-        slug: String(p.slug),
-        nome: String(p.nome),
-        descricao: String(p.descricao ?? ""),
-        preco_mensal: Number(p.preco_mensal ?? 0),
-        recursos: Array.isArray(p.recursos) ? p.recursos.map(String) : [],
-        destaque: Boolean(p.destaque),
-        badge: p.badge ?? null,
-      }));
-    } catch {
-      return PLANOS_PADRAO;
-    }
-  },
-);
+/** Planos ativos do OptiOne no catálogo (ou os padrões). Também usado no /llms.txt. */
+export async function loadOptionePlanos(): Promise<OptionePlano[]> {
+  try {
+    const supabase = publicClient();
+    const { data: sistema } = await supabase
+      .from("manager_sistemas")
+      .select("id")
+      .eq("slug", OPTIONE_SLUG)
+      .eq("ativo", true)
+      .maybeSingle();
+    if (!sistema) return PLANOS_PADRAO;
+    const { data: planos } = await supabase
+      .from("manager_planos")
+      .select("slug, nome, descricao, preco_mensal, recursos, destaque, badge")
+      .eq("sistema_id", sistema.id)
+      .eq("ativo", true)
+      .order("ordem")
+      .order("preco_mensal");
+    if (!planos?.length) return PLANOS_PADRAO;
+    return planos.map((p) => ({
+      slug: String(p.slug),
+      nome: String(p.nome),
+      descricao: String(p.descricao ?? ""),
+      preco_mensal: Number(p.preco_mensal ?? 0),
+      recursos: Array.isArray(p.recursos) ? p.recursos.map(String) : [],
+      destaque: Boolean(p.destaque),
+      badge: p.badge ?? null,
+    }));
+  } catch {
+    return PLANOS_PADRAO;
+  }
+}
+
+export const optionePlanos = createServerFn({ method: "GET" }).handler(loadOptionePlanos);
 
 class SignupError extends Error {
   constructor(

@@ -178,7 +178,7 @@ export function SiteChat() {
             style={{ background: "var(--gradient-dark)" }}
           >
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white">
-              <img src="/brand/amt-simbolo.png" alt="" className="w-7" />
+              <img src="/brand/amt-simbolo.webp" alt="" width={128} height={100} className="w-7" />
             </span>
             <div className="min-w-0 flex-1">
               <p className="font-display text-[15px] font-semibold leading-tight">AMT Sistemas</p>

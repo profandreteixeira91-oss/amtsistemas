@@ -355,6 +355,10 @@ function CrmShell({ user }: { user: User }) {
 
 export const Route = createFileRoute("/crm")({
   ssr: false,
-  head: () => ({ meta: [{ title: "AMT CRM" }, { name: "robots", content: "noindex, nofollow" }] }),
+  head: () => ({
+    meta: [{ title: "AMT CRM" }, { name: "robots", content: "noindex, nofollow" }],
+    // App instalável do CRM: o manifesto é só daqui, não do site público.
+    links: [{ rel: "manifest", href: "/manifest.webmanifest" }],
+  }),
   component: CrmGate,
 });

@@ -11,7 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as SuporteRouteImport } from './routes/suporte'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
+import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as CrmRouteImport } from './routes/crm'
 import { Route as AmtAdminRouteImport } from './routes/amt-admin'
 import { Route as IndexRouteImport } from './routes/index'
@@ -101,9 +103,19 @@ const SuporteRoute = SuporteRouteImport.update({
   path: '/suporte',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivacidadeRoute = PrivacidadeRouteImport.update({
   id: '/privacidade',
   path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
+  id: '/llms.txt',
+  path: '/llms.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CrmRoute = CrmRouteImport.update({
@@ -509,7 +521,9 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/amt-admin': typeof AmtAdminRouteWithChildren
   '/crm': typeof CrmRouteWithChildren
+  '/llms.txt': typeof LlmsDottxtRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/suporte': typeof SuporteRoute
   '/termos': typeof TermosRoute
   '/admin': typeof AdminPainelRouteWithChildren
@@ -590,7 +604,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/suporte': typeof SuporteRoute
   '/termos': typeof TermosRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
@@ -673,7 +689,9 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/amt-admin': typeof AmtAdminRouteWithChildren
   '/crm': typeof CrmRouteWithChildren
+  '/llms.txt': typeof LlmsDottxtRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/suporte': typeof SuporteRoute
   '/termos': typeof TermosRoute
   '/admin/_painel': typeof AdminPainelRouteWithChildren
@@ -758,7 +776,9 @@ export interface FileRouteTypes {
     | '/'
     | '/amt-admin'
     | '/crm'
+    | '/llms.txt'
     | '/privacidade'
+    | '/sitemap.xml'
     | '/suporte'
     | '/termos'
     | '/admin'
@@ -839,7 +859,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/llms.txt'
     | '/privacidade'
+    | '/sitemap.xml'
     | '/suporte'
     | '/termos'
     | '/admin/configuracoes'
@@ -921,7 +943,9 @@ export interface FileRouteTypes {
     | '/'
     | '/amt-admin'
     | '/crm'
+    | '/llms.txt'
     | '/privacidade'
+    | '/sitemap.xml'
     | '/suporte'
     | '/termos'
     | '/admin/_painel'
@@ -1005,7 +1029,9 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AmtAdminRoute: typeof AmtAdminRouteWithChildren
   CrmRoute: typeof CrmRouteWithChildren
+  LlmsDottxtRoute: typeof LlmsDottxtRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SuporteRoute: typeof SuporteRoute
   TermosRoute: typeof TermosRoute
   AdminPainelRoute: typeof AdminPainelRouteWithChildren
@@ -1049,11 +1075,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SuporteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacidade': {
       id: '/privacidade'
       path: '/privacidade'
       fullPath: '/privacidade'
       preLoaderRoute: typeof PrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/llms.txt': {
+      id: '/llms.txt'
+      path: '/llms.txt'
+      fullPath: '/llms.txt'
+      preLoaderRoute: typeof LlmsDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/crm': {
@@ -1751,7 +1791,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AmtAdminRoute: AmtAdminRouteWithChildren,
   CrmRoute: CrmRouteWithChildren,
+  LlmsDottxtRoute: LlmsDottxtRoute,
   PrivacidadeRoute: PrivacidadeRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   SuporteRoute: SuporteRoute,
   TermosRoute: TermosRoute,
   AdminPainelRoute: AdminPainelRouteWithChildren,

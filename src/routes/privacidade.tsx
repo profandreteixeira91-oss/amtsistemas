@@ -1,20 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import { pageHead } from "@/lib/seo";
+
 import { SiteShell } from "@/components/site/layout";
 import { Container, Eyebrow } from "@/components/site/primitives";
 
 export const Route = createFileRoute("/privacidade")({
-  head: () => ({
-    meta: [
-      { title: "Política de Privacidade — AMT Sistemas" },
-      {
-        name: "description",
-        content: "Política de Privacidade da AMT Sistemas em conformidade com a LGPD.",
-      },
-      { property: "og:title", content: "Política de Privacidade — AMT Sistemas" },
-      { property: "og:description", content: "Como coletamos, usamos e protegemos seus dados." },
-    ],
-  }),
+  head: () =>
+    pageHead({
+      title: "Política de Privacidade — AMT Sistemas",
+      description: "Política de Privacidade da AMT Sistemas em conformidade com a LGPD.",
+      path: "/privacidade",
+    }),
   component: PrivacidadePage,
 });
 

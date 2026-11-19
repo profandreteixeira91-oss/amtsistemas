@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { pageHead } from "@/lib/seo";
 
 type PublicLP = {
   id: string;
@@ -44,19 +45,12 @@ export const Route = createFileRoute("/lp/$slug")({
       return { meta: [{ title: "Página não encontrada" }, { name: "robots", content: "noindex" }] };
     }
     const p = loaderData.page;
-    const title = p.seo_titulo || p.titulo;
-    const desc = p.seo_descricao || p.headline || p.titulo;
-    return {
-      meta: [
-        { title },
-        { name: "description", content: desc },
-        { property: "og:title", content: title },
-        { property: "og:description", content: desc },
-        { property: "og:type", content: "website" },
-        { name: "twitter:card", content: "summary_large_image" },
-        ...(p.imagem_hero ? [{ property: "og:image", content: p.imagem_hero }, { name: "twitter:image", content: p.imagem_hero }] : []),
-      ],
-    };
+    return pageHead({
+      title: p.seo_titulo || p.titulo,
+      description: p.seo_descricao || p.headline || p.titulo,
+      path: `/lp/${p.slug}`,
+      ...(p.imagem_hero ? { image: p.imagem_hero, imageAlt: p.titulo } : {}),
+    });
   },
   notFoundComponent: () => (
     <div className="min-h-screen flex items-center justify-center p-6">

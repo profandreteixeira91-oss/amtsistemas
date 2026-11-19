@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { pageHead } from "@/lib/seo";
 import { useServerFn } from "@tanstack/react-start";
 import {
   AlertTriangle,
@@ -45,20 +46,19 @@ export const Route = createFileRoute("/optione/teste-gratis")({
     const plano = String(search.plano ?? "");
     return PLANOS.some((p) => p.slug === plano) ? { plano: plano as PlanoSlug } : {};
   },
-  head: () => ({
-    meta: [
-      { title: "Teste grátis por 14 dias | AMT OptiOne" },
-      {
-        name: "description",
-        content: "Cadastre a sua ótica e use o AMT OptiOne por 14 dias, sem cartão de crédito.",
-      },
-      { name: "robots", content: "index, follow" },
-    ],
-    links: [
-      { rel: "canonical", href: "https://amtsistemas.com.br/optione/teste-gratis" },
-      { rel: "icon", href: "/optione/icone-amt-optione.png" },
-    ],
-  }),
+  head: () => {
+    const head = pageHead({
+      title: "Teste grátis por 14 dias | AMT OptiOne",
+      description: "Cadastre a sua ótica e use o AMT OptiOne por 14 dias, sem cartão de crédito.",
+      path: "/optione/teste-gratis",
+      image: "/optione/og-amt-optione.jpg",
+      imageAlt: "Tela de visão geral do AMT OptiOne, sistema de gestão para óticas",
+    });
+    return {
+      meta: head.meta,
+      links: [...head.links, { rel: "icon", href: "/optione/icone-amt-optione.png" }],
+    };
+  },
   component: TesteGratisPage,
 });
 

@@ -45,49 +45,81 @@ import {
 } from "@/components/site/site-config";
 import { Container, IconBadge, Reveal, Section, SectionHeader } from "@/components/site/primitives";
 import { supabase } from "@/integrations/supabase/client";
+import { HOME_FAQ, SERVICOS } from "@/lib/site-content";
+import {
+  ORGANIZATION_ID,
+  SITE_DESCRIPTION,
+  SITE_URL,
+  WEBSITE_ID,
+  absoluteUrl,
+  faqLd,
+  jsonLd,
+  organizationLd,
+  pageHead,
+  websiteLd,
+} from "@/lib/seo";
+
+/** Print do sistema no topo: versões por largura de tela (até 1024 px de largura na página). */
+const HERO_IMG = {
+  src: "/optione/sistema-visao-geral-960.webp",
+  srcSet:
+    "/optione/sistema-visao-geral-640.webp 640w, /optione/sistema-visao-geral-960.webp 960w, /optione/sistema-visao-geral-1280.webp 1280w, /optione/sistema-visao-geral.webp 1600w",
+  sizes: "(min-width: 1088px) 1024px, calc(100vw - 2.5rem)",
+};
 
 const TITLE = "AMT Sistemas | Sistemas White Label, sites e aplicativos sob medida";
-const DESCRIPTION =
-  "Sistemas White Label com a marca da sua empresa, sites, softwares para Windows, aplicativos Android e iOS, lojas virtuais e automações sob medida.";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: TITLE },
-      { name: "description", content: DESCRIPTION },
-      { property: "og:title", content: TITLE },
-      { property: "og:description", content: DESCRIPTION },
-      { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://amtsistemas.com.br/" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: TITLE },
-      { name: "twitter:description", content: DESCRIPTION },
-      { name: "theme-color", content: "#0A2D5E" },
-    ],
-    links: [
-      { rel: "canonical", href: "https://amtsistemas.com.br/" },
-      { rel: "icon", type: "image/png", href: "/brand/amt-icone.png" },
-    ],
-    scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "Organization",
-          name: "AMT Sistemas e Soluções",
-          url: "https://amtsistemas.com.br/",
-          logo: "https://amtsistemas.com.br/brand/amt-logo.png",
-          description:
-            "Empresa de tecnologia especializada em sistemas White Label personalizados, sites, softwares e aplicativos sob medida.",
-          areaServed: "BR",
-        }),
-      },
-    ],
-  }),
+  head: () => {
+    const head = pageHead({
+      title: TITLE,
+      description: SITE_DESCRIPTION,
+      path: "/",
+      imageAlt: "AMT Sistemas e Soluções: sistemas White Label, sites e aplicativos sob medida",
+    });
+    return {
+      meta: [...head.meta, { name: "theme-color", content: "#0A2D5E" }],
+      links: [...head.links, { rel: "icon", type: "image/png", href: "/brand/amt-icone.png" }],
+      scripts: [
+        jsonLd([
+          {
+            ...organizationLd(),
+            makesOffer: servicos.map((s) => ({
+              "@type": "Offer",
+              itemOffered: { "@type": "Service", name: s.titulo, description: s.texto },
+            })),
+            owns: sistemas.map((s) => ({
+              "@type": "SoftwareApplication",
+              name: s.nome,
+              url: absoluteUrl(s.url),
+              description: s.descricao,
+            })),
+          },
+          websiteLd(),
+          {
+            "@type": "WebPage",
+            "@id": `${SITE_URL}/#webpage`,
+            url: `${SITE_URL}/`,
+            name: TITLE,
+            description: SITE_DESCRIPTION,
+            inLanguage: "pt-BR",
+            isPartOf: { "@id": WEBSITE_ID },
+            about: { "@id": ORGANIZATION_ID },
+          },
+          faqLd("/", faq),
+        ]),
+      ],
+    };
+  },
   component: AmtLanding,
 });
 
 /* -------------------- DADOS -------------------- */
+
+// Textos dos serviços e do FAQ em src/lib/site-content.ts (também usados no llms.txt e no JSON-LD).
+const SERVICO_ICONES: Icone[] = [Layers, Globe, Monitor, Smartphone, ShoppingCart, Workflow];
+const servicos = SERVICOS.map((s, i) => ({ ...s, icon: SERVICO_ICONES[i] ?? Layers }));
+const faq = HOME_FAQ;
 
 type Icone = React.ComponentType<{ className?: string }>;
 
@@ -109,46 +141,13 @@ const pilaresWhiteLabel: Array<{ icon: Icone; titulo: string; texto: string }> =
   },
 ];
 
-const servicos: Array<{ icon: Icone; titulo: string; texto: string }> = [
-  {
-    icon: Layers,
-    titulo: "Sistemas White Label",
-    texto:
-      "Plataformas completas com a sua marca, para vender aos seus clientes ou organizar a sua operação.",
-  },
-  {
-    icon: Globe,
-    titulo: "Websites",
-    texto: "Sites institucionais e landing pages rápidos, responsivos e prontos para o Google.",
-  },
-  {
-    icon: Monitor,
-    titulo: "Softwares para Windows",
-    texto: "Programas instalados no computador, com instalador próprio e atualização automática.",
-  },
-  {
-    icon: Smartphone,
-    titulo: "Aplicativos Android e iOS",
-    texto: "Apps publicados na Google Play e na App Store, integrados ao seu sistema.",
-  },
-  {
-    icon: ShoppingCart,
-    titulo: "Lojas virtuais",
-    texto: "E-commerce com catálogo, carrinho, frete, pagamento on-line e gestão de pedidos.",
-  },
-  {
-    icon: Workflow,
-    titulo: "Automações e IA",
-    texto: "WhatsApp automático, cobranças, integrações e Inteligência Artificial no dia a dia.",
-  },
-];
-
 type Sistema = {
   nome: string;
   segmento: string;
   descricao: string;
   logo: string;
   screenshot: string;
+  screenshotSrcSet: string;
   url: string;
   interno?: boolean;
 };
@@ -158,8 +157,10 @@ const sistemas: Sistema[] = [
     nome: "AMT OptiOne",
     segmento: "Óticas · Windows",
     descricao: "Vendas, receitas, laboratório, estoque e financeiro da ótica em um só sistema.",
-    logo: "/optione/icone-amt-optione.png",
-    screenshot: "/optione/sistema-visao-geral.webp",
+    logo: "/optione/icone-amt-optione-96.webp",
+    screenshot: "/optione/sistema-visao-geral-960.webp",
+    screenshotSrcSet:
+      "/optione/sistema-visao-geral-640.webp 640w, /optione/sistema-visao-geral-960.webp 960w, /optione/sistema-visao-geral-1280.webp 1280w",
     url: "/optione",
     interno: true,
   },
@@ -169,6 +170,8 @@ const sistemas: Sistema[] = [
     descricao: "Gestão de academias de artes marciais, com aplicativo para os alunos.",
     logo: "/brand/logo-dojo-manager.png",
     screenshot: "/assets/screenshot-dojo-manager-painel.webp",
+    screenshotSrcSet:
+      "/assets/screenshot-dojo-manager-painel-640.webp 640w, /assets/screenshot-dojo-manager-painel.webp 1284w",
     url: "https://amtdojomanager.com.br/dojo",
   },
 ];
@@ -178,29 +181,6 @@ const etapas = [
   { titulo: "Proposta", texto: "Definimos escopo, módulos, prazo e investimento." },
   { titulo: "Desenvolvimento", texto: "Construímos e validamos com você a cada etapa." },
   { titulo: "Entrega e evolução", texto: "Publicamos, treinamos a equipe e seguimos evoluindo." },
-];
-
-const faq = [
-  {
-    q: "O que é um sistema White Label?",
-    a: "É um sistema desenvolvido pela AMT e entregue com a identidade da sua empresa: nome, logotipo, cores, domínio e experiência de uso. Para os seus clientes, a solução é sua.",
-  },
-  {
-    q: "O sistema é criado para o meu negócio?",
-    a: "Sim. O desenvolvimento parte dos seus processos e regras, não de um modelo fechado. Você define os módulos e as permissões no planejamento.",
-  },
-  {
-    q: "Vocês também fazem sites e aplicativos?",
-    a: "Sim. Além de sistemas, desenvolvemos sites, softwares para Windows, aplicativos Android e iOS, lojas virtuais e automações, separados ou integrados ao seu sistema.",
-  },
-  {
-    q: "Quanto custa um projeto?",
-    a: "Depende do escopo: módulos, integrações, número de usuários e nível de personalização. Depois do diagnóstico, enviamos uma proposta com escopo, prazo e investimento.",
-  },
-  {
-    q: "Vocês cuidam da manutenção depois da entrega?",
-    a: "Sim. Hospedagem, atualizações, suporte e evolução do sistema são combinados junto com o escopo, conforme a necessidade de cada cliente.",
-  },
 ];
 
 /* -------------------- PÁGINA -------------------- */
@@ -282,7 +262,9 @@ function Hero() {
               <span className="h-2.5 w-2.5 rounded-full bg-[oklch(0.82_0.02_250)]" />
             </div>
             <img
-              src="/optione/sistema-visao-geral.webp"
+              src={HERO_IMG.src}
+              srcSet={HERO_IMG.srcSet}
+              sizes={HERO_IMG.sizes}
               alt="Tela de um sistema desenvolvido pela AMT Sistemas"
               width={1600}
               height={853}
@@ -468,6 +450,8 @@ function SistemaCard({ sistema: s }: { sistema: Sistema }) {
       <div className="aspect-[16/10] overflow-hidden border-b border-[var(--border)] bg-[var(--section-alt)]">
         <img
           src={s.screenshot}
+          srcSet={s.screenshotSrcSet}
+          sizes="(min-width: 768px) 560px, calc(100vw - 2.5rem)"
           alt={`Tela do ${s.nome}`}
           loading="lazy"
           className="h-full w-full object-cover object-left-top transition-transform duration-500 group-hover:scale-[1.02]"

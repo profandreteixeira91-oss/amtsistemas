@@ -13,22 +13,23 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { DEFAULT_OG_IMAGE, SITE_DESCRIPTION, SITE_NAME } from "@/lib/seo";
 
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
+        <h2 className="mt-4 text-xl font-semibold text-foreground">Página não encontrada</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
+          O endereço que você abriu não existe ou foi alterado.
         </p>
         <div className="mt-6">
           <Link
             to="/"
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Go home
+            Ir para a página inicial
           </Link>
         </div>
       </div>
@@ -47,10 +48,10 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
+          Esta página não carregou
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
+          Algo deu errado do nosso lado. Tente de novo ou volte para a página inicial.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
@@ -60,13 +61,13 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
             }}
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Try again
+            Tentar de novo
           </button>
           <a
             href="/"
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
-            Go home
+            Ir para a página inicial
           </a>
         </div>
       </div>
@@ -76,47 +77,20 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
+    // Padrões do site. Cada página pública define os próprios título, descrição, canônico e imagem de
+    // compartilhamento (pageHead em src/lib/seo.ts); os dados estruturados ficam nas páginas.
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "AMT Sistemas e Soluções | Sistemas personalizados, automação e IA" },
-      {
-        name: "description",
-        content:
-          "A AMT Sistemas e Soluções desenvolve sistemas personalizados, plataformas White Label, automações e soluções com Inteligência Artificial para empresas.",
-      },
-      { name: "author", content: "AMT Sistemas e Soluções" },
-      {
-        property: "og:title",
-        content: "AMT Sistemas e Soluções | Sistemas personalizados, automação e IA",
-      },
-      {
-        property: "og:description",
-        content:
-          "Sistemas personalizados, plataformas White Label, automações e soluções com Inteligência Artificial para empresas.",
-      },
+      { title: "AMT Sistemas e Soluções | Sistemas White Label, sites e aplicativos sob medida" },
+      { name: "description", content: SITE_DESCRIPTION },
+      { name: "author", content: SITE_NAME },
+      { property: "og:site_name", content: SITE_NAME },
+      { property: "og:locale", content: "pt_BR" },
       { property: "og:type", content: "website" },
-      { property: "og:site_name", content: "AMT Sistemas e Soluções" },
+      { property: "og:image", content: DEFAULT_OG_IMAGE },
       { name: "twitter:card", content: "summary_large_image" },
-      {
-        name: "twitter:title",
-        content: "AMT Sistemas e Soluções | Sistemas personalizados, automação e IA",
-      },
-      {
-        name: "twitter:description",
-        content:
-          "Sistemas personalizados, plataformas White Label, automações e soluções com Inteligência Artificial para empresas.",
-      },
-      {
-        property: "og:image",
-        content:
-          "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/13601656-c4eb-4578-ab62-7968538b49e1",
-      },
-      {
-        name: "twitter:image",
-        content:
-          "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/13601656-c4eb-4578-ab62-7968538b49e1",
-      },
+      { name: "twitter:image", content: DEFAULT_OG_IMAGE },
     ],
     links: [
       // Tipografia do site público (escopo .amt-site em styles.css).
@@ -128,22 +102,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&family=Sora:wght@500..800&display=swap",
       },
       { rel: "stylesheet", href: appCss },
-      { rel: "manifest", href: "/manifest.webmanifest" },
-      { rel: "apple-touch-icon", href: "/favicon.ico" },
-    ],
-    scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "Organization",
-          name: "AMT Sistemas e Soluções",
-          alternateName: "AMT Sistemas",
-          description:
-            "Desenvolvimento de sistemas personalizados, plataformas White Label, automações e soluções com Inteligência Artificial para empresas.",
-          areaServed: "BR",
-        }),
-      },
+      // O manifesto do CRM (instalável) é declarado só em /crm (src/routes/crm.tsx).
+      { rel: "apple-touch-icon", href: "/brand/amt-icone.png" },
     ],
   }),
   shellComponent: RootShell,

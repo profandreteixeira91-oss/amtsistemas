@@ -1,8 +1,16 @@
+# AMT Sistemas e Soluções (amtsistemas.com.br)
 User-agent: *
 Allow: /
+Allow: /llms.txt
 
-Disallow: /_authenticated/
-Disallow: /dashboard
+# Áreas logadas, painéis, portal do cliente e APIs
 Disallow: /admin
-Disallow: /crm
 Disallow: /amt-admin
+Disallow: /crm
+Disallow: /suporte
+Disallow: /portal/
+Disallow: /widget/
+Disallow: /optione/nova-chave
+Disallow: /api/
+
+Sitemap: https://amtsistemas.com.br/sitemap.xml

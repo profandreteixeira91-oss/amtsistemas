@@ -28,6 +28,10 @@ import { TicketChat, ticketStatusBadge, formatWhen } from "@/components/tickets/
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/suporte")({
+  // Área do cliente (logada): fora do Google.
+  head: () => ({
+    meta: [{ title: "Suporte — AMT Sistemas" }, { name: "robots", content: "noindex, nofollow" }],
+  }),
   component: SuporteUsuarioPage,
 });
 

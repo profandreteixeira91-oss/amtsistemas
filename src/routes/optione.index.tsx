@@ -35,121 +35,115 @@ import {
 } from "@/components/optione/shell";
 import { Reveal } from "@/components/site/primitives";
 import { optionePlanos, type OptionePlano } from "@/lib/optione.functions";
+import { ORGANIZATION_ID, absoluteUrl, faqLd, jsonLd, organizationLd, pageHead } from "@/lib/seo";
+import { OPTIONE_FAQ, OPTIONE_RECURSOS } from "@/lib/site-content";
 
 const TITLE = "AMT OptiOne | Sistema de gestão para óticas — teste grátis por 14 dias";
 const DESCRIPTION =
   "Vendas e PDV, receitas, pedidos de laboratório, estoque, financeiro e relacionamento com o cliente em um só sistema para a sua ótica. Teste grátis por 14 dias, sem cartão.";
-const URL = "https://amtsistemas.com.br/optione";
+const PATH = "/optione";
+const URL = absoluteUrl(PATH);
+
+/** Print do sistema: versões por largura de tela (até 1024 px de largura na página). */
+const SCREENSHOT = {
+  src: "/optione/sistema-visao-geral-960.webp",
+  srcSet:
+    "/optione/sistema-visao-geral-640.webp 640w, /optione/sistema-visao-geral-960.webp 960w, /optione/sistema-visao-geral-1280.webp 1280w, /optione/sistema-visao-geral.webp 1600w",
+  sizes: "(min-width: 1088px) 1024px, calc(100vw - 2.5rem)",
+};
 
 export const Route = createFileRoute("/optione/")({
   loader: () => optionePlanos(),
-  head: () => ({
-    meta: [
-      { title: TITLE },
-      { name: "description", content: DESCRIPTION },
-      { property: "og:title", content: TITLE },
-      { property: "og:description", content: DESCRIPTION },
-      { property: "og:type", content: "website" },
-      { property: "og:url", content: URL },
-      {
-        property: "og:image",
-        content: "https://amtsistemas.com.br/optione/sistema-visao-geral.webp",
-      },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: TITLE },
-      { name: "twitter:description", content: DESCRIPTION },
-    ],
-    links: [
-      { rel: "canonical", href: URL },
-      { rel: "icon", href: "/optione/icone-amt-optione.png" },
-    ],
-    scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "SoftwareApplication",
-          name: "AMT OptiOne",
-          applicationCategory: "BusinessApplication",
-          operatingSystem: "Windows 10, Windows 11",
-          description: DESCRIPTION,
-          url: URL,
-          offers: {
-            "@type": "Offer",
-            price: "0",
-            priceCurrency: "BRL",
-            description: "Teste grátis por 14 dias",
+  head: ({ loaderData }) => {
+    const head = pageHead({
+      title: TITLE,
+      description: DESCRIPTION,
+      path: PATH,
+      image: "/optione/og-amt-optione.jpg",
+      imageAlt: "Tela de visão geral do AMT OptiOne, sistema de gestão para óticas",
+    });
+    const planos = loaderData ?? [];
+    return {
+      meta: head.meta,
+      links: [...head.links, { rel: "icon", href: "/optione/icone-amt-optione.png" }],
+      scripts: [
+        jsonLd([
+          organizationLd(),
+          {
+            "@type": "SoftwareApplication",
+            "@id": `${URL}#software`,
+            name: "AMT OptiOne",
+            alternateName: "OptiOne",
+            applicationCategory: "BusinessApplication",
+            applicationSubCategory: "Sistema de gestão para óticas",
+            operatingSystem: "Windows 10, Windows 11",
+            inLanguage: "pt-BR",
+            description: DESCRIPTION,
+            url: URL,
+            image: absoluteUrl("/optione/og-amt-optione.jpg"),
+            screenshot: absoluteUrl("/optione/sistema-visao-geral.webp"),
+            featureList: recursos.map((r) => `${r.titulo}: ${r.texto}`),
+            publisher: { "@id": ORGANIZATION_ID },
+            offers: [
+              {
+                "@type": "Offer",
+                name: "Teste grátis de 14 dias",
+                price: "0",
+                priceCurrency: "BRL",
+                url: absoluteUrl("/optione/teste-gratis"),
+                description:
+                  "14 dias com todos os recursos do plano escolhido, sem cartão de crédito.",
+              },
+              ...planos
+                .filter((p) => p.preco_mensal > 0)
+                .map((p) => ({
+                  "@type": "Offer",
+                  name: `Plano ${p.nome}`,
+                  description: p.descricao || undefined,
+                  price: p.preco_mensal.toFixed(2),
+                  priceCurrency: "BRL",
+                  url: absoluteUrl(`/optione/teste-gratis?plano=${p.slug}`),
+                  priceSpecification: {
+                    "@type": "UnitPriceSpecification",
+                    price: p.preco_mensal.toFixed(2),
+                    priceCurrency: "BRL",
+                    unitText: "mês",
+                    referenceQuantity: {
+                      "@type": "QuantitativeValue",
+                      value: 1,
+                      unitCode: "MON",
+                    },
+                  },
+                })),
+            ],
           },
-          publisher: {
-            "@type": "Organization",
-            name: "AMT Sistemas e Soluções",
-            url: "https://amtsistemas.com.br/",
-          },
-        }),
-      },
-    ],
-  }),
+          faqLd(PATH, faq),
+        ]),
+      ],
+    };
+  },
   component: OptioneLanding,
 });
 
 type Item = { icon: ComponentType<{ className?: string }>; titulo: string; texto: string };
 
-const recursos: Item[] = [
-  {
-    icon: ScanBarcode,
-    titulo: "Vendas e PDV",
-    texto:
-      "Leitor de código de barras, pagamentos múltiplos com troco, sinal, crediário e orçamentos que viram venda.",
-  },
-  {
-    icon: ClipboardList,
-    titulo: "Receitas OD/OE",
-    texto:
-      "Esférico, cilíndrico, eixo, adição, DNP e altura, com alertas de digitação e histórico por cliente.",
-  },
-  {
-    icon: FlaskConical,
-    titulo: "Pedidos e laboratório",
-    texto:
-      "Quadro por etapa, do envio à entrega, com prazos, custos, ocorrências e alerta de atraso.",
-  },
-  {
-    icon: Package,
-    titulo: "Estoque e compras",
-    texto:
-      "Armações, lentes, lentes de contato e acessórios, com estoque mínimo, histórico e pedidos de compra.",
-  },
-  {
-    icon: Wallet,
-    titulo: "Financeiro",
-    texto:
-      "Contas a pagar e a receber, parcelas do crediário e relatórios em PDF com a identidade da ótica.",
-  },
-  {
-    icon: Heart,
-    titulo: "Relacionamento",
-    texto:
-      "Pós-venda, revisão de receita, aniversariantes e clientes inativos, com mensagem pronta para WhatsApp.",
-  },
-  {
-    icon: FileText,
-    titulo: "Documentos com a sua marca",
-    texto:
-      "Ordem de serviço, orçamento e comprovante em PDF com a logo da ótica, prontos para imprimir ou enviar.",
-  },
-  {
-    icon: Users2,
-    titulo: "Equipe e acessos",
-    texto:
-      "Um login para cada pessoa e só os módulos que ela precisa. Vendas registradas por vendedor.",
-  },
-  {
-    icon: BarChart3,
-    titulo: "Indicadores",
-    texto:
-      "Faturamento, lucro efetivo, ticket médio, conversão de orçamentos e produtos mais rentáveis.",
-  },
+// Textos dos recursos e do FAQ em src/lib/site-content.ts (também usados no llms.txt e no JSON-LD).
+const RECURSO_ICONES: Item["icon"][] = [
+  ScanBarcode,
+  ClipboardList,
+  FlaskConical,
+  Package,
+  Wallet,
+  Heart,
+  FileText,
+  Users2,
+  BarChart3,
 ];
+const recursos: Item[] = OPTIONE_RECURSOS.map((r, i) => ({
+  ...r,
+  icon: RECURSO_ICONES[i] ?? FileText,
+}));
+const faq = OPTIONE_FAQ;
 
 const passos = [
   {
@@ -169,33 +163,6 @@ const passos = [
     titulo: "Instale e comece a usar",
     texto:
       "Instale no Windows, entre com seu e-mail e senha, informe a chave e pronto: 14 dias de uso completo.",
-  },
-];
-
-const faq = [
-  {
-    q: "O teste grátis tem algum custo ou pede cartão?",
-    a: "Não. São 14 dias com todos os recursos do plano escolhido, sem cartão de crédito e sem compromisso.",
-  },
-  {
-    q: "O que acontece quando o teste termina?",
-    a: "Os seus dados continuam guardados. Para seguir registrando vendas e cadastros, basta contratar um plano com a nossa equipe. Enquanto isso, o sistema fica disponível para consulta.",
-  },
-  {
-    q: "O que é a chave de acesso?",
-    a: "É um código no formato AMT-XXXX-XXXX-XXXX-XXXX, exibido ao concluir o cadastro. Cada computador da ótica pede a chave uma única vez; depois, a equipe entra só com usuário e senha. Se perder a chave, o dono gera uma nova em amtsistemas.com.br/optione/nova-chave.",
-  },
-  {
-    q: "Em quais computadores o AMT OptiOne funciona?",
-    a: "Em Windows 10 ou 11, com conexão à internet. Os dados ficam na nuvem, com cópia de segurança, e cada ótica enxerga apenas os próprios dados.",
-  },
-  {
-    q: "Posso cadastrar a minha equipe?",
-    a: "Sim. O dono cria um login para cada pessoa, escolhe os módulos que ela pode usar e a equipe entra com o código da ótica, o nome de usuário e a senha.",
-  },
-  {
-    q: "Funciona com leitor de código de barras e impressora?",
-    a: "Sim. Leitores USB ou sem fio que funcionam como teclado são compatíveis sem driver, e os documentos saem em PDF prontos para qualquer impressora.",
   },
 ];
 
@@ -238,10 +205,10 @@ function Hero() {
       <div className="relative mx-auto max-w-6xl px-5 pb-14 pt-12 sm:px-6 sm:pb-20 sm:pt-16">
         <div className="mx-auto max-w-3xl text-center">
           <img
-            src="/optione/logo-amt-optione-vertical.png"
+            src="/optione/logo-amt-optione-vertical.webp"
             alt="AMT OptiOne — sistema de gestão para óticas"
-            width={560}
-            height={347}
+            width={480}
+            height={297}
             className="mx-auto w-[190px] sm:w-[240px]"
             fetchPriority="high"
           />
@@ -297,7 +264,9 @@ function Hero() {
               <span className="ml-3 text-xs text-muted-foreground">AMT OptiOne — Visão geral</span>
             </div>
             <img
-              src="/optione/sistema-visao-geral.webp"
+              src={SCREENSHOT.src}
+              srcSet={SCREENSHOT.srcSet}
+              sizes={SCREENSHOT.sizes}
               alt="Tela de visão geral do AMT OptiOne com vendas do mês, ações rápidas e atividades recentes"
               className="block h-auto w-full"
               width={1600}

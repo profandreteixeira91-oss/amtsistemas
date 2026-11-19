@@ -80,10 +80,10 @@ function OptioneLogo({ width = 190 }: { width?: number }) {
   // Dimensionada pela largura (a altura acompanha a proporção da imagem).
   return (
     <img
-      src="/optione/logo-amt-optione.png"
+      src="/optione/logo-amt-optione.webp"
       alt="AMT OptiOne"
-      width={720}
-      height={122}
+      width={400}
+      height={68}
       style={{ width }}
       className="h-auto max-w-none"
     />

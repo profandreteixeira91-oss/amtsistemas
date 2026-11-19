@@ -21,6 +21,9 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/widget/suporte")({
   ssr: false,
+  head: () => ({
+    meta: [{ title: "Suporte — AMT Sistemas" }, { name: "robots", content: "noindex, nofollow" }],
+  }),
   component: WidgetSuporte,
 });
 

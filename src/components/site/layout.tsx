@@ -61,7 +61,7 @@ export function SiteShell({
 export function AmtBrand({ inverted = false }: { inverted?: boolean }) {
   return (
     <span className="flex items-center gap-2.5">
-      <img src="/brand/amt-simbolo.png" alt="" width={512} height={400} className="w-11 shrink-0" />
+      <img src="/brand/amt-simbolo.webp" alt="" width={128} height={100} className="w-11 shrink-0" />
       <span className="flex flex-col leading-none">
         <span
           className={cn(
