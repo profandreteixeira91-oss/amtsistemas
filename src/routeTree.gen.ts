@@ -72,7 +72,9 @@ import { Route as AdminConfiguracoesRouteImport } from './routes/admin/configura
 import { Route as AdminPainelRouteImport } from './routes/admin/_painel'
 import { Route as AdminPainelIndexRouteImport } from './routes/admin/_painel/index'
 import { Route as CrmLeadsIdRouteImport } from './routes/crm.leads.$id'
+import { Route as ApiPublicVisitaRouteImport } from './routes/api.public.visita'
 import { Route as AdminPainelWhatsappRouteImport } from './routes/admin/_painel/whatsapp'
+import { Route as AdminPainelVisitasRouteImport } from './routes/admin/_painel/visitas'
 import { Route as AdminPainelSistemasRouteImport } from './routes/admin/_painel/sistemas'
 import { Route as AdminPainelMonitorRouteImport } from './routes/admin/_painel/monitor'
 import { Route as AdminPainelLeadsRouteImport } from './routes/admin/_painel/leads'
@@ -408,9 +410,19 @@ const CrmLeadsIdRoute = CrmLeadsIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => CrmLeadsRoute,
 } as any)
+const ApiPublicVisitaRoute = ApiPublicVisitaRouteImport.update({
+  id: '/api/public/visita',
+  path: '/api/public/visita',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminPainelWhatsappRoute = AdminPainelWhatsappRouteImport.update({
   id: '/whatsapp',
   path: '/whatsapp',
+  getParentRoute: () => AdminPainelRoute,
+} as any)
+const AdminPainelVisitasRoute = AdminPainelVisitasRouteImport.update({
+  id: '/visitas',
+  path: '/visitas',
   getParentRoute: () => AdminPainelRoute,
 } as any)
 const AdminPainelSistemasRoute = AdminPainelSistemasRouteImport.update({
@@ -587,7 +599,9 @@ export interface FileRoutesByFullPath {
   '/admin/leads': typeof AdminPainelLeadsRoute
   '/admin/monitor': typeof AdminPainelMonitorRoute
   '/admin/sistemas': typeof AdminPainelSistemasRoute
+  '/admin/visitas': typeof AdminPainelVisitasRoute
   '/admin/whatsapp': typeof AdminPainelWhatsappRoute
+  '/api/public/visita': typeof ApiPublicVisitaRoute
   '/crm/leads/$id': typeof CrmLeadsIdRoute
   '/admin/': typeof AdminPainelIndexRoute
   '/api/public/hooks/asaas': typeof ApiPublicHooksAsaasRoute
@@ -669,7 +683,9 @@ export interface FileRoutesByTo {
   '/admin/leads': typeof AdminPainelLeadsRoute
   '/admin/monitor': typeof AdminPainelMonitorRoute
   '/admin/sistemas': typeof AdminPainelSistemasRoute
+  '/admin/visitas': typeof AdminPainelVisitasRoute
   '/admin/whatsapp': typeof AdminPainelWhatsappRoute
+  '/api/public/visita': typeof ApiPublicVisitaRoute
   '/crm/leads/$id': typeof CrmLeadsIdRoute
   '/admin': typeof AdminPainelIndexRoute
   '/api/public/hooks/asaas': typeof ApiPublicHooksAsaasRoute
@@ -755,7 +771,9 @@ export interface FileRoutesById {
   '/admin/_painel/leads': typeof AdminPainelLeadsRoute
   '/admin/_painel/monitor': typeof AdminPainelMonitorRoute
   '/admin/_painel/sistemas': typeof AdminPainelSistemasRoute
+  '/admin/_painel/visitas': typeof AdminPainelVisitasRoute
   '/admin/_painel/whatsapp': typeof AdminPainelWhatsappRoute
+  '/api/public/visita': typeof ApiPublicVisitaRoute
   '/crm/leads/$id': typeof CrmLeadsIdRoute
   '/admin/_painel/': typeof AdminPainelIndexRoute
   '/api/public/hooks/asaas': typeof ApiPublicHooksAsaasRoute
@@ -842,7 +860,9 @@ export interface FileRouteTypes {
     | '/admin/leads'
     | '/admin/monitor'
     | '/admin/sistemas'
+    | '/admin/visitas'
     | '/admin/whatsapp'
+    | '/api/public/visita'
     | '/crm/leads/$id'
     | '/admin/'
     | '/api/public/hooks/asaas'
@@ -924,7 +944,9 @@ export interface FileRouteTypes {
     | '/admin/leads'
     | '/admin/monitor'
     | '/admin/sistemas'
+    | '/admin/visitas'
     | '/admin/whatsapp'
+    | '/api/public/visita'
     | '/crm/leads/$id'
     | '/admin'
     | '/api/public/hooks/asaas'
@@ -1009,7 +1031,9 @@ export interface FileRouteTypes {
     | '/admin/_painel/leads'
     | '/admin/_painel/monitor'
     | '/admin/_painel/sistemas'
+    | '/admin/_painel/visitas'
     | '/admin/_painel/whatsapp'
+    | '/api/public/visita'
     | '/crm/leads/$id'
     | '/admin/_painel/'
     | '/api/public/hooks/asaas'
@@ -1046,6 +1070,7 @@ export interface RootRouteChildren {
   PortalTokenRoute: typeof PortalTokenRoute
   WidgetSuporteRoute: typeof WidgetSuporteRoute
   OptioneIndexRoute: typeof OptioneIndexRoute
+  ApiPublicVisitaRoute: typeof ApiPublicVisitaRoute
   ApiPublicHooksAsaasRoute: typeof ApiPublicHooksAsaasRoute
   ApiPublicHooksAsaasTickRoute: typeof ApiPublicHooksAsaasTickRoute
   ApiPublicHooksCrmAlertasTickRoute: typeof ApiPublicHooksCrmAlertasTickRoute
@@ -1502,11 +1527,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CrmLeadsIdRouteImport
       parentRoute: typeof CrmLeadsRoute
     }
+    '/api/public/visita': {
+      id: '/api/public/visita'
+      path: '/api/public/visita'
+      fullPath: '/api/public/visita'
+      preLoaderRoute: typeof ApiPublicVisitaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/_painel/whatsapp': {
       id: '/admin/_painel/whatsapp'
       path: '/whatsapp'
       fullPath: '/admin/whatsapp'
       preLoaderRoute: typeof AdminPainelWhatsappRouteImport
+      parentRoute: typeof AdminPainelRoute
+    }
+    '/admin/_painel/visitas': {
+      id: '/admin/_painel/visitas'
+      path: '/visitas'
+      fullPath: '/admin/visitas'
+      preLoaderRoute: typeof AdminPainelVisitasRouteImport
       parentRoute: typeof AdminPainelRoute
     }
     '/admin/_painel/sistemas': {
@@ -1766,6 +1805,7 @@ interface AdminPainelRouteChildren {
   AdminPainelLeadsRoute: typeof AdminPainelLeadsRoute
   AdminPainelMonitorRoute: typeof AdminPainelMonitorRoute
   AdminPainelSistemasRoute: typeof AdminPainelSistemasRoute
+  AdminPainelVisitasRoute: typeof AdminPainelVisitasRoute
   AdminPainelWhatsappRoute: typeof AdminPainelWhatsappRoute
   AdminPainelIndexRoute: typeof AdminPainelIndexRoute
 }
@@ -1779,6 +1819,7 @@ const AdminPainelRouteChildren: AdminPainelRouteChildren = {
   AdminPainelLeadsRoute: AdminPainelLeadsRoute,
   AdminPainelMonitorRoute: AdminPainelMonitorRoute,
   AdminPainelSistemasRoute: AdminPainelSistemasRoute,
+  AdminPainelVisitasRoute: AdminPainelVisitasRoute,
   AdminPainelWhatsappRoute: AdminPainelWhatsappRoute,
   AdminPainelIndexRoute: AdminPainelIndexRoute,
 }
@@ -1808,6 +1849,7 @@ const rootRouteChildren: RootRouteChildren = {
   PortalTokenRoute: PortalTokenRoute,
   WidgetSuporteRoute: WidgetSuporteRoute,
   OptioneIndexRoute: OptioneIndexRoute,
+  ApiPublicVisitaRoute: ApiPublicVisitaRoute,
   ApiPublicHooksAsaasRoute: ApiPublicHooksAsaasRoute,
   ApiPublicHooksAsaasTickRoute: ApiPublicHooksAsaasTickRoute,
   ApiPublicHooksCrmAlertasTickRoute: ApiPublicHooksCrmAlertasTickRoute,

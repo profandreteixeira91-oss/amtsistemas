@@ -1,4 +1,4 @@
-import { Activity, Boxes, Code2, FileText, Hammer, HeartPulse, LayoutDashboard, MessageCircle, Users, Wrench } from "lucide-react";
+import { Activity, BarChart3, Boxes, Code2, FileText, Hammer, HeartPulse, LayoutDashboard, MessageCircle, Users, Wrench } from "lucide-react";
 
 import type { IconType } from "@/lib/admin/systems";
 
@@ -6,7 +6,7 @@ import type { IconType } from "@/lib/admin/systems";
 
 export type AdminModule = {
   label: string;
-  to: "/admin" | "/admin/sistemas" | "/admin/implantacoes" | "/admin/whatsapp" | "/admin/leads" | "/admin/monitor" | "/admin/formularios" | "/admin/ferramentas" | "/admin/auditoria" | "/admin/desenvolvimento";
+  to: "/admin" | "/admin/sistemas" | "/admin/implantacoes" | "/admin/whatsapp" | "/admin/leads" | "/admin/monitor" | "/admin/visitas" | "/admin/formularios" | "/admin/ferramentas" | "/admin/auditoria" | "/admin/desenvolvimento";
   icon: IconType;
 };
 
@@ -17,6 +17,7 @@ export const ADMIN_MODULES: AdminModule[] = [
   { label: "WhatsApp", to: "/admin/whatsapp", icon: MessageCircle },
   { label: "Leads", to: "/admin/leads", icon: Users },
   { label: "Monitor", to: "/admin/monitor", icon: HeartPulse },
+  { label: "Visitas", to: "/admin/visitas", icon: BarChart3 },
   { label: "Formulários", to: "/admin/formularios", icon: FileText },
   { label: "Ferramentas", to: "/admin/ferramentas", icon: Wrench },
   { label: "Auditoria", to: "/admin/auditoria", icon: Activity },

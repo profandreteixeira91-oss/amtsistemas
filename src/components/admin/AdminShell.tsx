@@ -3,6 +3,7 @@ import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-route
 import { ChevronsLeft, ChevronsRight, LogOut } from "lucide-react";
 
 import { AdminAlerts } from "@/components/admin/AdminAlerts";
+import { IGNORE_VISITS_KEY } from "@/components/site/VisitTracker";
 import { Button } from "@/components/ui/button";
 import { useAdminCounters } from "@/lib/admin/counters";
 import { ADMIN_MODULES, moduleForPath } from "@/lib/admin/modules";
@@ -49,6 +50,12 @@ export function AdminShell() {
           return;
         }
         setUserEmail(profile.email);
+        try {
+          // Este navegador é da equipe: as visitas dele ao site não entram em /admin › Visitas.
+          localStorage.setItem(IGNORE_VISITS_KEY, "1");
+        } catch {
+          // sem armazenamento
+        }
         setLoading(false);
       })
       .catch(async (error) => {
