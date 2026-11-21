@@ -31,6 +31,7 @@ const CLOSED = ["ganho", "perdido"];
 const ORIGINS: Array<{ key: string; label: string }> = [
   { key: "site-contato", label: "Formulário do site" },
   { key: "chat-site", label: "Chat do site" },
+  { key: "bot-whatsapp", label: "Assistente do WhatsApp" },
   { key: "teste-gratis-amt-optione", label: "Teste grátis OptiOne" },
   { key: "manual", label: "Cadastro manual" },
 ];

@@ -3,6 +3,7 @@ import {
   Archive,
   ArchiveRestore,
   ArrowLeft,
+  Bot,
   CalendarClock,
   Check,
   CheckCheck,
@@ -63,6 +64,8 @@ type Chat = {
   archived: boolean;
   follow_up_at: string | null;
   follow_up_note: string | null;
+  bot_handoff_at?: string | null;
+  bot_paused_until?: string | null;
 };
 type Message = {
   id: string;
@@ -75,6 +78,7 @@ type Message = {
   quoted_body: string | null;
   status: string | null;
   sent_at: string;
+  source?: string | null;
 };
 type QuickReply = { id: string; title: string; body: string };
 type AcademyOption = { owner_id: string; name: string; email: string | null; phone: string | null; city: string | null };
@@ -225,7 +229,10 @@ export function SupportWhatsAppWorkspace({ selected, onSelect }: { selected: str
               : "Conversas do número do suporte e chamados abertos pelas academias no Dojo Manager."}
           </p>
         </div>
-        {status?.connected ? <DisconnectButton onDone={() => void loadStatus()} /> : null}
+        <div className="flex flex-wrap items-center gap-2">
+          {status?.connected ? <BotSwitch /> : null}
+          {status?.connected ? <DisconnectButton onDone={() => void loadStatus()} /> : null}
+        </div>
       </div>
 
       {statusError ? <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{statusError}</p> : null}
@@ -465,6 +472,82 @@ function InboxSetup({ status, onChanged, onNotice }: { status: Status; onChanged
   );
 }
 
+const BOT_QUIET_MS = 24 * 3600_000;
+
+/** Formatação do WhatsApp no texto: *negrito*, _itálico_ e ~riscado~ (só quando o marcador fecha na mesma linha). */
+function waFormat(text: string) {
+  const parts = text.split(/(\*[^*\n]+\*|(?<![\w/])_[^_\n]+_(?![\w/])|~[^~\n]+~)/g);
+  return parts.map((part, i) => {
+    if (part.length > 2 && part.startsWith("*") && part.endsWith("*")) return <strong key={i}>{part.slice(1, -1)}</strong>;
+    if (part.length > 2 && part.startsWith("_") && part.endsWith("_")) return <em key={i}>{part.slice(1, -1)}</em>;
+    if (part.length > 2 && part.startsWith("~") && part.endsWith("~")) return <s key={i}>{part.slice(1, -1)}</s>;
+    return part;
+  });
+}
+
+/** Liga/desliga geral do Assistente Virtual AMT Sistemas (responde a todas as conversas novas). */
+function BotSwitch() {
+  const [enabled, setEnabled] = useState<boolean | null>(null);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    void inbox<{ enabled: boolean }>("bot_settings").then((r) => setEnabled(r.enabled)).catch(() => setEnabled(null));
+  }, []);
+  async function toggle() {
+    if (enabled === null || busy) return;
+    const question =
+      "Ligar o Assistente Virtual AMT Sistemas?\n\nEle vai responder sozinho às mensagens novas com o menu e o diagnóstico, e passa a conversa para você quando pedirem um atendente. Quando você responder numa conversa, ele fica quieto nela por 24 horas.";
+    if (!enabled && !window.confirm(question)) return;
+    setBusy(true);
+    try {
+      const r = await inbox<{ enabled: boolean }>("bot_settings_save", { enabled: !enabled });
+      setEnabled(r.enabled);
+    } catch (e) {
+      window.alert(errorText(e, "Não foi possível alterar o assistente."));
+    } finally {
+      setBusy(false);
+    }
+  }
+  if (enabled === null) return null;
+  return (
+    <button
+      type="button"
+      onClick={() => void toggle()}
+      disabled={busy}
+      title={enabled ? "Desligar o assistente virtual" : "Ligar o assistente virtual"}
+      className={`inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-sm font-medium transition-colors disabled:opacity-60 ${enabled ? "border-sky-200 bg-sky-50 text-sky-800 hover:bg-sky-100" : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}
+    >
+      <Bot className="h-4 w-4" />
+      Assistente virtual
+      <span className={`relative h-4 w-7 rounded-full transition-colors ${enabled ? "bg-sky-600" : "bg-slate-300"}`}>
+        <span className={`absolute top-0.5 h-3 w-3 rounded-full bg-white transition-all ${enabled ? "left-3.5" : "left-0.5"}`} />
+      </span>
+    </button>
+  );
+}
+
+/** Situação do assistente nesta conversa e o botão para pausar ou retomar. */
+function ChatBotToggle({ chat, onUpdate }: { chat: Chat; onUpdate: (patch: Record<string, unknown>) => Promise<void> }) {
+  if (chat.is_self) return null;
+  const paused = !!chat.bot_paused_until && new Date(chat.bot_paused_until).getTime() > Date.now();
+  const handoff = !paused && !!chat.bot_handoff_at && Date.now() - new Date(chat.bot_handoff_at).getTime() < BOT_QUIET_MS;
+  const label = paused ? "Assistente pausado" : handoff ? "Pediu atendente" : "Assistente ativo";
+  const title = paused
+    ? "O assistente não responde nesta conversa. Clique para retomar do menu."
+    : handoff
+      ? "O assistente passou a conversa para a equipe e fica quieto por 24 h. Clique para pausar de vez."
+      : "O assistente responde nesta conversa, exceto nas 24 h depois de uma resposta sua. Clique para pausar.";
+  return (
+    <button
+      type="button"
+      title={title}
+      onClick={() => void onUpdate({ bot_paused: !paused })}
+      className={`inline-flex h-8 items-center gap-1.5 rounded-md border px-2.5 text-xs font-medium ${paused ? "border-slate-200 text-slate-500 hover:bg-slate-50" : handoff ? "border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100" : "border-sky-200 bg-sky-50 text-sky-800 hover:bg-sky-100"}`}
+    >
+      <Bot className="h-3.5 w-3.5" /> {label}
+    </button>
+  );
+}
+
 function DisconnectButton({ onDone }: { onDone: () => void }) {
   const [busy, setBusy] = useState(false);
   async function logout() {
@@ -595,6 +678,7 @@ function Conversation({ chatId, onBack, onChanged }: { chatId: string; onBack: (
               {chat.academy && chat.name ? ` · ${chat.name}` : ""}
             </div>
           </div>
+          <ChatBotToggle chat={chat} onUpdate={update} />
           <Button size="sm" variant="outline" className="h-8 gap-1.5 text-xs" onClick={() => setFollowOpen((v) => !v)}>
             <CalendarClock className="h-3.5 w-3.5" />
             {chat.follow_up_at ? `Retorno ${formatBR(chat.follow_up_at)}` : "Agendar retorno"}
@@ -721,7 +805,12 @@ function Bubble({ m }: { m: Message }) {
   const Icon = m.type === "image" || m.type === "sticker" ? ImageIcon : m.type === "audio" ? Mic : FileText;
   return (
     <div className={`flex ${m.from_me ? "justify-end" : "justify-start"}`}>
-      <div className={`max-w-[78%] rounded-lg px-2.5 py-1.5 text-sm text-slate-900 shadow-sm ${m.from_me ? "bg-[#d9fdd3]" : "bg-white"}`}>
+      <div className={`max-w-[78%] rounded-lg px-2.5 py-1.5 text-sm text-slate-900 shadow-sm ${m.source === "bot" ? "bg-sky-50 ring-1 ring-sky-200" : m.from_me ? "bg-[#d9fdd3]" : "bg-white"}`}>
+        {m.source === "bot" ? (
+          <div className="mb-0.5 flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-sky-700">
+            <Bot className="h-3 w-3" /> Assistente virtual
+          </div>
+        ) : null}
         {m.quoted_body ? <div className="mb-1 rounded border-l-4 border-emerald-500 bg-black/5 px-2 py-1 text-xs text-slate-600">{m.quoted_body}</div> : null}
         {isMedia ? (
           media ? (
@@ -742,7 +831,7 @@ function Bubble({ m }: { m: Message }) {
             </button>
           )
         ) : null}
-        {m.body ? <div className="whitespace-pre-wrap break-words">{m.body}</div> : !isMedia ? <div className="italic text-slate-500">Mensagem não suportada</div> : null}
+        {m.body ? <div className="whitespace-pre-wrap break-words">{waFormat(m.body)}</div> : !isMedia ? <div className="italic text-slate-500">Mensagem não suportada</div> : null}
         <div className="mt-0.5 flex items-center justify-end gap-1 text-[10px] text-slate-500">
           {new Date(m.sent_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
           {m.from_me ? (
