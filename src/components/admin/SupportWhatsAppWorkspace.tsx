@@ -485,43 +485,77 @@ function waFormat(text: string) {
   });
 }
 
-/** Liga/desliga geral do Assistente Virtual AMT Sistemas (responde a todas as conversas novas). */
+type BotSettings = { enabled: boolean; buttons: boolean };
+
+function Toggle({ on }: { on: boolean }) {
+  return (
+    <span className={`relative h-4 w-7 shrink-0 rounded-full transition-colors ${on ? "bg-sky-600" : "bg-slate-300"}`}>
+      <span className={`absolute top-0.5 h-3 w-3 rounded-full bg-white transition-all ${on ? "left-3.5" : "left-0.5"}`} />
+    </span>
+  );
+}
+
+/** Liga/desliga geral do Assistente Virtual AMT Sistemas e o uso de botões nas perguntas. */
 function BotSwitch() {
-  const [enabled, setEnabled] = useState<boolean | null>(null);
+  const [settings, setSettings] = useState<BotSettings | null>(null);
   const [busy, setBusy] = useState(false);
   useEffect(() => {
-    void inbox<{ enabled: boolean }>("bot_settings").then((r) => setEnabled(r.enabled)).catch(() => setEnabled(null));
+    void inbox<BotSettings>("bot_settings").then(setSettings).catch(() => setSettings(null));
   }, []);
-  async function toggle() {
-    if (enabled === null || busy) return;
-    const question =
-      "Ligar o Assistente Virtual AMT Sistemas?\n\nEle vai responder sozinho às mensagens novas com o menu e o diagnóstico, e passa a conversa para você quando pedirem um atendente. Quando você responder numa conversa, ele fica quieto nela por 24 horas.";
-    if (!enabled && !window.confirm(question)) return;
+  async function save(patch: Partial<BotSettings>, question?: string) {
+    if (!settings || busy) return;
+    if (question && !window.confirm(question)) return;
     setBusy(true);
     try {
-      const r = await inbox<{ enabled: boolean }>("bot_settings_save", { enabled: !enabled });
-      setEnabled(r.enabled);
+      setSettings(await inbox<BotSettings>("bot_settings_save", patch));
     } catch (e) {
       window.alert(errorText(e, "Não foi possível alterar o assistente."));
     } finally {
       setBusy(false);
     }
   }
-  if (enabled === null) return null;
+  if (!settings) return null;
+  const { enabled, buttons } = settings;
   return (
-    <button
-      type="button"
-      onClick={() => void toggle()}
-      disabled={busy}
-      title={enabled ? "Desligar o assistente virtual" : "Ligar o assistente virtual"}
-      className={`inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-sm font-medium transition-colors disabled:opacity-60 ${enabled ? "border-sky-200 bg-sky-50 text-sky-800 hover:bg-sky-100" : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}
-    >
-      <Bot className="h-4 w-4" />
-      Assistente virtual
-      <span className={`relative h-4 w-7 rounded-full transition-colors ${enabled ? "bg-sky-600" : "bg-slate-300"}`}>
-        <span className={`absolute top-0.5 h-3 w-3 rounded-full bg-white transition-all ${enabled ? "left-3.5" : "left-0.5"}`} />
-      </span>
-    </button>
+    <div className="flex flex-wrap items-center gap-2">
+      <button
+        type="button"
+        onClick={() =>
+          void save(
+            { enabled: !enabled },
+            enabled
+              ? undefined
+              : "Ligar o Assistente Virtual AMT Sistemas?\n\nEle vai responder sozinho às mensagens novas com o menu e o diagnóstico, e passa a conversa para você quando pedirem um atendente. Quando você responder numa conversa, ele fica quieto nela por 24 horas.",
+          )
+        }
+        disabled={busy}
+        title={enabled ? "Desligar o assistente virtual" : "Ligar o assistente virtual"}
+        className={`inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-sm font-medium transition-colors disabled:opacity-60 ${enabled ? "border-sky-200 bg-sky-50 text-sky-800 hover:bg-sky-100" : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}
+      >
+        <Bot className="h-4 w-4" />
+        Assistente virtual
+        <Toggle on={enabled} />
+      </button>
+      {enabled ? (
+        <button
+          type="button"
+          onClick={() =>
+            void save(
+              { buttons: !buttons },
+              buttons
+                ? undefined
+                : "Usar botões nas perguntas do assistente?\n\nPerguntas com até 3 opções vão com botões para tocar; o texto continua com os números. Se o WhatsApp do cliente não confirmar a entrega em 20 segundos, ele reenvia a pergunta em texto.",
+            )
+          }
+          disabled={busy}
+          title="Botões de resposta rápida nas perguntas com até 3 opções"
+          className={`inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-sm font-medium transition-colors disabled:opacity-60 ${buttons ? "border-sky-200 bg-sky-50 text-sky-800 hover:bg-sky-100" : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}
+        >
+          Botões
+          <Toggle on={buttons} />
+        </button>
+      ) : null}
+    </div>
   );
 }
 
