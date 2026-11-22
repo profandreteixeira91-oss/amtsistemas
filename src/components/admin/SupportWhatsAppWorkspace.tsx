@@ -515,7 +515,8 @@ function BotSwitch() {
     }
   }
   if (!settings) return null;
-  const { enabled, buttons } = settings;
+  // Botões de resposta rápida: fora do painel enquanto o servidor do WhatsApp (Evolution 2.3.7) não os entrega.
+  const { enabled } = settings;
   return (
     <div className="flex flex-wrap items-center gap-2">
       <button
@@ -536,25 +537,6 @@ function BotSwitch() {
         Assistente virtual
         <Toggle on={enabled} />
       </button>
-      {enabled ? (
-        <button
-          type="button"
-          onClick={() =>
-            void save(
-              { buttons: !buttons },
-              buttons
-                ? undefined
-                : "Usar botões nas perguntas do assistente?\n\nPerguntas com até 3 opções vão com botões para tocar; o texto continua com os números. Se o WhatsApp do cliente não confirmar a entrega em 20 segundos, ele reenvia a pergunta em texto.",
-            )
-          }
-          disabled={busy}
-          title="Botões de resposta rápida nas perguntas com até 3 opções"
-          className={`inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-sm font-medium transition-colors disabled:opacity-60 ${buttons ? "border-sky-200 bg-sky-50 text-sky-800 hover:bg-sky-100" : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}
-        >
-          Botões
-          <Toggle on={buttons} />
-        </button>
-      ) : null}
     </div>
   );
 }
