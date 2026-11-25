@@ -28,6 +28,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { TicketRow, TicketThread, type Ticket } from "@/components/admin/SupportTicket";
+import { TrialFollowupButton } from "@/components/admin/TrialFollowupPanel";
 import { inbox } from "@/lib/support-inbox";
 
 // Caixa de entrada do WhatsApp do suporte AMT (instância amt-suporte, o número 551151040791), no mesmo esquema
@@ -230,6 +231,7 @@ export function SupportWhatsAppWorkspace({ selected, onSelect }: { selected: str
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          {status?.connected ? <TrialFollowupButton onOpenChat={(id) => setSelected(id)} /> : null}
           {status?.connected ? <BotSwitch /> : null}
           {status?.connected ? <DisconnectButton onDone={() => void loadStatus()} /> : null}
         </div>
